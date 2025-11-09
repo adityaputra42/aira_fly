@@ -1,0 +1,53 @@
+name: pss_app
+description: "A new Flutter project."
+publish_to: "none"
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.9.2
+
+dependencies:
+  animations: ^2.1.0
+  bloc: ^9.1.0
+  cupertino_icons: ^1.0.8
+  dio: ^5.9.0
+  equatable: ^2.0.7
+  flutter:
+    sdk: flutter
+  flutter_bloc: ^9.1.1
+  fpdart: ^1.2.0
+  get_it: ^8.2.0
+  go_router: ^16.3.0
+  iconify_flutter_plus: ^1.0.4
+  image_picker: ^1.2.0
+  internet_connection_checker_plus: ^2.9.0
+  meta: ^1.16.0
+  shared_preferences: ^2.5.3
+  shimmer: ^3.0.0
+
+dev_dependencies:
+  flutter_lints: ^5.0.0
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/
+    - assets/icons/
+
+  fonts:
+    - family: Poppins
+      fonts:
+        - asset: assets/fonts/poppin/Poppins-Bold.ttf
+        - asset: assets/fonts/poppin/Poppins-SemiBold.ttf
+        - asset: assets/fonts/poppin/Poppins-Medium.ttf
+        - asset: assets/fonts/poppin/Poppins-Regular.ttf
+        - asset: assets/fonts/poppin/Poppins-Light.ttf
+    - family: Roboto
+      fonts:
+        - asset: assets/fonts/roboto/Roboto-Bold.ttf
+        - asset: assets/fonts/roboto/Roboto-Medium.ttf
+        - asset: assets/fonts/roboto/Roboto-Regular.ttf
+        - asset: assets/fonts/roboto/Roboto-Light.ttf
