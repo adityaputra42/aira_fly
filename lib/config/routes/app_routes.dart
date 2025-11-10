@@ -1,3 +1,5 @@
+import 'package:animations/animations.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/main/ui/screen/main_screen.dart';
@@ -14,31 +16,112 @@ class AppRouter {
       GoRoute(
         path: '/',
         name: RouteNames.splash,
-        builder: (context, state) => const SplashScreen(),
+        pageBuilder: (context, state) => buildPageWithTransition(
+          key: state.pageKey,
+          child: const SplashScreen(),
+          transition: PageTransitionType.fade,
+        ),
       ),
-
       GoRoute(
         path: '/${RouteNames.onboarding}',
         name: RouteNames.onboarding,
-        builder: (context, state) => const OnboardingScreen(),
+        pageBuilder: (context, state) => buildPageWithTransition(
+          key: state.pageKey,
+          child: const OnboardingScreen(),
+          transition: PageTransitionType.sharedAxisHorizontal,
+        ),
       ),
       GoRoute(
         path: '/${RouteNames.main}',
         name: RouteNames.main,
-        builder: (context, state) => const MainScreen(),
+        pageBuilder: (context, state) => buildPageWithTransition(
+          key: state.pageKey,
+          child: const MainScreen(),
+          transition: PageTransitionType.fadeThrough,
+        ),
       ),
       GoRoute(
         path: '/${RouteNames.signin}',
         name: RouteNames.signin,
-        builder: (context, state) => const SignInScreen(),
+        pageBuilder: (context, state) => buildPageWithTransition(
+          key: state.pageKey,
+          child: const SignInScreen(),
+          transition: PageTransitionType.sharedAxisVertical,
+        ),
         routes: [
           GoRoute(
-            path: '/${RouteNames.signup}',
+            path: RouteNames.signup,
             name: RouteNames.signup,
-            builder: (context, state) => const SignUpScreen(),
+            pageBuilder: (context, state) => buildPageWithTransition(
+              key: state.pageKey,
+              child: const SignUpScreen(),
+              transition: PageTransitionType.fadeScale,
+            ),
           ),
         ],
       ),
     ],
+  );
+}
+
+enum PageTransitionType {
+  fade,
+  fadeScale,
+  fadeThrough,
+  sharedAxisHorizontal,
+  sharedAxisVertical,
+  sharedAxisScaled,
+}
+
+CustomTransitionPage buildPageWithTransition({
+  required Widget child,
+  required LocalKey key,
+  PageTransitionType transition = PageTransitionType.fade,
+}) {
+  return CustomTransitionPage(
+    key: key,
+    child: child,
+    transitionDuration: const Duration(milliseconds: 800),
+    reverseTransitionDuration: const Duration(milliseconds: 600),
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      switch (transition) {
+        case PageTransitionType.fade:
+          return FadeTransition(opacity: animation, child: child);
+
+        case PageTransitionType.fadeScale:
+          return FadeScaleTransition(animation: animation, child: child);
+
+        case PageTransitionType.fadeThrough:
+          return FadeThroughTransition(
+            animation: animation,
+            secondaryAnimation: secondaryAnimation,
+            child: child,
+          );
+
+        case PageTransitionType.sharedAxisHorizontal:
+          return SharedAxisTransition(
+            animation: animation,
+            secondaryAnimation: secondaryAnimation,
+            transitionType: SharedAxisTransitionType.horizontal,
+            child: child,
+          );
+
+        case PageTransitionType.sharedAxisVertical:
+          return SharedAxisTransition(
+            animation: animation,
+            secondaryAnimation: secondaryAnimation,
+            transitionType: SharedAxisTransitionType.vertical,
+            child: child,
+          );
+
+        case PageTransitionType.sharedAxisScaled:
+          return SharedAxisTransition(
+            animation: animation,
+            secondaryAnimation: secondaryAnimation,
+            transitionType: SharedAxisTransitionType.scaled,
+            child: child,
+          );
+      }
+    },
   );
 }

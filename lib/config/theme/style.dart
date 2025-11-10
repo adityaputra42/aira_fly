@@ -17,7 +17,7 @@ class Styles {
       onSurface: isDarkTheme ? AppColor.darkText1 : AppColor.lightText1,
       surfaceContainer: isDarkTheme ? AppColor.cardDark : AppColor.cardLight,
       onSurfaceVariant: isDarkTheme ? AppColor.darkText2 : AppColor.lightText2,
-      outline: AppColor.grayColor,
+      outline: isDarkTheme ? AppColor.strokeDark : AppColor.strokeLight,
       shadow: AppColor.strokeDark,
       inverseSurface: isDarkTheme ? AppColor.darkText1 : AppColor.lightText1,
       onInverseSurface: isDarkTheme ? AppColor.bgDark : AppColor.bgLight,
@@ -29,13 +29,7 @@ class Styles {
       colorScheme: colorScheme,
       scaffoldBackgroundColor: colorScheme.surface,
       fontFamily: "Poppins",
-      pageTransitionsTheme: const PageTransitionsTheme(
-        builders: <TargetPlatform, PageTransitionsBuilder>{
-          TargetPlatform.android: ZoomPageTransitionsBuilder(),
-        },
-      ),
 
-      /// Button theme (Material 3 → pakai [ElevatedButtonThemeData], [TextButtonThemeData], dll)
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: colorScheme.primary,
@@ -43,7 +37,12 @@ class Styles {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
       ),
-
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: <TargetPlatform, PageTransitionsBuilder>{
+          TargetPlatform.android: ZoomPageTransitionsBuilder(),
+          TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+        },
+      ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(foregroundColor: colorScheme.primary),
       ),

@@ -28,9 +28,18 @@ class CardGeneral extends StatelessWidget {
       margin: margin ?? const EdgeInsets.all(16),
       padding: padding ?? const EdgeInsets.all(16),
       decoration: BoxDecoration(
-          border: border,
-          borderRadius: BorderRadius.circular(radius ?? 8),
-          color: background ?? Theme.of(context).cardColor),
+        border: border,
+        borderRadius: BorderRadius.circular(radius ?? 8),
+        color: background ?? Theme.of(context).cardColor,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.blueGrey.withValues(alpha: 0.1),
+            spreadRadius: 1,
+            blurRadius: 2,
+            offset: const Offset(0, 1), // changes position of shadow
+          ),
+        ],
+      ),
       child: child,
     );
   }

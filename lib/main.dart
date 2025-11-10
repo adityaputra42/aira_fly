@@ -32,8 +32,8 @@ class MyApp extends StatelessWidget {
         return MaterialApp.router(
           routerConfig: AppRouter.router,
           debugShowCheckedModeBanner: false,
-          title: "Airafly",
-          theme: Styles.themeData(isDarkMode, context),
+          title: "Aira Fly",
+          theme: Styles.themeData(false, context),
         );
       },
     );

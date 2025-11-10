@@ -257,7 +257,7 @@ class _SignInScreenState extends State<SignInScreen> {
                                             style: AppFont.medium10.copyWith(
                                               color: Theme.of(
                                                 context,
-                                              ).primaryColor,
+                                              ).colorScheme.primary,
                                             ),
                                           ),
                                         ],

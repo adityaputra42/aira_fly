@@ -7,7 +7,6 @@ import 'package:pss_app/core/constants/images.dart';
 import 'package:pss_app/core/utils/size_extension.dart';
 
 import '../../../config/routes/route_names.dart';
-import '../../../config/theme/app_font.dart';
 import '../cubit/splash_cubit.dart';
 
 class SplashScreen extends StatelessWidget {
@@ -37,11 +36,11 @@ class SplashScreen extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Image.asset(AppImages.logo, width: context.w(0.3)),
+                  Image.asset(AppImages.logo, width: context.w(0.4)),
                   height(12),
                   Text(
                     "Aira Fly",
-                    style: AppFont.semibold16.copyWith(
+                    style: AppFont.semibold18.copyWith(
                       color: AppColor.primaryColor,
                     ),
                   ),

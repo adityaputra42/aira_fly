@@ -24,11 +24,10 @@ class CustomBottomNavbar extends StatelessWidget {
         borderRadius: BorderRadius.circular(32),
         boxShadow: [
           BoxShadow(
-            spreadRadius: 0.25,
-            blurRadius: 0.5,
-            color: Theme.of(
-              context,
-            ).colorScheme.onSurface.withValues(alpha: 0.1),
+            color: Colors.blueGrey.withValues(alpha: 0.1),
+            spreadRadius: 1,
+            blurRadius: 2,
+            offset: const Offset(0, 1), // changes position of shadow
           ),
         ],
       ),
@@ -38,8 +37,8 @@ class CustomBottomNavbar extends StatelessWidget {
         children: [
           navbarItem(
             context,
-            title: "Flight",
-            icon: Ph.airplane,
+            title: "Home",
+            icon: Mdi.home_outline,
             isSelected: selectedIndex == 0,
             index: 0,
           ),
