@@ -26,9 +26,9 @@ class SplashScreen extends StatelessWidget {
         return BlocListener<SplashCubit, SplashState>(
           listener: (context, state) {
             if (state is SplashToOnboarding) {
-              context.go('/${RouteNames.signin}');
+              context.pushReplacementNamed(RouteNames.signin);
             } else if (state is SplashToHome) {
-              context.go('/${RouteNames.main}');
+              context.pushReplacementNamed(RouteNames.main);
             }
           },
           child: Scaffold(

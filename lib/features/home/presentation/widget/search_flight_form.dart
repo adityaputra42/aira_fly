@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:iconify_flutter_plus/iconify_flutter_plus.dart';
 import 'package:iconify_flutter_plus/icons/mdi.dart';
+import 'package:pss_app/config/routes/route_names.dart';
 import 'package:pss_app/core/utils/size_extension.dart';
 
 import '../../../../config/theme/app_color.dart';
@@ -10,9 +12,14 @@ import '../../../../core/common/widget/input_text.dart';
 import '../../../../core/common/widget/primary_button.dart';
 import '../../../../core/constants/images.dart';
 
-class SearchFlightForm extends StatelessWidget {
+class SearchFlightForm extends StatefulWidget {
   const SearchFlightForm({super.key});
 
+  @override
+  State<SearchFlightForm> createState() => _SearchFlightFormState();
+}
+
+class _SearchFlightFormState extends State<SearchFlightForm> {
   @override
   Widget build(BuildContext context) {
     return SliverToBoxAdapter(
@@ -20,8 +27,11 @@ class SearchFlightForm extends StatelessWidget {
         children: [
           Container(
             width: context.w(1),
-            height: context.h(0.3),
-            decoration: BoxDecoration(color: AppColor.primaryColor),
+            height: context.w(0.75),
+            decoration: BoxDecoration(
+              color: AppColor.primaryColor,
+              borderRadius: BorderRadius.vertical(bottom: Radius.circular(8)),
+            ),
             child: SafeArea(
               child: Align(
                 alignment: Alignment.topCenter,
@@ -39,7 +49,17 @@ class SearchFlightForm extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                height(16),
+                widget.height(16),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Text(
+                    "Securely Book \nYour Flight Ticket",
+                    style: AppFont.semibold24.copyWith(
+                      color: AppColor.darkText1,
+                    ),
+                  ),
+                ),
+                widget.height(16),
                 Container(
                   margin: EdgeInsets.symmetric(horizontal: 16),
                   width: double.infinity,
@@ -73,7 +93,7 @@ class SearchFlightForm extends StatelessWidget {
                   ),
                 ),
                 SizedBox(
-                  height: context.h(0.4975),
+                  height: 434,
                   child: TabBarView(
                     children: [
                       CardGeneral(
@@ -84,7 +104,7 @@ class SearchFlightForm extends StatelessWidget {
                               prefixIcon: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  width(12),
+                                  widget.width(12),
                                   Iconify(
                                     Mdi.airplane,
                                     size: 18,
@@ -98,18 +118,21 @@ class SearchFlightForm extends StatelessWidget {
                                 size: 14,
                                 color: Theme.of(context).hintColor,
                               ),
+                              ontaped: () {
+                                context.pushNamed(RouteNames.searchAirport);
+                              },
                               hintText: "From",
                               title: "From",
 
                               readOnly: true,
                               cursor: false,
                             ),
-                            height(12),
+                            widget.height(12),
                             InputText(
                               prefixIcon: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  width(12),
+                                  widget.width(12),
                                   Iconify(
                                     Mdi.airplane,
                                     size: 18,
@@ -125,15 +148,18 @@ class SearchFlightForm extends StatelessWidget {
                               ),
                               hintText: "To",
                               title: "To",
+                              ontaped: () {
+                                context.pushNamed(RouteNames.searchAirport);
+                              },
                               readOnly: true,
                               cursor: false,
                             ),
-                            height(12),
+                            widget.height(12),
                             InputText(
                               prefixIcon: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  width(12),
+                                  widget.width(12),
                                   Iconify(
                                     Mdi.calendar_day_outline,
                                     size: 18,
@@ -152,7 +178,7 @@ class SearchFlightForm extends StatelessWidget {
                               readOnly: true,
                               cursor: false,
                             ),
-                            height(12),
+                            widget.height(12),
                             Row(
                               children: [
                                 Expanded(
@@ -160,7 +186,7 @@ class SearchFlightForm extends StatelessWidget {
                                     prefixIcon: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        width(12),
+                                        widget.width(12),
                                         Iconify(
                                           Mdi.people,
                                           size: 18,
@@ -179,13 +205,13 @@ class SearchFlightForm extends StatelessWidget {
                                     cursor: false,
                                   ),
                                 ),
-                                width(8),
+                                widget.width(8),
                                 Expanded(
                                   child: InputText(
                                     prefixIcon: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        width(12),
+                                        widget.width(12),
                                         Iconify(
                                           Mdi.car_seat,
                                           size: 18,
@@ -206,7 +232,7 @@ class SearchFlightForm extends StatelessWidget {
                                 ),
                               ],
                             ),
-                            height(24),
+                            widget.height(24),
                             PrimaryButton(
                               title: "Search Flight",
                               onPressed: () {},
@@ -222,7 +248,7 @@ class SearchFlightForm extends StatelessWidget {
                               prefixIcon: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  width(12),
+                                  widget.width(12),
                                   Iconify(
                                     Mdi.airplane,
                                     size: 18,
@@ -238,15 +264,18 @@ class SearchFlightForm extends StatelessWidget {
                               ),
                               hintText: "From",
                               title: "From",
+                              ontaped: () {
+                                context.pushNamed(RouteNames.searchAirport);
+                              },
                               readOnly: true,
                               cursor: false,
                             ),
-                            height(12),
+                            widget.height(12),
                             InputText(
                               prefixIcon: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  width(12),
+                                  widget.width(12),
                                   Iconify(
                                     Mdi.airplane,
                                     size: 18,
@@ -262,10 +291,13 @@ class SearchFlightForm extends StatelessWidget {
                               ),
                               hintText: "To",
                               title: "To",
+                              ontaped: () {
+                                context.pushNamed(RouteNames.searchAirport);
+                              },
                               readOnly: true,
                               cursor: false,
                             ),
-                            height(12),
+                            widget.height(12),
                             Row(
                               children: [
                                 Expanded(
@@ -273,7 +305,7 @@ class SearchFlightForm extends StatelessWidget {
                                     prefixIcon: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        width(12),
+                                        widget.width(12),
                                         Iconify(
                                           Mdi.calendar_day_outline,
                                           size: 18,
@@ -293,13 +325,13 @@ class SearchFlightForm extends StatelessWidget {
                                     cursor: false,
                                   ),
                                 ),
-                                width(8),
+                                widget.width(8),
                                 Expanded(
                                   child: InputText(
                                     prefixIcon: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        width(12),
+                                        widget.width(12),
                                         Iconify(
                                           Mdi.calendar_day_outline,
                                           size: 18,
@@ -320,7 +352,7 @@ class SearchFlightForm extends StatelessWidget {
                                 ),
                               ],
                             ),
-                            height(12),
+                            widget.height(12),
                             Row(
                               children: [
                                 Expanded(
@@ -328,7 +360,7 @@ class SearchFlightForm extends StatelessWidget {
                                     prefixIcon: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        width(12),
+                                        widget.width(12),
                                         Iconify(
                                           Mdi.people,
                                           size: 18,
@@ -347,13 +379,13 @@ class SearchFlightForm extends StatelessWidget {
                                     cursor: false,
                                   ),
                                 ),
-                                width(8),
+                                widget.width(8),
                                 Expanded(
                                   child: InputText(
                                     prefixIcon: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        width(12),
+                                        widget.width(12),
                                         Iconify(
                                           Mdi.car_seat,
                                           size: 18,
@@ -374,7 +406,7 @@ class SearchFlightForm extends StatelessWidget {
                                 ),
                               ],
                             ),
-                            height(24),
+                            widget.height(24),
                             PrimaryButton(
                               title: "Search Flight",
                               onPressed: () {},

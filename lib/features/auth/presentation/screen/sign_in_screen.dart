@@ -26,7 +26,7 @@ class _SignInScreenState extends State<SignInScreen> {
         children: [
           Container(
             width: context.w(1),
-            height: context.h(0.4),
+            height: context.w(0.75),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.vertical(bottom: Radius.circular(12)),
               color: AppColor.primaryColor,
@@ -72,15 +72,13 @@ class _SignInScreenState extends State<SignInScreen> {
                   widget.height(24),
                   Text(
                     "Welcome Back",
-                    style: AppFont.medium18.copyWith(
-                      color: AppColor.lightText1,
-                    ),
+                    style: AppFont.medium18.copyWith(color: AppColor.darkText1),
                   ),
                   widget.height(2),
                   Text(
                     "Sign in to continue",
                     style: AppFont.reguler12.copyWith(
-                      color: AppColor.lightText1,
+                      color: AppColor.darkText1,
                     ),
                   ),
                   widget.height(16),
@@ -138,7 +136,9 @@ class _SignInScreenState extends State<SignInScreen> {
                                     PrimaryButton(
                                       title: "Sign In",
                                       onPressed: () {
-                                        context.goNamed(RouteNames.main);
+                                        context.pushReplacementNamed(
+                                          RouteNames.main,
+                                        );
                                       },
                                     ),
                                     widget.height(16),

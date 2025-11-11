@@ -4,4 +4,6 @@ class RouteNames {
   static const main = 'main';
   static const signup = 'signup';
   static const signin = 'signin';
+  static const searchAirport = 'searchAirport';
+  static const flightSelecting = 'flightSelecting';
 }

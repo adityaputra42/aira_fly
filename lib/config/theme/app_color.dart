@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 
 class AppColor {
-  static const Color primaryColor = Color(0xff80C4E9);
+  static const Color primaryColor = Color(0xff3dccc7);
+  // static const Color primaryColor = Color(0xff80C4E9);
 
-  static const Color secondaryColor = Color(0xffB4EBE6);
+  static const Color secondaryColor = Color(0xff1e96fc);
   static const Color grayColor = Color(0xff8E90AD);
-  static const Color yellowColor = Color(0xffFFB433);
+  static const Color yellowColor = Color(0xffF2AE14);
   static const Color redColor = Color(0xffF25252);
   static const Color secondRedColor = Color(0xffEE9F91);
   static const Color greenColor = Color(0xff33D49D);
 
   // Ligth Mode
-  static const Color bgLight = Color(0xffF8FCFB);
+  static const Color bgLight = Color(0xffF6F6F6);
   static const Color cardLight = Color(0xffFFFFFF);
   static const Color lightText1 = Color(0xff25282C);
   static const Color lightText2 = Color(0xffADB1B8);
@@ -36,9 +37,13 @@ class AppColor {
   static const Color dividerDark = Color(0xff5D636F);
 
   static const LinearGradient primaryGradient = LinearGradient(
-    colors: [AppColor.primaryColor, AppColor.secondaryColor],
-    begin: Alignment.topRight,
-    end: Alignment.bottomLeft,
+    colors: [
+      AppColor.primaryColor,
+      AppColor.primaryColor,
+      AppColor.secondaryColor,
+    ],
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
   );
   static const LinearGradient errorGradient = LinearGradient(
     colors: [AppColor.redColor, AppColor.secondRedColor],
