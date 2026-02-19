@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../../../config/theme/app_color.dart';
-import '../../../../config/theme/app_font.dart';
+import '../../../../core/theme/app_color.dart';
+import '../../../../core/theme/app_font.dart';
 
 class AppBarHome extends StatelessWidget {
   const AppBarHome({super.key});

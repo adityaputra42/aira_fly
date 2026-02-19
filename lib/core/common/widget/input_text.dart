@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pss_app/core/utils/size_extension.dart';
-import '../../../config/theme/theme.dart';
+import '../../theme/theme.dart';
 
 class InputText extends StatelessWidget {
   final String? title;

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:pss_app/config/di/init_dependencies.dart';
-import 'package:pss_app/config/theme/theme.dart';
+import 'package:pss_app/init_dependencies.dart';
+import 'package:pss_app/core/theme/theme.dart';
 import 'package:pss_app/core/constants/images.dart';
 import 'package:pss_app/core/utils/size_extension.dart';
 
-import '../../../config/routes/route_names.dart';
+import '../../../core/routes/route_names.dart';
 import '../cubit/splash_cubit.dart';
 
 class SplashScreen extends StatelessWidget {

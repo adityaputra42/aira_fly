@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconify_flutter_plus/iconify_flutter_plus.dart';
 import 'package:iconify_flutter_plus/icons/mdi.dart';
-import 'package:iconify_flutter_plus/icons/ph.dart';
-import 'package:pss_app/config/theme/app_color.dart';
-import 'package:pss_app/config/theme/app_font.dart';
+import 'package:pss_app/core/theme/app_color.dart';
+import 'package:pss_app/core/theme/app_font.dart';
 import 'package:pss_app/core/common/widget/card_general.dart';
 import 'package:pss_app/core/common/widget/input_text.dart';
 import 'package:pss_app/core/utils/size_extension.dart';
@@ -25,17 +24,11 @@ class SearchAirportScreen extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                Icons.arrow_back_rounded,
-                size: 20,
-                color: Theme.of(context).cardColor,
-              ),
+              Icon(Icons.arrow_back_rounded, size: 20, color: Theme.of(context).cardColor),
               width(12),
               Text(
                 "Select Airport",
-                style: AppFont.medium16.copyWith(
-                  color: Theme.of(context).cardColor,
-                ),
+                style: AppFont.medium16.copyWith(color: Theme.of(context).cardColor),
               ),
             ],
           ),
@@ -58,10 +51,7 @@ class SearchAirportScreen extends StatelessWidget {
                   margin: EdgeInsets.only(bottom: 8),
                   child: Row(
                     children: [
-                      Iconify(
-                        Mdi.airplane_takeoff,
-                        color: AppColor.primaryColor,
-                      ),
+                      Iconify(Mdi.airplane_takeoff, color: AppColor.primaryColor),
                       width(12),
                       Expanded(
                         child: Column(

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'config/di/init_dependencies.dart';
-import 'config/routes/app_routes.dart';
-import 'config/theme/style.dart';
+import 'init_dependencies.dart';
+import 'core/routes/app_routes.dart';
+import 'core/theme/style.dart';
 import 'core/common/cubit/theme_cubit.dart';
 import 'core/main/cubit/main_cubit.dart';
 

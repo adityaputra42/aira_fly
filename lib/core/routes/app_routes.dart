@@ -6,7 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:pss_app/features/flight/ui/screen/flightSelecting/flight_selecting_screen.dart';
 import 'package:pss_app/features/flight/ui/screen/searchAirport/search_airport_screen.dart';
 
-import '../../core/main/ui/screen/main_screen.dart';
+import '../main/ui/screen/main_screen.dart';
 import '../../features/splash/ui/splash_screen.dart';
 import '../../features/auth/presentation/screen/sign_in_screen.dart';
 import '../../features/auth/presentation/screen/sign_up_screen.dart';
