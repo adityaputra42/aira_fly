@@ -6,7 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:pss_app/features/flight/ui/screen/flightSelecting/flight_selecting_screen.dart';
 import 'package:pss_app/features/flight/ui/screen/searchAirport/search_airport_screen.dart';
 
-import '../main/ui/screen/main_screen.dart';
+import '../../features/main/ui/screen/main_screen.dart';
 import '../../features/splash/ui/splash_screen.dart';
 import '../../features/auth/presentation/screen/sign_in_screen.dart';
 import '../../features/auth/presentation/screen/sign_up_screen.dart';
@@ -111,14 +111,9 @@ CustomTransitionPage buildPageWithTransition({
     key: key,
     child: child,
     transitionDuration: duration,
-    reverseTransitionDuration: Duration(
-      milliseconds: (duration.inMilliseconds * 0.75).round(),
-    ),
+    reverseTransitionDuration: Duration(milliseconds: (duration.inMilliseconds * 0.75).round()),
     transitionsBuilder: (context, animation, secondaryAnimation, child) {
-      final curvedAnimation = CurvedAnimation(
-        parent: animation,
-        curve: Curves.easeInOutCubic,
-      );
+      final curvedAnimation = CurvedAnimation(parent: animation, curve: Curves.easeInOutCubic);
 
       final curvedSecondaryAnimation = CurvedAnimation(
         parent: secondaryAnimation,

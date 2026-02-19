@@ -5,7 +5,7 @@ import 'init_dependencies.dart';
 import 'core/routes/app_routes.dart';
 import 'core/theme/style.dart';
 import 'core/common/cubit/theme_cubit.dart';
-import 'core/main/cubit/main_cubit.dart';
+import 'features/main/cubit/main_cubit.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,9 +14,7 @@ void main() async {
     MultiBlocProvider(
       providers: [
         BlocProvider(create: (context) => serviceLocator<MainCubit>()),
-        BlocProvider(
-          create: (context) => serviceLocator<ThemeCubit>()..loadTheme(),
-        ),
+        BlocProvider(create: (context) => serviceLocator<ThemeCubit>()..loadTheme()),
       ],
       child: const MyApp(),
     ),
@@ -33,7 +31,7 @@ class MyApp extends StatelessWidget {
           routerConfig: AppRouter.router,
           debugShowCheckedModeBanner: false,
           title: "Aira Fly",
-          theme: Styles.themeData(false, context),
+          theme: Styles.themeData(isDarkMode, context),
         );
       },
     );

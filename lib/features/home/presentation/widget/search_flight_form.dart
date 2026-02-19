@@ -54,9 +54,7 @@ class _SearchFlightFormState extends State<SearchFlightForm> {
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Text(
                     "Securely Book \nYour Flight Ticket",
-                    style: AppFont.semibold24.copyWith(
-                      color: AppColor.darkText1,
-                    ),
+                    style: AppFont.semibold24.copyWith(color: AppColor.darkText1),
                   ),
                 ),
                 widget.height(16),
@@ -73,7 +71,7 @@ class _SearchFlightFormState extends State<SearchFlightForm> {
                     physics: const NeverScrollableScrollPhysics(),
                     automaticIndicatorColorAdjustment: false,
                     indicator: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primary,
+                      color: AppColor.secondaryColor,
                       borderRadius: BorderRadius.circular(24),
                     ),
                     isScrollable: false,
@@ -105,12 +103,7 @@ class _SearchFlightFormState extends State<SearchFlightForm> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   widget.width(12),
-                                  Iconify(
-                                    Mdi.airplane,
-                                    size: 18,
-
-                                    color: AppColor.primaryColor,
-                                  ),
+                                  Iconify(Mdi.airplane, size: 18, color: AppColor.secondaryColor),
                                 ],
                               ),
                               icon: Icon(
@@ -133,12 +126,7 @@ class _SearchFlightFormState extends State<SearchFlightForm> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   widget.width(12),
-                                  Iconify(
-                                    Mdi.airplane,
-                                    size: 18,
-
-                                    color: AppColor.primaryColor,
-                                  ),
+                                  Iconify(Mdi.airplane, size: 18, color: AppColor.secondaryColor),
                                 ],
                               ),
                               icon: Icon(
@@ -164,7 +152,7 @@ class _SearchFlightFormState extends State<SearchFlightForm> {
                                     Mdi.calendar_day_outline,
                                     size: 18,
 
-                                    color: AppColor.primaryColor,
+                                    color: AppColor.secondaryColor,
                                   ),
                                 ],
                               ),
@@ -190,7 +178,7 @@ class _SearchFlightFormState extends State<SearchFlightForm> {
                                         Iconify(
                                           Mdi.people,
                                           size: 18,
-                                          color: AppColor.primaryColor,
+                                          color: AppColor.secondaryColor,
                                         ),
                                       ],
                                     ),
@@ -215,7 +203,7 @@ class _SearchFlightFormState extends State<SearchFlightForm> {
                                         Iconify(
                                           Mdi.car_seat,
                                           size: 18,
-                                          color: AppColor.primaryColor,
+                                          color: AppColor.secondaryColor,
                                         ),
                                       ],
                                     ),
@@ -235,7 +223,9 @@ class _SearchFlightFormState extends State<SearchFlightForm> {
                             widget.height(24),
                             PrimaryButton(
                               title: "Search Flight",
-                              onPressed: () {},
+                              onPressed: () {
+                                context.pushNamed(RouteNames.flightSelecting);
+                              },
                             ),
                           ],
                         ),
@@ -249,12 +239,7 @@ class _SearchFlightFormState extends State<SearchFlightForm> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   widget.width(12),
-                                  Iconify(
-                                    Mdi.airplane,
-                                    size: 18,
-
-                                    color: AppColor.primaryColor,
-                                  ),
+                                  Iconify(Mdi.airplane, size: 18, color: AppColor.secondaryColor),
                                 ],
                               ),
                               icon: Icon(
@@ -276,12 +261,7 @@ class _SearchFlightFormState extends State<SearchFlightForm> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   widget.width(12),
-                                  Iconify(
-                                    Mdi.airplane,
-                                    size: 18,
-
-                                    color: AppColor.primaryColor,
-                                  ),
+                                  Iconify(Mdi.airplane, size: 18, color: AppColor.secondaryColor),
                                 ],
                               ),
                               icon: Icon(
@@ -310,7 +290,7 @@ class _SearchFlightFormState extends State<SearchFlightForm> {
                                           Mdi.calendar_day_outline,
                                           size: 18,
 
-                                          color: AppColor.primaryColor,
+                                          color: AppColor.secondaryColor,
                                         ),
                                       ],
                                     ),
@@ -335,7 +315,7 @@ class _SearchFlightFormState extends State<SearchFlightForm> {
                                         Iconify(
                                           Mdi.calendar_day_outline,
                                           size: 18,
-                                          color: AppColor.primaryColor,
+                                          color: AppColor.secondaryColor,
                                         ),
                                       ],
                                     ),
@@ -364,7 +344,7 @@ class _SearchFlightFormState extends State<SearchFlightForm> {
                                         Iconify(
                                           Mdi.people,
                                           size: 18,
-                                          color: AppColor.primaryColor,
+                                          color: AppColor.secondaryColor,
                                         ),
                                       ],
                                     ),
@@ -389,7 +369,7 @@ class _SearchFlightFormState extends State<SearchFlightForm> {
                                         Iconify(
                                           Mdi.car_seat,
                                           size: 18,
-                                          color: AppColor.primaryColor,
+                                          color: AppColor.secondaryColor,
                                         ),
                                       ],
                                     ),
@@ -409,7 +389,9 @@ class _SearchFlightFormState extends State<SearchFlightForm> {
                             widget.height(24),
                             PrimaryButton(
                               title: "Search Flight",
-                              onPressed: () {},
+                              onPressed: () {
+                                context.pushNamed(RouteNames.flightSelecting);
+                              },
                             ),
                           ],
                         ),

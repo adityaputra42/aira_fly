@@ -1,0 +1,174 @@
+import 'package:paged_vertical_calendar/utils/date_models.dart';
+
+abstract class DateUtils {
+  static Month getMonth(
+    DateTime? minDate,
+    DateTime? maxDate,
+    int monthPage,
+    bool up, {
+    bool startWeekWithSunday = false,
+  }) {
+    DateTime startDate = (minDate ?? DateTime.now()).removeTime();
+
+    if (monthPage > 1) {
+      final offset = monthPage - 1;
+      if (up) {
+        startDate = DateTime(startDate.year, startDate.month - offset, 1);
+      } else {
+        startDate = DateTime(startDate.year, startDate.month + offset, 1);
+      }
+    }
+
+    final weekMinDate = _findDayOfWeekInMonth(
+      startDate,
+      getWeekDay(startDate, startWeekWithSunday),
+      startWeekWithSunday: startWeekWithSunday,
+    );
+
+    DateTime firstDayOfWeek = weekMinDate;
+    DateTime lastDayOfWeek = _lastDayOfWeek(weekMinDate, startWeekWithSunday);
+
+    List<Week> weeks = [];
+
+    while (true) {
+      if (up) {
+        Week week;
+        if (maxDate != null && firstDayOfWeek.isBefore(maxDate)) {
+          week = Week(maxDate, lastDayOfWeek);
+        } else {
+          week = Week(firstDayOfWeek, lastDayOfWeek);
+        }
+
+        if (maxDate != null && lastDayOfWeek.isSameDayOrAfter(maxDate)) {
+          weeks.add(week);
+        } else if (maxDate == null) {
+          weeks.add(week);
+        }
+        if (week.isLastWeekOfMonth) break;
+      } else {
+        if (maxDate != null && lastDayOfWeek.isSameDayOrAfter(maxDate)) {
+          Week week = Week(firstDayOfWeek, maxDate);
+          weeks.add(week);
+          break;
+        }
+
+        Week week = Week(firstDayOfWeek, lastDayOfWeek);
+        weeks.add(week);
+
+        if (week.isLastWeekOfMonth) break;
+      }
+
+      firstDayOfWeek = lastDayOfWeek.nextDay;
+      lastDayOfWeek = _lastDayOfWeek(firstDayOfWeek, startWeekWithSunday);
+    }
+
+    return Month(weeks);
+  }
+
+  static int getWeekDay(DateTime date, bool startWeekWithSunday) {
+    if (startWeekWithSunday) {
+      return date.weekday == DateTime.sunday ? 1 : date.weekday + 1;
+    } else {
+      return date.weekday;
+    }
+  }
+
+  /// calculates the last of the week by calculating the remaining days in a
+  /// standard week and evaluating if this week extends beyond the total days
+  /// in that month, and capping it to the end of the month if it does
+  static DateTime _lastDayOfWeek(DateTime firstDayOfWeek, bool startWeekWithSunday) {
+    int daysInMonth = firstDayOfWeek.daysInMonth;
+
+    final dayOfWeek = getWeekDay(firstDayOfWeek, startWeekWithSunday);
+    final restOfWeek = DateTime.daysPerWeek - dayOfWeek;
+
+    return firstDayOfWeek.day + restOfWeek > daysInMonth
+        ? DateTime(firstDayOfWeek.year, firstDayOfWeek.month, daysInMonth)
+        : firstDayOfWeek.addDays(restOfWeek);
+  }
+
+  static DateTime _findDayOfWeekInMonth(
+    DateTime date,
+    int dayOfWeek, {
+    bool startWeekWithSunday = false,
+  }) {
+    date = date.removeTime();
+
+    if (date.weekday == (startWeekWithSunday ? DateTime.sunday : DateTime.monday)) {
+      return date;
+    } else {
+      return date.subtract(Duration(days: getWeekDay(date, startWeekWithSunday) - dayOfWeek));
+    }
+  }
+
+  static List<int> daysPerMonth(int year) => <int>[
+    31,
+    _isLeapYear(year) ? 29 : 28,
+    31,
+    30,
+    31,
+    30,
+    31,
+    31,
+    30,
+    31,
+    30,
+    31,
+  ];
+
+  /// efficient leapyear calcualtion transcribed from a C stackoverflow answer
+  static bool _isLeapYear(int year) {
+    return (year & 3) == 0 && ((year % 25) != 0 || (year & 15) == 0);
+  }
+
+  static List<DateTime> listOfValidDatesInMonth(Month month, List<int> weekdaysToHide) {
+    final totalDays = month.daysInMonth;
+    final validDates = <DateTime>[];
+    for (int i = 1; i <= totalDays; i++) {
+      final date = DateTime(month.year, month.month, i);
+      if (!weekdaysToHide.contains(date.weekday)) {
+        validDates.add(date);
+      }
+    }
+    return (validDates);
+  }
+
+  /// This method returns the number of spaces required before first valid based of the hidden weekdays.
+  /// For example, if the first valid date falls on a Tuesday, that means that the weekday "monday"
+  /// is hidden, which makes the first valid date index "1"
+  static int getNoOfSpaceRequiredBeforeFirstValidDate(
+    List<int> weekdaysToHide,
+    int weekdayValueForFirstValidDay, [
+    bool isSundayFirstDayOfWeek = false,
+  ]) {
+    final mondayWeekDayList = [1, 2, 3, 4, 5, 6, 7];
+    final sundayWeekDayList = [7, 1, 2, 3, 4, 5, 6];
+
+    mondayWeekDayList.removeWhere((weekday) => weekdaysToHide.contains(weekday));
+    sundayWeekDayList.removeWhere((weekday) => weekdaysToHide.contains(weekday));
+
+    return isSundayFirstDayOfWeek
+        ? sundayWeekDayList.indexOf(weekdayValueForFirstValidDay)
+        : mondayWeekDayList.indexOf(weekdayValueForFirstValidDay);
+  }
+}
+
+extension DateUtilsExtensions on DateTime {
+  int get daysInMonth => DateUtils.daysPerMonth(year)[month - 1];
+
+  DateTime get nextDay => DateTime(year, month, day + 1);
+
+  bool isSameDayOrAfter(DateTime other) => isAfter(other) || isSameDay(other);
+
+  bool isSameDayOrBefore(DateTime other) => isBefore(other) || isSameDay(other);
+
+  bool isSameDay(DateTime other) => year == other.year && month == other.month && day == other.day;
+
+  DateTime removeTime() => DateTime(year, month, day);
+
+  bool isSameMonth(DateTime other) => other.year == year && other.month == month;
+
+  DateTime addDays(int daysToAdd) {
+    return DateTime(year, month, day + daysToAdd, hour, minute, second, millisecond, microsecond);
+  }
+}

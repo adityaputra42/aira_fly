@@ -11,6 +11,7 @@ dependencies:
   animations: ^2.1.1
   bloc: ^9.2.0
   cached_network_image: ^3.4.1
+  carousel_slider: ^5.1.2
   cupertino_icons: ^1.0.8
   dio: ^5.9.1
   equatable: ^2.0.8
@@ -23,7 +24,9 @@ dependencies:
   iconify_flutter_plus: ^1.0.4
   image_picker: ^1.2.0
   internet_connection_checker_plus: ^2.9.1+2
+  intl: ^0.20.2
   meta: ^1.16.0
+  paged_vertical_calendar: ^1.1.10
   shared_preferences: ^2.5.4
   shimmer: ^3.0.0
 

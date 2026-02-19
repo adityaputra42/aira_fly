@@ -5,6 +5,6 @@ class FlightSelectingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(body: CustomScrollView(slivers: []));
+    return const Scaffold(body: CustomScrollView(slivers: [SliverAppBar()]));
   }
 }

@@ -61,25 +61,18 @@ class _SignInScreenState extends State<SignInScreen> {
 
                         Text(
                           "Aira Fly",
-                          style: AppFont.semibold16.copyWith(
-                            color: AppColor.cardLight,
-                          ),
+                          style: AppFont.semibold16.copyWith(color: AppColor.cardLight),
                         ),
                       ],
                     ),
                   ),
 
                   widget.height(24),
-                  Text(
-                    "Welcome Back",
-                    style: AppFont.medium18.copyWith(color: AppColor.darkText1),
-                  ),
+                  Text("Welcome Back", style: AppFont.medium18.copyWith(color: AppColor.darkText1)),
                   widget.height(2),
                   Text(
                     "Sign in to continue",
-                    style: AppFont.reguler12.copyWith(
-                      color: AppColor.darkText1,
-                    ),
+                    style: AppFont.reguler12.copyWith(color: AppColor.darkText1),
                   ),
                   widget.height(16),
                   Expanded(
@@ -87,186 +80,152 @@ class _SignInScreenState extends State<SignInScreen> {
                       margin: EdgeInsets.zero,
                       radius: 16,
                       child: LayoutBuilder(
-                        builder: (context, constraints) =>
-                            SingleChildScrollView(
-                              child: ConstrainedBox(
-                                constraints: BoxConstraints(
-                                  minHeight: constraints.maxHeight,
+                        builder: (context, constraints) => SingleChildScrollView(
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                InputText(hintText: "Input your email address!", title: "Email"),
+                                widget.height(12),
+                                InputText(
+                                  hintText: "Input your password",
+                                  title: "Password",
+                                  obscureText: obscureText,
+                                  icon: InkWell(
+                                    onTap: () {
+                                      setState(() {
+                                        obscureText = !obscureText;
+                                      });
+                                    },
+                                    child: Icon(
+                                      obscureText
+                                          ? Icons.visibility_outlined
+                                          : Icons.visibility_off_outlined,
+                                      size: 20,
+                                      color: Theme.of(context).colorScheme.onSurface,
+                                    ),
+                                  ),
                                 ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                widget.height(12),
+                                Align(
+                                  alignment: Alignment.centerRight,
+                                  child: Text(
+                                    "Forgot Password?",
+                                    style: AppFont.reguler12.copyWith(
+                                      color: AppColor.secondaryColor,
+                                    ),
+                                  ),
+                                ),
+                                widget.height(24),
+                                PrimaryButton(
+                                  title: "Sign In",
+                                  onPressed: () {
+                                    context.pushReplacementNamed(RouteNames.main);
+                                  },
+                                ),
+                                widget.height(16),
+                                Row(
                                   children: [
-                                    InputText(
-                                      hintText: "Input your email address!",
-                                      title: "Email",
-                                    ),
-                                    widget.height(12),
-                                    InputText(
-                                      hintText: "Input your password",
-                                      title: "Password",
-                                      obscureText: obscureText,
-                                      icon: InkWell(
-                                        onTap: () {
-                                          setState(() {
-                                            obscureText = !obscureText;
-                                          });
-                                        },
-                                        child: Icon(
-                                          obscureText
-                                              ? Icons.visibility_outlined
-                                              : Icons.visibility_off_outlined,
-                                          size: 20,
-                                          color: Theme.of(
-                                            context,
-                                          ).colorScheme.onSurface,
+                                    Expanded(
+                                      child: SizedBox(
+                                        height: 1,
+                                        child: Divider(
+                                          thickness: 1,
+                                          color: Theme.of(context).hintColor,
                                         ),
                                       ),
                                     ),
-                                    widget.height(12),
-                                    Align(
-                                      alignment: Alignment.centerRight,
-                                      child: Text(
-                                        "Forgot Password?",
-                                        style: AppFont.reguler12.copyWith(
-                                          color: AppColor.primaryColor,
-                                        ),
+                                    widget.width(8),
+                                    Text(
+                                      "Or",
+                                      style: AppFont.medium14.copyWith(
+                                        color: Theme.of(context).hintColor,
                                       ),
                                     ),
-                                    widget.height(24),
-                                    PrimaryButton(
-                                      title: "Sign In",
-                                      onPressed: () {
-                                        context.pushReplacementNamed(
-                                          RouteNames.main,
-                                        );
-                                      },
-                                    ),
-                                    widget.height(16),
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          child: SizedBox(
-                                            height: 1,
-                                            child: Divider(
-                                              thickness: 1,
-                                              color: Theme.of(
-                                                context,
-                                              ).hintColor,
-                                            ),
-                                          ),
+                                    widget.width(8),
+                                    Expanded(
+                                      child: SizedBox(
+                                        height: 1,
+                                        child: Divider(
+                                          thickness: 1,
+                                          color: Theme.of(context).hintColor,
                                         ),
-                                        widget.width(8),
-                                        Text(
-                                          "Or",
-                                          style: AppFont.medium14.copyWith(
-                                            color: Theme.of(context).hintColor,
-                                          ),
-                                        ),
-                                        widget.width(8),
-                                        Expanded(
-                                          child: SizedBox(
-                                            height: 1,
-                                            child: Divider(
-                                              thickness: 1,
-                                              color: Theme.of(
-                                                context,
-                                              ).hintColor,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    widget.height(16),
-                                    PrimaryButton(
-                                      bgColor: Theme.of(
-                                        context,
-                                      ).colorScheme.surface,
-                                      textColor: Theme.of(
-                                        context,
-                                      ).colorScheme.onSurface,
-                                      title: "Continue With Google",
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Iconify(
-                                            Mdi.google,
-                                            size: 18,
-                                            color: Theme.of(
-                                              context,
-                                            ).colorScheme.onSurface,
-                                          ),
-                                          widget.width(8),
-                                          Text(
-                                            "Continue With Google",
-                                            style: AppFont.medium12.copyWith(
-                                              color: Theme.of(
-                                                context,
-                                              ).colorScheme.onSurface,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      onPressed: () {},
-                                    ),
-                                    widget.height(16),
-                                    PrimaryButton(
-                                      bgColor: Theme.of(
-                                        context,
-                                      ).colorScheme.surface,
-                                      textColor: Theme.of(
-                                        context,
-                                      ).colorScheme.onSurface,
-                                      title: "Continue With Apple Id",
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Iconify(
-                                            Mdi.apple,
-                                            size: 18,
-                                            color: Theme.of(
-                                              context,
-                                            ).colorScheme.onSurface,
-                                          ),
-                                          widget.width(8),
-                                          Text(
-                                            "Continue With Apple Id",
-                                            style: AppFont.medium12.copyWith(
-                                              color: Theme.of(
-                                                context,
-                                              ).colorScheme.onSurface,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      onPressed: () {},
-                                    ),
-                                    widget.height(24),
-                                    Text.rich(
-                                      TextSpan(
-                                        children: [
-                                          TextSpan(
-                                            text: "Don't have an account? ",
-                                            style: AppFont.reguler10.copyWith(
-                                              color: Theme.of(
-                                                context,
-                                              ).hintColor,
-                                            ),
-                                          ),
-                                          TextSpan(
-                                            text: "Sign Up",
-                                            style: AppFont.medium10.copyWith(
-                                              color: Theme.of(
-                                                context,
-                                              ).colorScheme.primary,
-                                            ),
-                                          ),
-                                        ],
                                       ),
                                     ),
                                   ],
                                 ),
-                              ),
+                                widget.height(16),
+                                PrimaryButton(
+                                  bgColor: Theme.of(context).colorScheme.surface,
+                                  textColor: Theme.of(context).colorScheme.onSurface,
+                                  title: "Continue With Google",
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Iconify(
+                                        Mdi.google,
+                                        size: 18,
+                                        color: Theme.of(context).colorScheme.onSurface,
+                                      ),
+                                      widget.width(8),
+                                      Text(
+                                        "Continue With Google",
+                                        style: AppFont.medium12.copyWith(
+                                          color: Theme.of(context).colorScheme.onSurface,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  onPressed: () {},
+                                ),
+                                widget.height(16),
+                                PrimaryButton(
+                                  bgColor: Theme.of(context).colorScheme.surface,
+                                  textColor: Theme.of(context).colorScheme.onSurface,
+                                  title: "Continue With Apple Id",
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Iconify(
+                                        Mdi.apple,
+                                        size: 18,
+                                        color: Theme.of(context).colorScheme.onSurface,
+                                      ),
+                                      widget.width(8),
+                                      Text(
+                                        "Continue With Apple Id",
+                                        style: AppFont.medium12.copyWith(
+                                          color: Theme.of(context).colorScheme.onSurface,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  onPressed: () {},
+                                ),
+                                widget.height(24),
+                                Text.rich(
+                                  TextSpan(
+                                    children: [
+                                      TextSpan(
+                                        text: "Don't have an account? ",
+                                        style: AppFont.reguler10.copyWith(
+                                          color: Theme.of(context).hintColor,
+                                        ),
+                                      ),
+                                      TextSpan(
+                                        text: "Sign Up",
+                                        style: AppFont.medium10.copyWith(
+                                          color: AppColor.secondaryColor,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ),
+                          ),
+                        ),
                       ),
                     ),
                   ),

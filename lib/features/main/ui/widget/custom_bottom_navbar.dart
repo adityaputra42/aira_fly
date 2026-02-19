@@ -6,8 +6,8 @@ import 'package:iconify_flutter_plus/icons/mdi.dart';
 import 'package:iconify_flutter_plus/icons/uil.dart';
 import 'package:pss_app/core/utils/size_extension.dart';
 
-import '../../../theme/app_color.dart';
-import '../../../theme/app_font.dart';
+import '../../../../core/theme/app_color.dart';
+import '../../../../core/theme/app_font.dart';
 
 class CustomBottomNavbar extends StatelessWidget {
   const CustomBottomNavbar({super.key, this.selectedIndex, this.onTap});
@@ -16,9 +16,9 @@ class CustomBottomNavbar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.fromLTRB(16, 8, 16, 24),
+      margin: EdgeInsets.fromLTRB(16, 8, 16, 16),
       width: context.w(0.88),
-      padding: const EdgeInsets.all(6),
+      padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(32),
@@ -93,11 +93,7 @@ class CustomBottomNavbar extends StatelessWidget {
     );
   }
 
-  Widget activeNavbar(
-    BuildContext context, {
-    required String icon,
-    required String title,
-  }) {
+  Widget activeNavbar(BuildContext context, {required String icon, required String title}) {
     return Container(
       height: 44,
       width: context.w(0.275),
@@ -113,12 +109,8 @@ class CustomBottomNavbar extends StatelessWidget {
             width: 40,
             height: 40,
             padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(width: 1, color: AppColor.primaryColor),
-              color: AppColor.darkText1,
-            ),
-            child: Iconify(icon, size: 20, color: AppColor.primaryColor),
+            decoration: BoxDecoration(shape: BoxShape.circle, color: AppColor.darkText1),
+            child: Iconify(icon, size: 20, color: AppColor.secondaryColor),
           ),
           width(4),
           Flexible(
@@ -138,9 +130,12 @@ class CustomBottomNavbar extends StatelessWidget {
     return Container(
       height: 44,
       width: 44,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(shape: BoxShape.circle),
-      child: Iconify(icon, size: 20, color: AppColor.grayColor),
+      // padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: AppColor.grayColor.withValues(alpha: 0.1),
+      ),
+      child: Center(child: Iconify(icon, size: 20, color: AppColor.grayColor)),
     );
   }
 }
