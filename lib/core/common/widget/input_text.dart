@@ -125,16 +125,13 @@ class InputText extends StatelessWidget {
           onEditingComplete: onComplete,
           style:
               textStyle ??
-              AppFont.medium12.copyWith(
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
+              AppFont.medium12.copyWith(color: Theme.of(context).colorScheme.onSurface),
           decoration: InputDecoration(
             enabled: enable,
             isDense: true,
 
             contentPadding:
-                contentPadding ??
-                const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                contentPadding ?? const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
             suffixIcon: icon,
             suffix: suffix,
             prefixIcon: prefixIcon,
@@ -154,9 +151,7 @@ class InputText extends StatelessWidget {
             hintText: hintText,
             filled: filled,
             fillColor: filledColor ?? Theme.of(context).colorScheme.surface,
-            hintStyle:
-                hintStyle ??
-                AppFont.reguler12.copyWith(color: Theme.of(context).hintColor),
+            hintStyle: hintStyle ?? AppFont.reguler12.copyWith(color: Theme.of(context).hintColor),
             border: OutlineInputBorder(
               borderRadius: borderRadius ?? BorderRadius.circular(10),
               borderSide:
@@ -186,8 +181,7 @@ class InputText extends StatelessWidget {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: borderRadius ?? BorderRadius.circular(10),
-              borderSide:
-                  borderSide ?? const BorderSide(color: AppColor.primaryColor),
+              borderSide: borderSide ?? const BorderSide(color: AppColor.secondaryColor),
             ),
           ),
         ),

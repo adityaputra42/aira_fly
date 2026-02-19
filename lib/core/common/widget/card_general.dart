@@ -33,10 +33,10 @@ class CardGeneral extends StatelessWidget {
         color: background ?? Theme.of(context).cardColor,
         boxShadow: [
           BoxShadow(
-            color: Colors.blueGrey.withValues(alpha: 0.1),
-            spreadRadius: 1,
-            blurRadius: 2,
-            offset: const Offset(0, 1), // changes position of shadow
+            color: Theme.of(context).hintColor.withValues(alpha: 0.1),
+            spreadRadius: 0.5,
+            blurRadius: 0.5,
+            offset: const Offset(0, 0.5),
           ),
         ],
       ),

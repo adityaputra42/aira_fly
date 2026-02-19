@@ -10,7 +10,7 @@ class PrimaryButton extends StatelessWidget {
     this.margin = EdgeInsets.zero,
     required this.onPressed,
     this.disable = false,
-    this.activeColor = AppColor.primaryColor,
+    this.activeColor = AppColor.secondaryColor,
     this.disableColor,
     this.bgColor,
     this.textColor,
@@ -21,7 +21,7 @@ class PrimaryButton extends StatelessWidget {
     this.borderColor,
     this.textStyle,
     this.buttonPadding,
-    this.height = 42,
+    this.height = 40,
   });
 
   final String title;
@@ -52,7 +52,7 @@ class PrimaryButton extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
         color: !disable
-            ? (bgColor ?? AppColor.primaryColor)
+            ? (bgColor ?? AppColor.secondaryColor)
             : (disableColor ?? Theme.of(context).cardColor),
       ),
       child: ElevatedButton(
@@ -60,13 +60,11 @@ class PrimaryButton extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           elevation: 0,
           // overlayColor: AppColor.secondaryColor,
-          shadowColor: AppColor.primaryColor.withValues(alpha: 0.25),
+          shadowColor: AppColor.secondaryColor.withValues(alpha: 0.25),
           backgroundColor: Colors.transparent,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
-        onPressed: disable ? () {} : onPressed,
+        onPressed: disable ? null : onPressed,
         child:
             child ??
             Text(
