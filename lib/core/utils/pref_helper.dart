@@ -25,13 +25,12 @@ class PrefHelper {
 
   bool get isFirstInstall => _pref.getBool("firstInstall") ?? true;
 
-  setDarkTheme(bool value) {
+  void setDarkTheme(bool value) {
     _pref.setBool("theme", value);
   }
 
   bool getTheme() {
-    var phoneTheme =
-        SchedulerBinding.instance.platformDispatcher.platformBrightness;
+    var phoneTheme = SchedulerBinding.instance.platformDispatcher.platformBrightness;
     bool isDarkMode = phoneTheme == Brightness.dark;
     return _pref.getBool("theme") ?? isDarkMode;
   }

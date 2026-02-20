@@ -50,9 +50,7 @@ class SearchAirportScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(4),
                     color: AppColor.secondaryColor.withValues(alpha: 0.1),
                   ),
-                  child: Center(
-                    child: Iconify(Mdi.airplane_takeoff, color: AppColor.secondaryColor),
-                  ),
+                  child: Center(child: Iconify(Mdi.plane, color: AppColor.secondaryColor)),
                 ),
                 width(12),
                 Expanded(

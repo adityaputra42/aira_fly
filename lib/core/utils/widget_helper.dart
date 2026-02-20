@@ -17,6 +17,7 @@ class WidgetHelper {
     double? fontSize,
     double height = 60,
     bool isCanBack = true,
+    bool titleCenter = false,
   }) {
     return AppBar(
       elevation: 0.1,
@@ -79,6 +80,7 @@ class WidgetHelper {
                           ),
 
                           overflow: TextOverflow.ellipsis,
+                          textAlign: titleCenter ? TextAlign.center : TextAlign.start,
                         ),
                 ),
               ),
@@ -92,7 +94,7 @@ class WidgetHelper {
       automaticallyImplyLeading: false,
       backgroundColor: color ?? Theme.of(context).colorScheme.surface,
       surfaceTintColor: color ?? Theme.of(context).colorScheme.surface,
-      shadowColor: Theme.of(context).canvasColor,
+      shadowColor: Theme.of(context).canvasColor.withValues(alpha: 0.3),
       toolbarHeight: height,
     );
   }

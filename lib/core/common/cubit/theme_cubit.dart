@@ -15,7 +15,7 @@ class ThemeCubit extends Cubit<bool> {
   /// Toggle theme
   Future<void> toggleTheme() async {
     final newTheme = !state;
-    await pref.setDarkTheme(newTheme);
+    pref.setDarkTheme(newTheme);
     emit(newTheme);
   }
 }

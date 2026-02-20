@@ -80,7 +80,7 @@ class _DateSliderState extends State<DateSlider> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: 10, bottom: 15),
+      padding: const EdgeInsets.only(top: 8, bottom: 8),
       child: Row(
         children: [
           _DateNavigation(
@@ -96,7 +96,7 @@ class _DateSliderState extends State<DateSlider> {
               itemCount: dateList.length,
               carouselController: carouselController,
               options: CarouselOptions(
-                height: 50,
+                height: 48,
                 aspectRatio: 7,
                 initialPage: _initialIndex,
                 viewportFraction: .26,
@@ -149,7 +149,7 @@ class _DateItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color textColor = isActive ? AppColor.primaryColor : Colors.white.withValues(alpha: .8);
+    Color textColor = isActive ? AppColor.primaryColor : Colors.white;
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
@@ -157,21 +157,15 @@ class _DateItem extends StatelessWidget {
         margin: const EdgeInsets.symmetric(horizontal: 2),
         width: double.infinity,
         decoration: BoxDecoration(
-          color: isActive ? Colors.white : AppColor.primaryColor,
-          borderRadius: BorderRadius.circular(10),
+          color: isActive ? Colors.white : Colors.white.withValues(alpha: 0.15),
+          borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: AppColor.primaryColor,
-            style: isActive ? BorderStyle.solid : BorderStyle.none,
+            color: isActive ? AppColor.primaryColor : Colors.white.withValues(alpha: 0.75),
+            style: BorderStyle.solid,
           ),
         ),
         child: Center(
-          child: Text(
-            date,
-            style: AppFont.medium12.copyWith(
-              color: textColor,
-              // fontWeight: price != '0' ? FontWeight.w400 : FontWeight.w500,
-            ),
-          ),
+          child: Text(date, style: AppFont.medium12.copyWith(color: textColor)),
         ),
       ),
     );
@@ -225,7 +219,10 @@ class _DateNavigationState extends State<_DateNavigation> {
       },
       child: Container(
         padding: padding,
-        margin: const EdgeInsets.symmetric(horizontal: 10),
+        margin: EdgeInsets.only(
+          left: widget.navigationType == _NavigationType.forward ? 8 : 0,
+          right: widget.navigationType == _NavigationType.forward ? 0 : 8,
+        ),
         decoration: BoxDecoration(
           color: Colors.white.withValues(alpha: .8),
           shape: BoxShape.circle,
