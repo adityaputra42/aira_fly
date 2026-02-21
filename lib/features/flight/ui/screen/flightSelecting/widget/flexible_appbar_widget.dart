@@ -17,12 +17,12 @@ class FlexibleAppBarWidget extends StatelessWidget {
                 padding: EdgeInsets.all(6),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(6),
-                  color: (Theme.of(context).colorScheme.onSurface).withValues(alpha: 0.1),
+                  color: (AppColor.darkText1).withValues(alpha: 0.1),
                 ),
                 child: Center(
                   child: Icon(
                     Icons.arrow_back_ios_new_rounded,
-                    color: Theme.of(context).colorScheme.onSurface,
+                    color: AppColor.darkText1,
                     size: 18,
                   ),
                 ),
@@ -32,7 +32,7 @@ class FlexibleAppBarWidget extends StatelessWidget {
             Expanded(
               child: Text(
                 "Departure Flight",
-                style: AppFont.semibold16,
+                style: AppFont.semibold16.copyWith(color: AppColor.darkText1),
                 textAlign: TextAlign.center,
               ),
             ),
@@ -43,15 +43,9 @@ class FlexibleAppBarWidget extends StatelessWidget {
                 padding: EdgeInsets.all(6),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(6),
-                  color: (Theme.of(context).colorScheme.onSurface).withValues(alpha: 0.1),
+                  color: (AppColor.darkText1).withValues(alpha: 0.1),
                 ),
-                child: Center(
-                  child: Icon(
-                    Icons.edit_rounded,
-                    color: Theme.of(context).colorScheme.onSurface,
-                    size: 18,
-                  ),
-                ),
+                child: Center(child: Icon(Icons.edit_rounded, color: AppColor.darkText1, size: 18)),
               ),
             ),
           ],

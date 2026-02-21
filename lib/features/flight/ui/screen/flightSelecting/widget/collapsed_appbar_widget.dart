@@ -15,20 +15,20 @@ class CollapsedAppBarWidget extends StatelessWidget {
             padding: EdgeInsets.all(6),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(6),
-              color: (Theme.of(context).colorScheme.onSurface).withValues(alpha: 0.1),
+              color: (AppColor.darkText1).withValues(alpha: 0.1),
             ),
             child: Center(
-              child: Icon(
-                Icons.arrow_back_ios_new_rounded,
-                color: Theme.of(context).colorScheme.onSurface,
-                size: 18,
-              ),
+              child: Icon(Icons.arrow_back_ios_new_rounded, color: AppColor.darkText1, size: 18),
             ),
           ),
         ),
         width(8),
         Expanded(
-          child: Text("CGK - DPS", style: AppFont.semibold16, textAlign: TextAlign.center),
+          child: Text(
+            "CGK - DPS",
+            style: AppFont.semibold16.copyWith(color: AppColor.darkText1),
+            textAlign: TextAlign.center,
+          ),
         ),
         width(8),
         InkWell(
@@ -37,15 +37,9 @@ class CollapsedAppBarWidget extends StatelessWidget {
             padding: EdgeInsets.all(6),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(6),
-              color: (Theme.of(context).colorScheme.onSurface).withValues(alpha: 0.1),
+              color: (AppColor.darkText1).withValues(alpha: 0.1),
             ),
-            child: Center(
-              child: Icon(
-                Icons.edit_rounded,
-                color: Theme.of(context).colorScheme.onSurface,
-                size: 18,
-              ),
-            ),
+            child: Center(child: Icon(Icons.edit_rounded, color: AppColor.darkText1, size: 18)),
           ),
         ),
       ],

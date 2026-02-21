@@ -1,7 +1,11 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconify_flutter_plus/iconify_flutter_plus.dart';
+import 'package:iconify_flutter_plus/icons/bx.dart';
 import 'package:iconify_flutter_plus/icons/mdi.dart';
+import 'package:intl/intl.dart';
 import 'package:pss_app/core/common/widget/card_general.dart';
 import 'package:pss_app/core/common/widget/date_slider.dart';
 import 'package:pss_app/core/theme/theme.dart';
@@ -11,6 +15,7 @@ import '../../../../../core/constants/images.dart';
 import '../../../../../core/utils/size_extension.dart';
 part 'widget/collapsed_appbar_widget.dart';
 part 'widget/flexible_appbar_widget.dart';
+part 'widget/card_flight_selecting.dart';
 
 class FlightSelectingScreen extends StatefulWidget {
   const FlightSelectingScreen({super.key});
@@ -63,7 +68,7 @@ class _FlightSelectingScreenState extends State<FlightSelectingScreen> {
                   collapsedHeight: collapsedBarHeight,
                   expandedHeight: expandedBarHeight,
                   automaticallyImplyLeading: false,
-                  title: Visibility(visible: isCollapsed, child: CollapsedAppBarWidget()),
+
                   flexibleSpace: FlexibleSpaceBar(
                     background: Align(
                       alignment: Alignment.bottomCenter,
@@ -75,18 +80,18 @@ class _FlightSelectingScreenState extends State<FlightSelectingScreen> {
                     ),
                     titlePadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     expandedTitleScale: 1,
-                    title: Visibility(visible: !isCollapsed, child: FlexibleAppBarWidget()),
+                    title: FlexibleAppBarWidget(),
                   ),
                 ),
-                //
+
                 SliverList.builder(
                   itemBuilder: (context, index) {
-                    return CardGeneral(
-                      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      child: Text("data"),
+                    return Padding(
+                      padding: EdgeInsets.fromLTRB(16, 12, 16, index == 7 ? 76 : 0),
+                      child: CardFlightSelecting(),
                     );
                   },
-                  itemCount: 10,
+                  itemCount: 8,
                 ),
               ],
             ),
@@ -104,7 +109,7 @@ class _FlightSelectingScreenState extends State<FlightSelectingScreen> {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.sort),
+                          Icon(Icons.sort, color: AppColor.secondaryColor, size: 16),
                           widget.width(8),
                           Text("Sort", style: AppFont.medium14),
                         ],
@@ -118,7 +123,7 @@ class _FlightSelectingScreenState extends State<FlightSelectingScreen> {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.filter),
+                          Icon(Icons.filter, color: AppColor.secondaryColor, size: 16),
                           widget.width(8),
                           Text("Filter", style: AppFont.medium14),
                         ],

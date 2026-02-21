@@ -149,7 +149,7 @@ class _DateItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color textColor = isActive ? AppColor.primaryColor : Colors.white;
+    Color textColor = isActive ? AppColor.secondaryColor : Colors.white;
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
@@ -160,7 +160,7 @@ class _DateItem extends StatelessWidget {
           color: isActive ? Colors.white : Colors.white.withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: isActive ? AppColor.primaryColor : Colors.white.withValues(alpha: 0.75),
+            color: isActive ? AppColor.secondaryColor : Colors.white.withValues(alpha: 0.75),
             style: BorderStyle.solid,
           ),
         ),
