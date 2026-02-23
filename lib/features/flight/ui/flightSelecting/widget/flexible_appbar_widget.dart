@@ -1,8 +1,8 @@
-part of '../flight_selecting_screen.dart';
+part of '../screen/flight_selecting_screen.dart';
 
 class FlexibleAppBarWidget extends StatelessWidget {
-  const FlexibleAppBarWidget({super.key});
-
+  const FlexibleAppBarWidget({super.key, required this.isCollapsed});
+  final bool isCollapsed;
   @override
   Widget build(BuildContext context) {
     return ListView(
@@ -17,7 +17,7 @@ class FlexibleAppBarWidget extends StatelessWidget {
                 padding: EdgeInsets.all(6),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(6),
-                  color: (AppColor.darkText1).withValues(alpha: 0.1),
+                  color: (AppColor.darkText1).withValues(alpha: 0.2),
                 ),
                 child: Center(
                   child: Icon(
@@ -31,7 +31,7 @@ class FlexibleAppBarWidget extends StatelessWidget {
             width(8),
             Expanded(
               child: Text(
-                "Departure Flight",
+                isCollapsed ? "CGK - DPS" : "Departure Flight",
                 style: AppFont.semibold16.copyWith(color: AppColor.darkText1),
                 textAlign: TextAlign.center,
               ),
@@ -43,7 +43,7 @@ class FlexibleAppBarWidget extends StatelessWidget {
                 padding: EdgeInsets.all(6),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(6),
-                  color: (AppColor.darkText1).withValues(alpha: 0.1),
+                  color: (AppColor.darkText1).withValues(alpha: 0.2),
                 ),
                 child: Center(child: Icon(Icons.edit_rounded, color: AppColor.darkText1, size: 18)),
               ),

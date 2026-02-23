@@ -50,7 +50,7 @@ class PrimaryButton extends StatelessWidget {
       height: height,
       margin: margin,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(borderRadius ?? 12),
         color: !disable
             ? (bgColor ?? AppColor.secondaryColor)
             : (disableColor ?? Theme.of(context).cardColor),
@@ -59,7 +59,7 @@ class PrimaryButton extends StatelessWidget {
         onHover: (value) {},
         style: ElevatedButton.styleFrom(
           elevation: 0,
-          // overlayColor: AppColor.secondaryColor,
+         
           shadowColor: AppColor.secondaryColor.withValues(alpha: 0.25),
           backgroundColor: Colors.transparent,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),

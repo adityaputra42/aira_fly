@@ -3,9 +3,10 @@ import 'dart:io';
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:pss_app/features/flight/ui/screen/flightSelecting/flight_selecting_screen.dart';
-import 'package:pss_app/features/flight/ui/screen/searchAirport/search_airport_screen.dart';
+import 'package:pss_app/features/flight/ui/flightSelecting/screen/flight_selecting_screen.dart';
+import 'package:pss_app/features/flight/ui/searchAirport/screen/search_airport_screen.dart';
 
+import '../../features/flight/ui/flightResult/screen/flight_result_screen.dart';
 import '../../features/main/ui/screen/main_screen.dart';
 import '../../features/splash/ui/splash_screen.dart';
 import '../../features/auth/presentation/screen/sign_in_screen.dart';
@@ -61,6 +62,17 @@ class AppRouter {
               child: const FlightSelectingScreen(),
               transition: PageTransitionType.fadeScale,
             ),
+            routes: [
+              GoRoute(
+                path: RouteNames.flightResult,
+                name: RouteNames.flightResult,
+                pageBuilder: (context, state) => buildPageWithTransition(
+                  key: state.pageKey,
+                  child: const FlightResultScreen(),
+                  transition: PageTransitionType.fadeScale,
+                ),
+              ),
+            ],
           ),
         ],
       ),

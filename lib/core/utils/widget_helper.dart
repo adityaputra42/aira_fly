@@ -22,6 +22,7 @@ class WidgetHelper {
     return AppBar(
       elevation: 0.1,
       title: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
           Row(
@@ -38,7 +39,7 @@ class WidgetHelper {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(6),
                           color: (titleColor ?? Theme.of(context).colorScheme.onSurface).withValues(
-                            alpha: 0.1,
+                            alpha: 0.2,
                           ),
                         ),
                         child: Center(

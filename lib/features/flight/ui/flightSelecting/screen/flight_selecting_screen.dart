@@ -12,10 +12,10 @@ import 'package:pss_app/core/theme/theme.dart';
 import 'package:pss_app/core/utils/dashed_divider.dart';
 
 import '../../../../../core/constants/images.dart';
+import '../../../../../core/routes/route_names.dart';
 import '../../../../../core/utils/size_extension.dart';
-part 'widget/collapsed_appbar_widget.dart';
-part 'widget/flexible_appbar_widget.dart';
-part 'widget/card_flight_selecting.dart';
+part '../widget/flexible_appbar_widget.dart';
+part '../widget/card_flight_selecting.dart';
 
 class FlightSelectingScreen extends StatefulWidget {
   const FlightSelectingScreen({super.key});
@@ -80,7 +80,7 @@ class _FlightSelectingScreenState extends State<FlightSelectingScreen> {
                     ),
                     titlePadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     expandedTitleScale: 1,
-                    title: FlexibleAppBarWidget(),
+                    title: FlexibleAppBarWidget(isCollapsed: isCollapsed),
                   ),
                 ),
 
@@ -100,6 +100,7 @@ class _FlightSelectingScreenState extends State<FlightSelectingScreen> {
               alignment: Alignment.bottomCenter,
               child: CardGeneral(
                 radius: 99,
+                background: AppColor.primaryColor,
                 padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -111,12 +112,16 @@ class _FlightSelectingScreenState extends State<FlightSelectingScreen> {
                         children: [
                           Icon(Icons.sort, color: AppColor.secondaryColor, size: 16),
                           widget.width(8),
-                          Text("Sort", style: AppFont.medium14),
+                          Text("Sort", style: AppFont.medium14.copyWith(color: AppColor.darkText1)),
                         ],
                       ),
                     ),
                     widget.width(24),
-                    SizedBox(width: 1, height: 32, child: VerticalDivider(thickness: 1)),
+                    SizedBox(
+                      width: 1,
+                      height: 32,
+                      child: VerticalDivider(thickness: 1, color: AppColor.darkText1),
+                    ),
                     widget.width(24),
                     InkWell(
                       onTap: () {},
@@ -125,7 +130,10 @@ class _FlightSelectingScreenState extends State<FlightSelectingScreen> {
                         children: [
                           Icon(Icons.filter, color: AppColor.secondaryColor, size: 16),
                           widget.width(8),
-                          Text("Filter", style: AppFont.medium14),
+                          Text(
+                            "Filter",
+                            style: AppFont.medium14.copyWith(color: AppColor.darkText1),
+                          ),
                         ],
                       ),
                     ),
