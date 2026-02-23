@@ -153,7 +153,7 @@ class InputText extends StatelessWidget {
             fillColor: filledColor ?? Theme.of(context).colorScheme.surface,
             hintStyle: hintStyle ?? AppFont.reguler12.copyWith(color: Theme.of(context).hintColor),
             border: OutlineInputBorder(
-              borderRadius: borderRadius ?? BorderRadius.circular(10),
+              borderRadius: borderRadius ?? BorderRadius.circular(8),
               borderSide:
                   borderSide ??
                   BorderSide(
@@ -162,7 +162,7 @@ class InputText extends StatelessWidget {
                   ),
             ),
             disabledBorder: OutlineInputBorder(
-              borderRadius: borderRadius ?? BorderRadius.circular(10),
+              borderRadius: borderRadius ?? BorderRadius.circular(8),
               borderSide:
                   borderSide ??
                   BorderSide(
@@ -171,7 +171,7 @@ class InputText extends StatelessWidget {
                   ),
             ),
             enabledBorder: OutlineInputBorder(
-              borderRadius: borderRadius ?? BorderRadius.circular(10),
+              borderRadius: borderRadius ?? BorderRadius.circular(8),
               borderSide:
                   borderSide ??
                   BorderSide(
@@ -180,7 +180,7 @@ class InputText extends StatelessWidget {
                   ),
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: borderRadius ?? BorderRadius.circular(10),
+              borderRadius: borderRadius ?? BorderRadius.circular(8),
               borderSide: borderSide ?? const BorderSide(color: AppColor.secondaryColor),
             ),
           ),

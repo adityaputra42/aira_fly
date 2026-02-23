@@ -69,7 +69,7 @@ class _SearchFlightFormState extends State<SearchFlightForm> {
                     automaticIndicatorColorAdjustment: false,
                     indicator: BoxDecoration(
                       color: AppColor.secondaryColor,
-                      borderRadius: BorderRadius.circular(4),
+                      borderRadius: BorderRadius.circular(6),
                     ),
                     isScrollable: false,
                     dividerColor: Colors.transparent,
@@ -88,11 +88,12 @@ class _SearchFlightFormState extends State<SearchFlightForm> {
                   ),
                 ),
                 SizedBox(
-                  height: 434,
+                  height: context.h(0.47),
                   child: TabBarView(
                     children: [
                       CardGeneral(
                         margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        padding: EdgeInsets.all(12),
                         child: Column(
                           children: [
                             InputText(
@@ -229,6 +230,7 @@ class _SearchFlightFormState extends State<SearchFlightForm> {
                       ),
                       CardGeneral(
                         margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        padding: EdgeInsets.all(12),
                         child: Column(
                           children: [
                             InputText(
