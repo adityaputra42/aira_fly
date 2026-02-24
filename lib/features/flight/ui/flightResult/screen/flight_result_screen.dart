@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:iconify_flutter_plus/iconify_flutter_plus.dart';
 import 'package:iconify_flutter_plus/icons/bx.dart';
 import 'package:iconify_flutter_plus/icons/material_symbols.dart';
@@ -12,6 +13,7 @@ import 'package:pss_app/core/theme/theme.dart';
 import 'package:pss_app/core/utils/widget_helper.dart';
 import 'package:timelines_plus/timelines_plus.dart';
 
+import '../../../../../core/routes/route_names.dart';
 import '../../../../../core/utils/dashed_divider.dart';
 import '../../../../../core/utils/size_extension.dart';
 
@@ -51,7 +53,7 @@ class FlightResultScreen extends StatelessWidget {
                   physics: const NeverScrollableScrollPhysics(),
                   automaticIndicatorColorAdjustment: false,
                   indicator: BoxDecoration(
-                    color: AppColor.secondaryColor,
+                    color: AppColor.primaryColor,
                     borderRadius: BorderRadius.circular(6),
                   ),
                   isScrollable: false,
@@ -124,7 +126,9 @@ class FlightResultScreen extends StatelessWidget {
               ),
               PrimaryButton(
                 title: "Continue",
-                onPressed: () {},
+                onPressed: () {
+                  context.pushNamed(RouteNames.paxBooking);
+                },
                 width: context.w(0.4),
                 borderRadius: 8,
               ),

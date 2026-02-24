@@ -10,7 +10,7 @@ class PrimaryButton extends StatelessWidget {
     this.margin = EdgeInsets.zero,
     required this.onPressed,
     this.disable = false,
-    this.activeColor = AppColor.secondaryColor,
+    this.activeColor = AppColor.primaryColor,
     this.disableColor,
     this.bgColor,
     this.textColor,
@@ -52,7 +52,7 @@ class PrimaryButton extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(borderRadius ?? 8),
         color: !disable
-            ? (bgColor ?? AppColor.secondaryColor)
+            ? (bgColor ?? AppColor.primaryColor)
             : (disableColor ?? Theme.of(context).cardColor),
       ),
       child: ElevatedButton(
@@ -60,7 +60,7 @@ class PrimaryButton extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           elevation: 0,
 
-          shadowColor: AppColor.secondaryColor.withValues(alpha: 0.25),
+          shadowColor: AppColor.primaryColor.withValues(alpha: 0.25),
           backgroundColor: Colors.transparent,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),

@@ -6,7 +6,9 @@ import 'package:go_router/go_router.dart';
 import 'package:pss_app/features/flight/ui/flightSelecting/screen/flight_selecting_screen.dart';
 import 'package:pss_app/features/flight/ui/searchAirport/screen/search_airport_screen.dart';
 
+import '../../features/flight/ui/addonBooking/screen/addon_booking_screen.dart';
 import '../../features/flight/ui/flightResult/screen/flight_result_screen.dart';
+import '../../features/flight/ui/paxBookingFlight/screen/pax_booking_screen.dart';
 import '../../features/main/ui/screen/main_screen.dart';
 import '../../features/splash/ui/splash_screen.dart';
 import '../../features/auth/presentation/screen/sign_in_screen.dart';
@@ -71,6 +73,28 @@ class AppRouter {
                   child: const FlightResultScreen(),
                   transition: PageTransitionType.fadeScale,
                 ),
+                routes: [
+                  GoRoute(
+                    path: RouteNames.paxBooking,
+                    name: RouteNames.paxBooking,
+                    pageBuilder: (context, state) => buildPageWithTransition(
+                      key: state.pageKey,
+                      child: const PaxBookingScreen(),
+                      transition: PageTransitionType.fadeScale,
+                    ),
+                    routes: [
+                      GoRoute(
+                        path: RouteNames.addonBooking,
+                        name: RouteNames.addonBooking,
+                        pageBuilder: (context, state) => buildPageWithTransition(
+                          key: state.pageKey,
+                          child: const AddonBookingScreen(),
+                          transition: PageTransitionType.fadeScale,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ],
           ),

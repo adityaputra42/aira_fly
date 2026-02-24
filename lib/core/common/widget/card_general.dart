@@ -6,6 +6,7 @@ class CardGeneral extends StatelessWidget {
     this.child,
     this.background,
     this.margin,
+    this.useShadow = true,
     this.padding,
     this.border,
     this.radius,
@@ -16,6 +17,7 @@ class CardGeneral extends StatelessWidget {
   final Color? background;
   final EdgeInsets? margin;
   final EdgeInsets? padding;
+  final bool useShadow;
   final double? radius;
   final Border? border;
   final double? width;
@@ -31,13 +33,15 @@ class CardGeneral extends StatelessWidget {
         border: border,
         borderRadius: BorderRadius.circular(radius ?? 8),
         color: background ?? Theme.of(context).cardColor,
-        boxShadow: [
-          BoxShadow(
-            color: Theme.of(context).shadowColor.withValues(alpha: 0.1),
-            blurRadius: 0.5,
-            offset: Offset(0, 0.5),
-          ),
-        ],
+        boxShadow: useShadow
+            ? [
+                BoxShadow(
+                  color: Theme.of(context).shadowColor.withValues(alpha: 0.1),
+                  blurRadius: 0.5,
+                  offset: Offset(0, 0.5),
+                ),
+              ]
+            : null,
       ),
       child: child,
     );

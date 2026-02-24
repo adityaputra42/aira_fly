@@ -27,7 +27,7 @@ class _SearchFlightFormState extends State<SearchFlightForm> {
         children: [
           Container(
             width: context.w(1),
-            height: context.w(0.75),
+            height: context.w(0.65),
             decoration: BoxDecoration(
               color: AppColor.primaryColor,
               borderRadius: BorderRadius.vertical(bottom: Radius.circular(8)),
@@ -49,7 +49,7 @@ class _SearchFlightFormState extends State<SearchFlightForm> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                widget.height(16),
+                widget.height(8),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Text(
@@ -68,7 +68,7 @@ class _SearchFlightFormState extends State<SearchFlightForm> {
                     physics: const NeverScrollableScrollPhysics(),
                     automaticIndicatorColorAdjustment: false,
                     indicator: BoxDecoration(
-                      color: AppColor.secondaryColor,
+                      color: AppColor.primaryColor,
                       borderRadius: BorderRadius.circular(6),
                     ),
                     isScrollable: false,

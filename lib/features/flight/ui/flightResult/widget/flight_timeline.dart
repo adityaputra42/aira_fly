@@ -97,8 +97,8 @@ class CardTimeline extends StatelessWidget {
             indicatorBuilder: (_, index) {
               return DotIndicator(
                 size: isEdgeIndex(index) || index == 2 ? 0 : null,
-                color: isEdgeIndex(index) ? Colors.white : AppColor.secondaryColor,
-                border: Border.all(color: Theme.of(context).hintColor, width: 0.5),
+                color: isEdgeIndex(index) ? null : AppColor.secondaryColor,
+                border: Border.all(color: AppColor.secondaryColor, width: 0.5),
               );
             },
             contentsBuilder: (context, index) {
@@ -136,8 +136,9 @@ class CardTimeline extends StatelessWidget {
               if (index == 2) {
                 return CardGeneral(
                   margin: EdgeInsets.symmetric(horizontal: 8, vertical: 12),
-                  background: Theme.of(context).colorScheme.surface,
-                  padding: EdgeInsets.all(8),
+                  background: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.15),
+                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  useShadow: false,
                   radius: 4,
                   child: Text(
                     "Duration: 2h 45m",
@@ -184,9 +185,9 @@ class CardTimeline extends StatelessWidget {
               }
 
               return Connector.solidLine(
-                color: Theme.of(context).dividerColor,
-                space: 3,
-                thickness: 3,
+                color: Theme.of(context).canvasColor,
+                space: 2.5,
+                thickness: 2.5,
               );
             },
           ),

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
 class AppColor {
-  static const Color primaryColor = Color(0xff0A937F);
-  static const Color secondaryColor = Color(0xffFF7F11);
+  // static const Color primaryColor = Color(0xff0A937F);
+  // static const Color secondaryColor = Color(0xffFF7F11);
+  static const Color primaryColor = Color(0xff2664FA);
+  static const Color secondaryColor = Color(0xff36E7FF);
   static const Color grayColor = Color(0xff8E90AD);
   static const Color yellowColor = Color(0xffF2AE14);
   static const Color redColor = Color(0xffF25252);
@@ -10,10 +12,10 @@ class AppColor {
   static const Color greenColor = Color(0xff33D49D);
 
   // Ligth Mode
-  static const Color bgLight = Color(0xffF6F6F6);
+  static const Color bgLight = Color(0xffF6F6F8);
   static const Color cardLight = Color(0xffFFFFFF);
   static const Color lightText1 = Color(0xff25282C);
-  static const Color lightText2 = Color(0xffADB1B8);
+  static const Color lightText2 = Color(0xff878787);
   static const Color lightText3 = Color(0xffE8EBF1);
   static const Color strokeLight = Color(0xffE2E8F0);
   static const Color lightGrey = Color(0xffF3F5F7);
@@ -29,7 +31,7 @@ class AppColor {
   static const Color bgDark = Color(0xff0A0D14);
   static const Color cardDark = Color(0xff14171D);
   static const Color darkText1 = Color(0xffFBFCFF);
-  static const Color darkText2 = Color(0xff7E7E81);
+  static const Color darkText2 = Color(0xffADB1B8);
   static const Color darkText3 = Color(0xff90A3BF);
   static const Color strokeDark = Color(0xff2D3748);
   static const Color dividerDark = Color(0xff5D636F);

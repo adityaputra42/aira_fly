@@ -110,7 +110,7 @@ class _FlightSelectingScreenState extends State<FlightSelectingScreen> {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.sort, color: AppColor.secondaryColor, size: 16),
+                          Iconify(Mdi.sort_variant, color: AppColor.secondaryColor, size: 16),
                           widget.width(8),
                           Text("Sort", style: AppFont.medium14.copyWith(color: AppColor.darkText1)),
                         ],
@@ -119,7 +119,7 @@ class _FlightSelectingScreenState extends State<FlightSelectingScreen> {
                     widget.width(24),
                     SizedBox(
                       width: 1,
-                      height: 32,
+                      height: 28,
                       child: VerticalDivider(thickness: 1, color: AppColor.darkText1),
                     ),
                     widget.width(24),
@@ -128,7 +128,7 @@ class _FlightSelectingScreenState extends State<FlightSelectingScreen> {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.filter, color: AppColor.secondaryColor, size: 16),
+                          Iconify(Mdi.filter_outline, color: AppColor.secondaryColor, size: 16),
                           widget.width(8),
                           Text(
                             "Filter",
