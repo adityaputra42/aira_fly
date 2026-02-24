@@ -69,7 +69,8 @@ class PaxBookingScreen extends StatelessWidget {
                         padding: EdgeInsets.symmetric(vertical: 4, horizontal: 12),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(4),
-                          color: AppColor.secondaryColor.withValues(alpha: 0.2),
+                          color: AppColor.secondaryColor.withValues(alpha: 0.1),
+                          border: Border.all(color: AppColor.secondaryColor, width: 0.5),
                         ),
                         child: Text(
                           "Edit",

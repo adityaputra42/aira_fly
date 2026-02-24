@@ -38,9 +38,7 @@ class WidgetHelper {
                         padding: EdgeInsets.all(6),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(6),
-                          color: (titleColor ?? Theme.of(context).colorScheme.onSurface).withValues(
-                            alpha: 0.2,
-                          ),
+                          color: (titleColor ?? Theme.of(context).hintColor).withValues(alpha: 0.2),
                         ),
                         child: Center(
                           child: Icon(

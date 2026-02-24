@@ -142,7 +142,9 @@ class CardTimeline extends StatelessWidget {
                   radius: 4,
                   child: Text(
                     "Duration: 2h 45m",
-                    style: AppFont.reguler12.copyWith(color: Theme.of(context).hintColor),
+                    style: AppFont.reguler12.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
                   ),
                 );
               }

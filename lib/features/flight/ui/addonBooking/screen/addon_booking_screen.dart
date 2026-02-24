@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:iconify_flutter_plus/iconify_flutter_plus.dart';
 import 'package:iconify_flutter_plus/icons/material_symbols.dart';
 import 'package:iconify_flutter_plus/icons/mdi.dart';
@@ -7,6 +8,7 @@ import 'package:pss_app/core/common/widget/card_general.dart';
 import 'package:pss_app/core/theme/theme.dart';
 
 import '../../../../../core/common/widget/primary_button.dart';
+import '../../../../../core/routes/route_names.dart';
 import '../../../../../core/utils/dashed_divider.dart';
 import '../../../../../core/utils/size_extension.dart';
 import '../../../../../core/utils/widget_helper.dart';
@@ -35,6 +37,9 @@ class AddonBookingScreen extends StatelessWidget {
             Text("Addon Service", style: AppFont.medium14),
             height(12),
             CardMenuAddon(
+              onTap: () {
+                context.pushNamed(RouteNames.addonBaggage);
+              },
               title: 'Baggage',
               description: 'Permit 20kg baggage for each passenger',
               icon: Mdi.bag_suitcase,
@@ -42,12 +47,18 @@ class AddonBookingScreen extends StatelessWidget {
             ),
             height(16),
             CardMenuAddon(
+              onTap: () {
+                context.pushNamed(RouteNames.addonMeal);
+              },
               title: 'In-flight Meal',
               description: 'Pre-order your meal and enjoy it on board',
               icon: Mdi.food,
             ),
             height(16),
             CardMenuAddon(
+              onTap: () {
+                context.pushNamed(RouteNames.addonSeat);
+              },
               title: 'Seat Selection',
               description: 'Select your preferred seat',
               icon: Mdi.seat_passenger,

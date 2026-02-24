@@ -9,4 +9,10 @@ class RouteNames {
   static const flightResult = 'flightResult';
   static const paxBooking = 'paxBooking';
   static const addonBooking = 'addonBooking';
+  static const addonBaggage = 'addonBaggage';
+  static const addonMeal = 'addonMeal';
+  static const addonSeat = 'addonSeat';
+  static const selectingBaggage = 'selectingBaggage';
+  static const selectingMeal = 'selectingMeal';
+  static const selectingSeat = 'selectingSeat';
 }
