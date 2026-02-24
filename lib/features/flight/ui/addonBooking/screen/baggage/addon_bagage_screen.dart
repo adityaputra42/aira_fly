@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:pss_app/core/routes/route_names.dart';
 import 'package:pss_app/features/flight/ui/addonBooking/widget/card_flight_addon.dart';
 
 import '../../../../../../core/common/widget/primary_button.dart';
@@ -24,12 +25,24 @@ class AddonBagageScreen extends StatelessWidget {
         padding: EdgeInsetsGeometry.all(16),
         child: Column(
           children: [
-            CardFlightAddon(isSelected: true),
+            CardFlightAddon(
+              isSelected: true,
+              onTap: () {
+                context.pushNamed(RouteNames.selectingBaggage);
+              },
+            ),
             height(16),
-            CardFlightAddon(isReturn: true, isSelected: true),
+            CardFlightAddon(
+              isReturn: true,
+              isSelected: true,
+              onTap: () {
+                context.pushNamed(RouteNames.selectingBaggage);
+              },
+            ),
           ],
         ),
       ),
+
       bottomNavigationBar: SafeArea(
         top: false,
         child: Container(
