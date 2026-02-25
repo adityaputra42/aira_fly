@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:pss_app/core/common/widget/card_general.dart';
 
 import '../../../../../../core/common/widget/primary_button.dart';
+import '../../../../../../core/common/widget/selectable_box.dart';
 import '../../../../../../core/theme/theme.dart';
 import '../../../../../../core/utils/size_extension.dart';
 import '../../../../../../core/utils/widget_helper.dart';
@@ -41,11 +43,108 @@ class _SelectingSeatScreenState extends State<SelectingSeatScreen> {
                   CustomTabBarPassager(
                     titles: passengger,
                     selectedIndex: selectedIndex,
+                    value: "E3",
+                    price: 115000,
                     onTap: (index) {
                       setState(() {
                         selectedIndex = index;
                       });
                     },
+                  ),
+                  Expanded(
+                    child: CardGeneral(
+                      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Row(
+                                children: [
+                                  SelectableBox(
+                                    text: "",
+                                    onTap: () {},
+                                    width: 16,
+                                    height: 16,
+                                    radius: 4,
+                                  ),
+                                  widget.width(4),
+                                  Text(
+                                    "Available",
+                                    style: AppFont.reguler12.copyWith(
+                                      color: Theme.of(context).hintColor,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Row(
+                                children: [
+                                  SelectableBox(
+                                    text: "",
+                                    onTap: () {},
+                                    width: 16,
+                                    height: 16,
+                                    isEnable: false,
+                                    radius: 4,
+                                  ),
+                                  widget.width(4),
+                                  Text(
+                                    "Reversed",
+                                    style: AppFont.reguler12.copyWith(
+                                      color: Theme.of(context).hintColor,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Row(
+                                children: [
+                                  SelectableBox(
+                                    text: "",
+                                    onTap: () {},
+                                    width: 16,
+                                    height: 16,
+                                    isSelected: true,
+                                    radius: 4,
+                                  ),
+                                  widget.width(4),
+                                  Text(
+                                    "Selected",
+                                    style: AppFont.reguler12.copyWith(
+                                      color: Theme.of(context).hintColor,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          widget.height(8),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: List.generate(
+                              6,
+                              (index) => Padding(
+                                padding: EdgeInsets.only(
+                                  right: index < 6 - 1 ? 12 : 0,
+
+                                  left: (index == 3) ? 24 : 0,
+                                ),
+                                child: SizedBox(
+                                  width: 40,
+                                  child: Center(
+                                    child: Text(
+                                      String.fromCharCode(index + 65),
+                                      style: AppFont.medium14,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          widget.height(8),
+                          Expanded(child: SingleChildScrollView(child: generateSeats())),
+                        ],
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -103,5 +202,38 @@ class _SelectingSeatScreenState extends State<SelectingSeatScreen> {
         ),
       ),
     );
+  }
+
+  Column generateSeats() {
+    List<Widget> widgets = [];
+
+    for (int i = 0; i < 10; i++) {
+      widgets.add(
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(
+            6,
+            (index) => Padding(
+              padding: EdgeInsets.only(
+                right: index < 6 - 1 ? 12 : 0,
+                bottom: 16,
+                left: (index == 3) ? 24 : 0,
+              ),
+              child: SelectableBox(
+                text: "${String.fromCharCode(index + 65)}${i + 1}",
+                width: 40,
+                height: 40,
+                fontsize: 13,
+                isEnable: index == 1 && i == 5 ? false : true,
+                isSelected: index == 4 && i == 2 ? true : false,
+                onTap: () {},
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Column(children: widgets);
   }
 }

@@ -10,13 +10,16 @@ class CustomTabBarPassager extends StatefulWidget {
   final List<String> titles;
   final Function(int)? onTap;
   final double fonsize;
-
+  final String? value;
+  final double? price;
   const CustomTabBarPassager({
     super.key,
     required this.titles,
     this.selectedIndex,
     this.fonsize = 14,
     this.onTap,
+    this.value,
+    this.price,
   });
 
   @override
@@ -59,6 +62,8 @@ class _CustomTabBarPassagerState extends State<CustomTabBarPassager> {
                   isSelected: widget.selectedIndex == widget.titles.indexOf(e),
                   passengger: e,
                   index: widget.titles.indexOf(e) + 1,
+                  value: widget.value,
+                  price: widget.price,
                 ),
               ),
             )
@@ -74,19 +79,25 @@ class CardTabPassangger extends StatelessWidget {
     required this.passengger,
     required this.index,
     this.isSelected = false,
+    this.value,
+    this.price,
   });
   final String passengger;
+  final String? value;
+  final double? price;
   final int index;
   final bool isSelected;
   @override
   Widget build(BuildContext context) {
     return CardGeneral(
+      height: value != null ? 78 : 58,
       margin: EdgeInsets.zero,
+      useShadow: false,
       background: isSelected ? AppColor.primaryColor : Theme.of(context).cardColor,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       radius: 6,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
@@ -97,9 +108,27 @@ class CardTabPassangger extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
+          Visibility(
+            visible: value != null,
+            child: Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(
+                value ?? '',
+                style: AppFont.reguler12.copyWith(
+                  color: isSelected ? AppColor.darkText1 : Theme.of(context).hintColor,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ),
           height(4),
           Text(
-            NumberFormat.currency(locale: "id_ID", symbol: "Rp ", decimalDigits: 0).format(0),
+            NumberFormat.currency(
+              locale: "id_ID",
+              symbol: "Rp ",
+              decimalDigits: 0,
+            ).format(price ?? 0),
             style: AppFont.reguler12.copyWith(
               color: isSelected ? AppColor.darkText1 : Theme.of(context).hintColor,
             ),

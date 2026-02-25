@@ -42,6 +42,8 @@ class _SelectingMealScreenState extends State<SelectingMealScreen> {
                   CustomTabBarPassager(
                     titles: passengger,
                     selectedIndex: selectedIndex,
+                    value: "Chicken Katsu",
+                    price: 25000,
                     onTap: (index) {
                       setState(() {
                         selectedIndex = index;

@@ -43,6 +43,8 @@ class _SelectingBaggageScreenState extends State<SelectingBaggageScreen> {
                   CustomTabBarPassager(
                     titles: passengger,
                     selectedIndex: selectedIndex,
+                    value: "25 Kg",
+                    price: 175000,
                     onTap: (index) {
                       setState(() {
                         selectedIndex = index;
