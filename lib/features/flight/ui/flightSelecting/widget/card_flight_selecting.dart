@@ -17,12 +17,24 @@ class CardFlightSelecting extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Image.network(
-                  "https://static.vecteezy.com/system/resources/thumbnails/055/210/906/small/garuda-indonesia-logo-square-rounded-garuda-indonesia-logo-garuda-indonesia-logo-free-download-free-png.png",
+                CachedNetworkImage(
                   width: 40,
                   height: 40,
                   fit: BoxFit.cover,
+                  fadeInDuration: const Duration(milliseconds: 100),
+
+                  imageUrl:
+                      "https://static.vecteezy.com/system/resources/thumbnails/055/210/906/small/garuda-indonesia-logo-square-rounded-garuda-indonesia-logo-garuda-indonesia-logo-free-download-free-png.png",
+                  imageBuilder: (context, imageProvider) => Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      image: DecorationImage(image: imageProvider, fit: BoxFit.cover),
+                    ),
+                  ),
+                  placeholder: (context, url) => ShimmerLoading(radius: 8),
+                  errorWidget: (context, url, error) => Icon(Icons.error),
                 ),
+
                 width(12),
                 Expanded(
                   child: Column(

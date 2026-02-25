@@ -157,10 +157,10 @@ class _DateItem extends StatelessWidget {
         margin: const EdgeInsets.symmetric(horizontal: 2),
         width: double.infinity,
         decoration: BoxDecoration(
-          color: isActive ? AppColor.secondaryColor : Colors.white.withValues(alpha: 0.85),
+          color: isActive ? AppColor.secondaryColor : Colors.white.withValues(alpha: 0.9),
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: isActive ? AppColor.secondaryColor : AppColor.darkText1.withValues(alpha: 0.75),
+            color: isActive ? AppColor.secondaryColor : AppColor.darkText1.withValues(alpha: 0.9),
             style: BorderStyle.solid,
           ),
         ),

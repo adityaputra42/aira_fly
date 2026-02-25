@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:pss_app/core/routes/route_names.dart';
 
 import '../../../../../../core/common/widget/primary_button.dart';
 import '../../../../../../core/theme/theme.dart';
@@ -22,7 +23,49 @@ class AddonSeatScreen extends StatelessWidget {
       ),
       body: Padding(
         padding: EdgeInsetsGeometry.all(16),
-        child: Column(children: [CardFlightAddon(), height(16), CardFlightAddon(isReturn: true)]),
+        child: Column(
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("Departure Flight", style: AppFont.medium14),
+                height(8),
+                CardFlightAddon(
+                  onTap: () {
+                    context.pushNamed(RouteNames.selectingSeat);
+                  },
+                ),
+                height(8),
+                CardFlightAddon(
+                  onTap: () {
+                    context.pushNamed(RouteNames.selectingSeat);
+                  },
+                ),
+              ],
+            ),
+            height(16),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("Return Flight", style: AppFont.medium14),
+                height(8),
+                CardFlightAddon(
+                  isReturn: true,
+                  onTap: () {
+                    context.pushNamed(RouteNames.selectingSeat);
+                  },
+                ),
+                height(8),
+                CardFlightAddon(
+                  isReturn: true,
+                  onTap: () {
+                    context.pushNamed(RouteNames.selectingSeat);
+                  },
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
       bottomNavigationBar: SafeArea(
         top: false,

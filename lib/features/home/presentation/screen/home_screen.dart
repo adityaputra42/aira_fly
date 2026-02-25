@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:pss_app/core/common/widget/shimmer_loading.dart';
 import 'package:pss_app/core/theme/theme.dart';
 import 'package:pss_app/core/common/widget/card_general.dart';
 import 'package:pss_app/core/utils/size_extension.dart';
@@ -69,13 +70,22 @@ class HomeScreen extends StatelessWidget {
                         ),
                         width: context.w(0.6),
                         child: ClipRRect(
-                          borderRadius: BorderRadiusGeometry.circular(12),
+                          borderRadius: BorderRadiusGeometry.circular(8),
                           child: CachedNetworkImage(
+                            width: context.w(0.6),
                             fit: BoxFit.cover,
                             fadeInDuration: const Duration(milliseconds: 100),
+                            height: 68,
                             imageUrl:
                                 'https://news.atlasbeachfest.com/wp-content/uploads/2023/05/18-Gambar-Utama.webp',
-                            width: 24,
+                            imageBuilder: (context, imageProvider) => Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(8),
+                                image: DecorationImage(image: imageProvider, fit: BoxFit.cover),
+                              ),
+                            ),
+                            placeholder: (context, url) => ShimmerLoading(radius: 8),
+                            errorWidget: (context, url, error) => Icon(Icons.error),
                           ),
                         ),
                       ),

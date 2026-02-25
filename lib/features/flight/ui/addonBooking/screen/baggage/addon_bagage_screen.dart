@@ -25,19 +25,31 @@ class AddonBagageScreen extends StatelessWidget {
         padding: EdgeInsetsGeometry.all(16),
         child: Column(
           children: [
-            CardFlightAddon(
-              isSelected: true,
-              onTap: () {
-                context.pushNamed(RouteNames.selectingBaggage);
-              },
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("Departure Flight", style: AppFont.medium14),
+                height(8),
+                CardFlightAddon(
+                  onTap: () {
+                    context.pushNamed(RouteNames.selectingBaggage);
+                  },
+                ),
+              ],
             ),
             height(16),
-            CardFlightAddon(
-              isReturn: true,
-              isSelected: true,
-              onTap: () {
-                context.pushNamed(RouteNames.selectingBaggage);
-              },
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("Return Flight", style: AppFont.medium14),
+                height(8),
+                CardFlightAddon(
+                  isReturn: true,
+                  onTap: () {
+                    context.pushNamed(RouteNames.selectingBaggage);
+                  },
+                ),
+              ],
             ),
           ],
         ),
