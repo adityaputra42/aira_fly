@@ -10,6 +10,7 @@ import 'package:intl/intl.dart';
 import 'package:pss_app/core/common/widget/card_general.dart';
 import 'package:pss_app/core/common/widget/date_slider.dart';
 import 'package:pss_app/core/theme/theme.dart';
+import 'package:pss_app/core/utils/clipper.dart';
 import 'package:pss_app/core/utils/dashed_divider.dart';
 
 import '../../../../../core/common/widget/shimmer_loading.dart';

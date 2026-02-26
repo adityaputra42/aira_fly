@@ -1,70 +1,66 @@
+import 'dart:math' as math;
+
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:iconify_flutter_plus/iconify_flutter_plus.dart';
-import 'package:iconify_flutter_plus/icons/material_symbols.dart';
+import 'package:iconify_flutter_plus/icons/bx.dart';
 import 'package:iconify_flutter_plus/icons/mdi.dart';
 import 'package:intl/intl.dart';
 import 'package:pss_app/core/common/widget/card_general.dart';
-import 'package:pss_app/core/theme/theme.dart';
+import 'package:pss_app/core/common/widget/input_text.dart';
+import 'package:pss_app/core/common/widget/secondary_button.dart';
+import 'package:pss_app/core/utils/size_extension.dart';
 
 import '../../../../../core/common/widget/primary_button.dart';
-import '../../../../../core/routes/route_names.dart';
+import '../../../../../core/common/widget/shimmer_loading.dart';
+import '../../../../../core/theme/theme.dart';
+import '../../../../../core/utils/clipper.dart';
 import '../../../../../core/utils/dashed_divider.dart';
-import '../../../../../core/utils/size_extension.dart';
 import '../../../../../core/utils/widget_helper.dart';
 
-part '../widget/card_detail_flight.dart';
-part '../widget/card_menu_addon.dart';
+part '../widget/card_ticket_booking_detail.dart';
+part '../widget/carousel_ticket.dart';
+part '../widget/price_detail.dart';
 
-class AddonBookingScreen extends StatelessWidget {
-  const AddonBookingScreen({super.key});
+class BookingDetailScreen extends StatelessWidget {
+  const BookingDetailScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: WidgetHelper.appBar(
         context: context,
-        title: "Addon Booking Flight",
+        title: "Booking Payment",
         color: AppColor.primaryColor,
         titleColor: AppColor.darkText1,
       ),
-      body: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            CardDetailFlight(),
-            Text("Addon Service", style: AppFont.medium14),
-            height(12),
-            CardMenuAddon(
-              onTap: () {
-                context.pushNamed(RouteNames.addonBaggage);
-              },
-              title: 'Baggage',
-              description: 'Permit 20kg baggage for each passenger',
-              icon: Mdi.bag_suitcase,
-              isSelected: true,
+      body: ListView(
+        children: [
+          height(8),
+          CarouselTicket(),
+          PriceDetail(),
+          CardGeneral(
+            margin: EdgeInsets.symmetric(horizontal: 16),
+            padding: EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("Payment Method", style: AppFont.semibold16),
+                height(8),
+                InputText(
+                  hintText: "Select payment Method",
+                  readOnly: true,
+                  cursor: false,
+                  prefixIcon: Iconify(Mdi.bank_add, size: 16, color: AppColor.secondaryColor),
+                  icon: Icon(Icons.arrow_forward_ios_rounded, size: 16),
+                ),
+              ],
             ),
-            height(16),
-            CardMenuAddon(
-              onTap: () {
-                context.pushNamed(RouteNames.addonMeal);
-              },
-              title: 'In-flight Meal',
-              description: 'Pre-order your meal and enjoy it on board',
-              icon: Mdi.food,
-            ),
-            height(16),
-            CardMenuAddon(
-              onTap: () {
-                context.pushNamed(RouteNames.addonSeat);
-              },
-              title: 'Seat Selection',
-              description: 'Select your preferred seat',
-              icon: Mdi.seat_passenger,
-            ),
-          ],
-        ),
+          ),
+
+          height(8),
+        ],
       ),
       bottomNavigationBar: SafeArea(
         top: false,
@@ -96,24 +92,16 @@ class AddonBookingScreen extends StatelessWidget {
                           locale: "id_ID",
                           symbol: "Rp ",
                           decimalDigits: 0,
-                        ).format(4500000),
+                        ).format(8400000),
                         style: AppFont.medium14,
                       ),
                     ],
                   ),
-                  width(4),
-                  Iconify(
-                    Mdi.expand_more,
-                    color: Theme.of(context).colorScheme.onSurface,
-                    size: 28,
-                  ),
                 ],
               ),
               PrimaryButton(
-                title: "Book Now",
-                onPressed: () {
-                  context.pushNamed(RouteNames.bookingDetail);
-                },
+                title: "Pay Now",
+                onPressed: () {},
                 width: context.w(0.4),
                 borderRadius: 8,
               ),

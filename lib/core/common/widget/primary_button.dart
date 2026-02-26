@@ -71,7 +71,7 @@ class PrimaryButton extends StatelessWidget {
               title,
               style:
                   textStyle ??
-                  AppFont.medium14.copyWith(
+                  AppFont.medium12.copyWith(
                     color: disable
                         ? Theme.of(context).hintColor
                         : (textColor ?? AppColor.darkText1),

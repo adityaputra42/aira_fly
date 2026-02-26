@@ -6,7 +6,7 @@ class SecondaryButton extends StatelessWidget {
   const SecondaryButton({
     super.key,
     required this.title,
-    this.height = 48,
+    this.height = 40,
     this.width = double.infinity,
     this.margin = EdgeInsets.zero,
     this.pading = EdgeInsets.zero,
@@ -42,10 +42,7 @@ class SecondaryButton extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           padding: pading,
           elevation: 0,
-          side: BorderSide(
-            width: 1,
-            color: borderColor ?? Theme.of(context).canvasColor,
-          ),
+          side: BorderSide(width: 1, color: borderColor ?? Theme.of(context).canvasColor),
           backgroundColor: bgColor ?? Theme.of(context).colorScheme.surface,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
@@ -53,16 +50,12 @@ class SecondaryButton extends StatelessWidget {
         child: loading
             ? const Padding(
                 padding: EdgeInsets.all(8),
-                child: Center(
-                  child: CircularProgressIndicator(
-                    color: AppColor.primaryColor,
-                  ),
-                ),
+                child: Center(child: CircularProgressIndicator(color: AppColor.primaryColor)),
               )
             : Text(
                 title,
                 textAlign: TextAlign.center,
-                style: AppFont.medium14.copyWith(
+                style: AppFont.medium12.copyWith(
                   color: disable
                       ? Theme.of(context).hintColor
                       : (textColor ?? Theme.of(context).colorScheme.onSurface),
