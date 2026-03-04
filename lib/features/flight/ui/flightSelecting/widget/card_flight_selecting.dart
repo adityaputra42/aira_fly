@@ -83,7 +83,7 @@ class CardFlightSelecting extends StatelessWidget {
                               context.w(0.1),
                               dashColor: AppColor.secondaryColor,
                             ),
-                            width(8),
+                            width(4),
                             Transform.rotate(
                               angle: -math.pi / 0.66,
                               child: Iconify(
@@ -92,7 +92,7 @@ class CardFlightSelecting extends StatelessWidget {
                                 size: 24,
                               ),
                             ),
-                            width(8),
+                            width(4),
                             generateDashedDivider(
                               context.w(0.1),
                               dashColor: AppColor.secondaryColor,

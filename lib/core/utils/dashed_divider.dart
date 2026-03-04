@@ -8,7 +8,7 @@ Widget generateDashedDivider(double width, {Color? dashColor}) {
     children: List.generate(
       n,
       (index) => (index % 2 == 0)
-          ? Container(height: 2, width: width / n, color: dashColor ?? AppColor.grayColor)
+          ? Container(height: 1, width: width / n, color: dashColor ?? AppColor.grayColor)
           : SizedBox(width: width / n),
     ),
   );

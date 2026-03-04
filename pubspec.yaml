@@ -29,6 +29,7 @@ dependencies:
   paged_vertical_calendar: ^1.1.10
   shared_preferences: ^2.5.4
   shimmer: ^3.0.0
+  syncfusion_flutter_barcodes: ^32.2.7
   timelines_plus: ^1.0.8
 
 dev_dependencies:
