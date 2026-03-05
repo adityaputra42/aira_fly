@@ -16,9 +16,9 @@ class MainScreen extends StatelessWidget {
           return HomeScreen();
         case 1:
           return TicketScreen();
-        // case 2:
-        //   return const Center(child: Text("History"));
         case 2:
+          return const Center(child: Text("History"));
+        case 3:
           return const Center(child: Text("Setting"));
 
         default:

@@ -22,6 +22,17 @@ class CardTikcetList extends StatelessWidget {
                     Text("BF47S8", style: AppFont.reguler14),
                   ],
                 ),
+                height(4),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "GA-245",
+                      style: AppFont.reguler12.copyWith(color: Theme.of(context).hintColor),
+                    ),
+                    Text("Confirm", style: AppFont.medium12.copyWith(color: AppColor.greenColor)),
+                  ],
+                ),
                 height(16),
                 generateDashedDivider(context.w(0.82)),
               ],

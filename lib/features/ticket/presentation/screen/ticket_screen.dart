@@ -32,15 +32,73 @@ class TicketScreen extends StatelessWidget {
           child: InputText(hintText: "Search"),
         ),
       ),
-      body: ListView.builder(
-        padding: EdgeInsets.symmetric(horizontal: 16),
-        itemBuilder: (context, index) {
-          return Padding(
-            padding: EdgeInsets.only(top: index == 0 ? 16 : 12, bottom: index == 4 ? 126 : 0),
-            child: CardTikcetList(),
-          );
-        },
-        itemCount: 5,
+      body: DefaultTabController(
+        length: 2,
+        child: Column(
+          children: [
+            CardGeneral(
+              margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              width: double.infinity,
+              height: 42,
+              padding: EdgeInsets.all(2),
+
+              child: TabBar(
+                physics: const NeverScrollableScrollPhysics(),
+                automaticIndicatorColorAdjustment: false,
+                indicator: BoxDecoration(
+                  color: AppColor.primaryColor,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                isScrollable: false,
+                dividerColor: Colors.transparent,
+                indicatorColor: Theme.of(context).colorScheme.surface,
+                labelColor: AppColor.darkText1,
+                labelPadding: EdgeInsets.zero,
+                labelStyle: AppFont.medium14,
+                unselectedLabelColor: Theme.of(context).hintColor,
+                unselectedLabelStyle: AppFont.reguler14,
+                indicatorSize: TabBarIndicatorSize.tab,
+                onTap: (index) {},
+                tabs: const [
+                  Tab(child: Text("Active Ticket")),
+                  Tab(child: Text("Ticket History")),
+                ],
+              ),
+            ),
+            Expanded(
+              child: TabBarView(
+                children: [
+                  ListView.builder(
+                    padding: EdgeInsets.symmetric(horizontal: 16),
+                    itemBuilder: (context, index) {
+                      return Padding(
+                        padding: EdgeInsets.only(
+                          top: index == 0 ? 0 : 12,
+                          bottom: index == 4 ? 126 : 0,
+                        ),
+                        child: CardTikcetList(),
+                      );
+                    },
+                    itemCount: 1,
+                  ),
+                  ListView.builder(
+                    padding: EdgeInsets.symmetric(horizontal: 16),
+                    itemBuilder: (context, index) {
+                      return Padding(
+                        padding: EdgeInsets.only(
+                          top: index == 0 ? 0 : 12,
+                          bottom: index == 4 ? 126 : 0,
+                        ),
+                        child: CardTikcetList(),
+                      );
+                    },
+                    itemCount: 5,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
