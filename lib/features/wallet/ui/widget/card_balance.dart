@@ -9,13 +9,14 @@ class CardBalance extends StatelessWidget {
       width: double.infinity,
       margin: EdgeInsets.zero,
       gradient: AppColor.cardGradient,
+      background: AppColor.primaryColor,
       child: Stack(
         children: [
           Align(
             alignment: Alignment.topCenter,
             child: Image.asset(
               AppImages.map,
-              width: context.w(0.7),
+              width: context.w(0.6),
               color: AppColor.cardLight.withValues(alpha: .5),
             ),
           ),

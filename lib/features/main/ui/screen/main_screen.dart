@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pss_app/features/home/presentation/screen/home_screen.dart';
+import 'package:pss_app/features/setting/ui/screen/setting_screen.dart';
 import 'package:pss_app/features/ticket/presentation/screen/ticket_screen.dart';
 import 'package:pss_app/features/wallet/ui/screen/wallet_screen.dart';
 import '../cubit/main_cubit.dart';
@@ -20,7 +21,7 @@ class MainScreen extends StatelessWidget {
         case 2:
           return WalletScreen();
         case 3:
-          return const Center(child: Text("Setting"));
+          return SettingScreen();
 
         default:
           return HomeScreen();

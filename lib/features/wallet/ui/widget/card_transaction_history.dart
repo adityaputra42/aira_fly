@@ -30,7 +30,7 @@ class CardTransactionHistory extends StatelessWidget {
                 height(2),
                 Text(
                   DateFormat("dd MMM yyyy, HH:mm:ss").format(DateTime.now()),
-                  style: AppFont.reguler10.copyWith(color: Theme.of(context).hintColor),
+                  style: AppFont.reguler12.copyWith(color: Theme.of(context).hintColor),
                 ),
               ],
             ),
