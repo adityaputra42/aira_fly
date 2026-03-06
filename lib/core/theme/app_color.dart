@@ -53,13 +53,10 @@ class AppColor {
     end: Alignment.bottomCenter,
   );
 
-  static LinearGradient disableButtonGradient = LinearGradient(
-    colors: [
-      AppColor.primaryColor.withValues(alpha: 0.5),
-      AppColor.secondaryColor.withValues(alpha: 0.5),
-    ],
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
+  static LinearGradient cardGradient = LinearGradient(
+    colors: [Color(0xff04BADB), AppColor.primaryColor, Color(0xff163B94)],
+    begin: Alignment.topRight,
+    end: Alignment.bottomLeft,
   );
 
   static const LinearGradient splashDarkGradient = LinearGradient(

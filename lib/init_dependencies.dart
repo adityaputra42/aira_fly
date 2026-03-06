@@ -3,7 +3,7 @@ import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'core/common/cubit/theme_cubit.dart';
-import 'features/main/cubit/main_cubit.dart';
+import 'features/main/ui/cubit/main_cubit.dart';
 import 'features/splash/cubit/splash_cubit.dart';
 import 'core/utils/connection_checker.dart';
 import 'core/utils/pref_helper.dart';

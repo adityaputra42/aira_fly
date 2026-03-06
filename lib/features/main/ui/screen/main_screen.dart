@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pss_app/features/home/presentation/screen/home_screen.dart';
 import 'package:pss_app/features/ticket/presentation/screen/ticket_screen.dart';
-import '../../cubit/main_cubit.dart';
+import 'package:pss_app/features/wallet/ui/screen/wallet_screen.dart';
+import '../cubit/main_cubit.dart';
 import '../widget/custom_bottom_navbar.dart';
 
 class MainScreen extends StatelessWidget {
@@ -17,7 +18,7 @@ class MainScreen extends StatelessWidget {
         case 1:
           return TicketScreen();
         case 2:
-          return const Center(child: Text("History"));
+          return WalletScreen();
         case 3:
           return const Center(child: Text("Setting"));
 

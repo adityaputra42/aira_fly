@@ -5,7 +5,7 @@ import 'init_dependencies.dart';
 import 'core/routes/app_routes.dart';
 import 'core/theme/style.dart';
 import 'core/common/cubit/theme_cubit.dart';
-import 'features/main/cubit/main_cubit.dart';
+import 'features/main/ui/cubit/main_cubit.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

@@ -8,6 +8,7 @@ class CardGeneral extends StatelessWidget {
     this.margin,
     this.useShadow = true,
     this.padding,
+    this.gradient,
     this.border,
     this.radius,
     this.height,
@@ -19,6 +20,7 @@ class CardGeneral extends StatelessWidget {
   final EdgeInsets? padding;
   final bool useShadow;
   final double? radius;
+  final Gradient? gradient;
   final Border? border;
   final double? width;
   final double? height;
@@ -32,6 +34,7 @@ class CardGeneral extends StatelessWidget {
       decoration: BoxDecoration(
         border: border,
         borderRadius: BorderRadius.circular(radius ?? 8),
+        gradient: gradient,
         color: background ?? Theme.of(context).cardColor,
         boxShadow: useShadow
             ? [

@@ -17,7 +17,7 @@ class CustomBottomNavbar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       margin: EdgeInsets.fromLTRB(16, 8, 16, 16),
-      width: context.w(0.88),
+      width: context.w(1),
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
