@@ -16,4 +16,5 @@ class RouteNames {
   static const selectingMeal = 'selectingMeal';
   static const selectingSeat = 'selectingSeat';
   static const bookingDetail = 'bookingDetail';
+  static const ticketDetail = 'ticketDetail';
 }

@@ -19,7 +19,13 @@ class WalletScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: WidgetHelper.appBar(context: context, title: "Wallet", isCanBack: false),
+      appBar: WidgetHelper.appBar(
+        context: context,
+        title: "Wallet",
+        isCanBack: false,
+        color: AppColor.primaryColor,
+        titleColor: AppColor.darkText1,
+      ),
       body: SafeArea(
         child: Padding(
           padding: EdgeInsetsGeometry.symmetric(horizontal: 16, vertical: 8),

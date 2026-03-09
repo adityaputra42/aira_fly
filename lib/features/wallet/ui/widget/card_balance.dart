@@ -8,7 +8,6 @@ class CardBalance extends StatelessWidget {
     return CardGeneral(
       width: double.infinity,
       margin: EdgeInsets.zero,
-      gradient: AppColor.cardGradient,
       background: AppColor.primaryColor,
       child: Stack(
         children: [

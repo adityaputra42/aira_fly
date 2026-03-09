@@ -7,6 +7,7 @@ import 'package:pss_app/features/flight/ui/addonBooking/screen/meal/addon_meal_s
 import 'package:pss_app/features/flight/ui/bookingPayment/screen/booking_detail_screen.dart';
 import 'package:pss_app/features/flight/ui/flightSelecting/screen/flight_selecting_screen.dart';
 import 'package:pss_app/features/flight/ui/searchAirport/screen/search_airport_screen.dart';
+import 'package:pss_app/features/ticket/presentation/screen/ticket_detail.dart';
 
 import '../../features/flight/ui/addonBooking/screen/addon_booking_screen.dart';
 import '../../features/flight/ui/addonBooking/screen/baggage/addon_bagage_screen.dart';
@@ -54,6 +55,15 @@ class AppRouter {
           transition: PageTransitionType.fadeThrough,
         ),
         routes: [
+          GoRoute(
+            path: RouteNames.ticketDetail,
+            name: RouteNames.ticketDetail,
+            pageBuilder: (context, state) => buildPageWithTransition(
+              key: state.pageKey,
+              child: const TicketDetailScreen(),
+              transition: PageTransitionType.fadeScale,
+            ),
+          ),
           GoRoute(
             path: RouteNames.searchAirport,
             name: RouteNames.searchAirport,

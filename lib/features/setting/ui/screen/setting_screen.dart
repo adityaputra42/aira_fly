@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_switch/flutter_switch.dart';
 import 'package:iconify_flutter_plus/iconify_flutter_plus.dart';
 import 'package:iconify_flutter_plus/icons/material_symbols.dart';
 import 'package:iconify_flutter_plus/icons/mdi.dart';
@@ -52,9 +53,23 @@ class SettingScreen extends StatelessWidget {
             ),
             height(12),
             CardMenu(icon: Mdi.person, title: "Edit Profile"),
-            CardMenu(icon: Mdi.file_report_outline, title: "Report"),
             CardMenu(icon: Mdi.account_lock_open, title: "Change Password"),
-            CardMenu(icon: MaterialSymbols.dark_mode_rounded, title: "Dark Mode"),
+            CardMenu(icon: Mdi.file_report_outline, title: "Report"),
+            CardMenu(icon: Mdi.language, title: "Language"),
+            CardMenu(
+              icon: MaterialSymbols.dark_mode_rounded,
+              title: "Dark Mode",
+              rightIcon: FlutterSwitch(
+                width: 36.0,
+                height: 20.0,
+                toggleSize: 16.0,
+                value: false,
+                activeColor: AppColor.primaryColor,
+                inactiveColor: Theme.of(context).highlightColor,
+                padding: 2.0,
+                onToggle: (val) {},
+              ),
+            ),
             CardMenu(icon: Mdi.logout, title: "Log Out"),
           ],
         ),
@@ -64,9 +79,10 @@ class SettingScreen extends StatelessWidget {
 }
 
 class CardMenu extends StatelessWidget {
-  const CardMenu({super.key, required this.icon, required this.title});
+  const CardMenu({super.key, required this.icon, required this.title, this.rightIcon});
   final String title;
   final String icon;
+  final Widget? rightIcon;
 
   @override
   Widget build(BuildContext context) {
@@ -78,11 +94,12 @@ class CardMenu extends StatelessWidget {
           Iconify(icon, size: 24, color: AppColor.primaryColor),
           width(8),
           Expanded(child: Text(title, style: AppFont.medium14)),
-          Icon(
-            Icons.arrow_forward_ios_rounded,
-            size: 20,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
+          rightIcon ??
+              Icon(
+                Icons.arrow_forward_ios_rounded,
+                size: 20,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
         ],
       ),
     );
