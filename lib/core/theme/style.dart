@@ -40,7 +40,7 @@ class Styles {
       pageTransitionsTheme: const PageTransitionsTheme(
         builders: <TargetPlatform, PageTransitionsBuilder>{
           TargetPlatform.android: ZoomPageTransitionsBuilder(),
-          TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+          TargetPlatform.iOS: ZoomPageTransitionsBuilder(),
         },
       ),
       textButtonTheme: TextButtonThemeData(
@@ -57,9 +57,7 @@ class Styles {
       datePickerTheme: DatePickerThemeData(
         backgroundColor: colorScheme.surface,
         surfaceTintColor: colorScheme.surfaceContainer,
-        headerBackgroundColor: isDarkTheme
-            ? AppColor.cardDark
-            : AppColor.cardLight,
+        headerBackgroundColor: isDarkTheme ? AppColor.cardDark : AppColor.cardLight,
         headerForegroundColor: colorScheme.onSurface,
         yearStyle: AppFont.medium12.copyWith(color: colorScheme.onSurface),
         dayStyle: AppFont.medium12.copyWith(color: colorScheme.onSurface),

@@ -9,7 +9,7 @@ environment:
 
 dependencies:
   animations: ^2.1.1
-  bloc: ^9.2.0
+  bloc: ^9.2.1
   cached_network_image: ^3.4.1
   carousel_slider: ^5.1.2
   cupertino_icons: ^1.0.8
@@ -24,14 +24,14 @@ dependencies:
   go_router: ^17.1.0
   iconify_flutter_plus: ^1.0.4
   image_picker: ^1.2.0
-  internet_connection_checker_plus: ^2.9.1+2
+  internet_connection_checker_plus: ^3.0.0
   intl: ^0.20.2
   meta: ^1.16.0
   paged_vertical_calendar: ^1.1.10
   shared_preferences: ^2.5.4
   shimmer: ^3.0.0
-  syncfusion_flutter_barcodes: ^32.2.7
-  timelines_plus: ^1.0.8
+  syncfusion_flutter_barcodes: ^33.2.4
+  timelines_plus: ^2.0.0
 
 dev_dependencies:
   flutter_lints: ^6.0.0
