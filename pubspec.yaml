@@ -8,7 +8,7 @@ environment:
   sdk: ^3.11.0
 
 dependencies:
-  animations: ^2.1.1
+  animations: ^3.0.0
   bloc: ^9.2.1
   cached_network_image: ^3.4.1
   carousel_slider: ^5.1.2
@@ -29,8 +29,8 @@ dependencies:
   meta: ^1.16.0
   paged_vertical_calendar: ^1.1.10
   shared_preferences: ^2.5.4
-  shimmer: ^3.0.0
-  syncfusion_flutter_barcodes: ^33.2.4
+  shimmer: ^4.0.0
+  syncfusion_flutter_barcodes: ^34.2.4
   timelines_plus: ^2.0.0
 
 dev_dependencies:
