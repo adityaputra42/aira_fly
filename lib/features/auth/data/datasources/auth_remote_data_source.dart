@@ -1,59 +1,66 @@
+import 'package:pss_app/core/network/network.dart';
 
-import '../../../../core/error/exceptions.dart';
-import '../models/user_model.dart';
+import '../../../../core/constants/enpoint.dart';
 
 abstract interface class AuthRemoteDataSource {
-  // Session? get currentUserSession;
-  Future<UserModel> signUpWithEmailPassword({
+  Future<ApiResponse?> signUp({
     required String name,
     required String email,
     required String password,
+    required String username,
   });
-  Future<UserModel> loginWithEmailPassword({
-    required String email,
-    required String password,
-  });
-  Future<UserModel?> getCurrentUserData();
+  Future<ApiResponse?> login({required String email, required String password});
+  Future<ApiResponse?> getCurrentUserData();
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
-  // final SupabaseClient supabaseClient;
-  AuthRemoteDataSourceImpl();
-
-  // @override
-  // Session? get currentUserSession => supabaseClient.auth.currentSession;
+  final DioClient dio = DioClient();
 
   @override
-  Future<UserModel> loginWithEmailPassword({
-    required String email,
-    required String password,
-  }) async {
+  Future<ApiResponse?> getCurrentUserData() async {
     try {
-      return UserModel(email: email, id: "id", name: "name");
+      var response = await dio.get(Endpoint.getUser);
+      if (response.data == null) {
+        return ApiResponse.withError(response, response.statusMessage, null);
+      }
+      return ApiResponse.withSuccess(response, response.data);
     } catch (e) {
-      throw ServerException(e.toString());
+      return null;
     }
   }
 
   @override
-  Future<UserModel> signUpWithEmailPassword({
+  Future<ApiResponse?> login({required String email, required String password}) async {
+    try {
+      var param = {"email": email, "password": password};
+      var response = await dio.post(Endpoint.login, data: param);
+      if (response.data == null) {
+        return ApiResponse.withError(response, response.statusMessage, null);
+      }
+
+      return ApiResponse.withSuccess(response, response.data);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  @override
+  Future<ApiResponse?> signUp({
     required String name,
     required String email,
     required String password,
+    required String username,
   }) async {
     try {
-      return UserModel(email: email, id: "id", name: name);
-    } catch (e) {
-      throw ServerException(e.toString());
-    }
-  }
+      var param = {"username": username, "full_name": name, "email": email, "password": password};
+      var response = await dio.post(Endpoint.register, data: param);
+      if (response.data == null) {
+        return ApiResponse.withError(response, response.statusMessage, null);
+      }
 
-  @override
-  Future<UserModel?> getCurrentUserData() async {
-    try {
-      return null;
+      return ApiResponse.withSuccess(response, response.data);
     } catch (e) {
-      throw ServerException(e.toString());
+      return null;
     }
   }
 }

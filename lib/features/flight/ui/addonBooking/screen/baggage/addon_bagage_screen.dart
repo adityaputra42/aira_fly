@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:pss_app/core/routes/route_names.dart';
+import 'package:pss_app/app/routes/route_names.dart';
 import 'package:pss_app/features/flight/ui/addonBooking/widget/card_flight_addon.dart';
 
 import '../../../../../../core/common/widget/primary_button.dart';
-import '../../../../../../core/theme/theme.dart';
+import '../../../../../../app/theme/theme.dart';
 import '../../../../../../core/utils/size_extension.dart';
 import '../../../../../../core/utils/widget_helper.dart';
 

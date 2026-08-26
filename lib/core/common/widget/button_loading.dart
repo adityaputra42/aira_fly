@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../theme/app_color.dart';
+import '../../../app/theme/app_color.dart';
 
 class ButtonLoading extends StatelessWidget {
   const ButtonLoading({

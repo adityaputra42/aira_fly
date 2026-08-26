@@ -1,74 +1,105 @@
 import 'package:fpdart/fpdart.dart';
+import 'package:pss_app/features/auth/data/models/user_model.dart';
+import 'package:pss_app/features/auth/domain/entities/user_entities.dart';
 
-import '../../../../core/common/entities/user.dart';
-import '../../../../core/constants/constant.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/utils/connection_checker.dart';
 import '../../domain/repository/auth_repository.dart';
+import '../datasources/auth_local_datasource.dart';
 import '../datasources/auth_remote_data_source.dart';
-import '../models/user_model.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSource remoteDataSource;
+  final AuthLocalDataSource localDataSource;
   final ConnectionChecker connectionChecker;
-  const AuthRepositoryImpl(this.remoteDataSource, this.connectionChecker);
+
+  const AuthRepositoryImpl(this.remoteDataSource, this.localDataSource, this.connectionChecker);
 
   @override
-  Future<Either<Failure, User>> currentUser() async {
+  Future<Either<Failure, UserEntity>> signUpWithEmailPassword({
+    required String name,
+    required String email,
+    required String password,
+    required String username,
+  }) async {
     try {
-      if (!await (connectionChecker.isConnected)) {
-        return right(UserModel(id: "id", email: "", name: ""));
-      }
-      final user = await remoteDataSource.getCurrentUserData();
-      if (user == null) {
-        return left(Failure('User not logged in!'));
+      if (!await connectionChecker.isConnected) {
+        return left(Failure('No internet connection'));
       }
 
-      return right(user);
+      final response = await remoteDataSource.signUp(
+        name: name,
+        email: email,
+        password: password,
+        username: username,
+      );
+      if (response == null) {
+        return left(Failure('Register Failed'));
+      }
+
+      var loginResponse = loginResponseModelFromJson(response.data);
+
+      localDataSource.saveAccessToken(loginResponse.accessToken ?? "");
+
+      localDataSource.saveRefreshToken(loginResponse.refreshToken ?? "");
+
+      return right(loginResponse.user ?? UserModel());
     } on ServerException catch (e) {
       return left(Failure(e.message));
+    } catch (e) {
+      return left(Failure(e.toString()));
     }
   }
 
   @override
-  Future<Either<Failure, User>> loginWithEmailPassword({
-    required String email,
-    required String password,
-  }) async {
-    return _getUser(
-      () async => await remoteDataSource.loginWithEmailPassword(
-        email: email,
-        password: password,
-      ),
-    );
-  }
-
-  @override
-  Future<Either<Failure, User>> signUpWithEmailPassword({
-    required String name,
-    required String email,
-    required String password,
-  }) async {
-    return _getUser(
-      () async => await remoteDataSource.signUpWithEmailPassword(
-        name: name,
-        email: email,
-        password: password,
-      ),
-    );
-  }
-
-  Future<Either<Failure, User>> _getUser(Future<User> Function() fn) async {
+  Future<Either<Failure, UserEntity>> currentUser() async {
     try {
-      if (!await (connectionChecker.isConnected)) {
-        return left(Failure(Constants.noConnectionErrorMessage));
+      if (!await connectionChecker.isConnected) {
+        return left(Failure('No internet connection'));
       }
-      final user = await fn();
+
+      final response = await remoteDataSource.getCurrentUserData();
+      if (response == null) {
+        return left(Failure('Register Failed'));
+      }
+      var user = userModelFromJson(response.data);
 
       return right(user);
     } on ServerException catch (e) {
       return left(Failure(e.message));
+    } catch (e) {
+      return left(Failure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, UserEntity>> loginWithEmailPassword({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      if (!await connectionChecker.isConnected) {
+        return left(Failure('No internet connection'));
+      }
+
+      final response = await remoteDataSource.login(email: email, password: password);
+
+      if (response == null) {
+        return left(Failure('Register Failed'));
+      }
+
+      var loginResponse = loginResponseModelFromJson(response.data);
+
+      localDataSource.saveAccessToken(loginResponse.accessToken ?? "");
+
+      localDataSource.saveRefreshToken(loginResponse.refreshToken ?? "");
+
+      return right(loginResponse.user ?? UserModel());
+    } on ServerException catch (e) {
+      return left(Failure(e.message));
+    } catch (e) {
+      return left(Failure(e.toString()));
     }
   }
 }

@@ -5,7 +5,7 @@ import 'package:pss_app/core/common/widget/card_general.dart';
 
 import '../../../../../../core/common/widget/primary_button.dart';
 import '../../../../../../core/common/widget/selectable_box.dart';
-import '../../../../../../core/theme/theme.dart';
+import '../../../../../../app/theme/theme.dart';
 import '../../../../../../core/utils/size_extension.dart';
 import '../../../../../../core/utils/widget_helper.dart';
 import '../../../flightResult/screen/flight_result_screen.dart';

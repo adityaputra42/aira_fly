@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pss_app/core/theme/theme.dart';
+import 'package:pss_app/app/theme/theme.dart';
 
 class SelectableBox extends StatelessWidget {
   final bool isSelected;

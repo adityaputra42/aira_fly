@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pss_app/core/common/widget/primary_button.dart';
 
-import '../../../../core/theme/theme.dart';
+import '../../../../app/theme/theme.dart';
 import '../../../../core/utils/size_extension.dart';
 import '../../../../core/utils/widget_helper.dart';
 import '../../../flight/ui/bookingPayment/screen/booking_detail_screen.dart';

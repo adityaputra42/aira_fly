@@ -9,13 +9,13 @@ import 'package:iconify_flutter_plus/icons/mdi.dart';
 import 'package:intl/intl.dart';
 import 'package:pss_app/core/common/widget/card_general.dart';
 import 'package:pss_app/core/common/widget/date_slider.dart';
-import 'package:pss_app/core/theme/theme.dart';
+import 'package:pss_app/app/theme/theme.dart';
 import 'package:pss_app/core/utils/clipper.dart';
 import 'package:pss_app/core/utils/dashed_divider.dart';
 
 import '../../../../../core/common/widget/shimmer_loading.dart';
 import '../../../../../core/constants/images.dart';
-import '../../../../../core/routes/route_names.dart';
+import '../../../../../app/routes/route_names.dart';
 import '../../../../../core/utils/size_extension.dart';
 part '../widget/flexible_appbar_widget.dart';
 part '../widget/card_flight_selecting.dart';

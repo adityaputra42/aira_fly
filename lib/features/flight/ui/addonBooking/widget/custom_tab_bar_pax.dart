@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:pss_app/core/common/widget/card_general.dart';
-import 'package:pss_app/core/theme/theme.dart';
+import 'package:pss_app/app/theme/theme.dart';
 
 import '../../../../../core/utils/size_extension.dart';
 

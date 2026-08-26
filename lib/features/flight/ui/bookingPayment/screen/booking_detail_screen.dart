@@ -14,7 +14,7 @@ import 'package:pss_app/core/utils/size_extension.dart';
 
 import '../../../../../core/common/widget/primary_button.dart';
 import '../../../../../core/common/widget/shimmer_loading.dart';
-import '../../../../../core/theme/theme.dart';
+import '../../../../../app/theme/theme.dart';
 import '../../../../../core/utils/clipper.dart';
 import '../../../../../core/utils/dashed_divider.dart';
 import '../../../../../core/utils/widget_helper.dart';

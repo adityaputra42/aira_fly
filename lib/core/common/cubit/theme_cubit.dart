@@ -3,19 +3,18 @@ import 'package:bloc/bloc.dart';
 import '../../utils/pref_helper.dart';
 
 class ThemeCubit extends Cubit<bool> {
-  final PrefHelper pref;
-  ThemeCubit({required this.pref}) : super(false);
+  ThemeCubit() : super(false);
 
   /// Load theme saat aplikasi start
   Future<void> loadTheme() async {
-    final isDark = pref.getTheme();
+    final isDark = PrefHelper.instance.getTheme();
     emit(isDark);
   }
 
   /// Toggle theme
   Future<void> toggleTheme() async {
     final newTheme = !state;
-    pref.setDarkTheme(newTheme);
+    PrefHelper.instance.setDarkTheme(newTheme);
     emit(newTheme);
   }
 }

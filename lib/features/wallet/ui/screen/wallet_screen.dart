@@ -4,7 +4,7 @@ import 'package:iconify_flutter_plus/icons/mdi.dart';
 import 'package:intl/intl.dart';
 import 'package:pss_app/core/common/widget/card_general.dart';
 import 'package:pss_app/core/common/widget/secondary_button.dart';
-import 'package:pss_app/core/theme/theme.dart';
+import 'package:pss_app/app/theme/theme.dart';
 import 'package:pss_app/core/utils/widget_helper.dart';
 
 import '../../../../core/constants/images.dart';

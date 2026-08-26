@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconify_flutter_plus/iconify_flutter_plus.dart';
 import 'package:iconify_flutter_plus/icons/mdi.dart';
-import 'package:pss_app/core/routes/route_names.dart';
+import 'package:pss_app/app/routes/route_names.dart';
 import 'package:pss_app/core/utils/size_extension.dart';
 
-import '../../../../core/theme/app_color.dart';
-import '../../../../core/theme/app_font.dart';
+import '../../../../app/theme/app_color.dart';
+import '../../../../app/theme/app_font.dart';
 import '../../../../core/common/widget/card_general.dart';
 import '../../../../core/common/widget/input_text.dart';
 import '../../../../core/common/widget/primary_button.dart';

@@ -9,7 +9,7 @@ import 'package:intl/intl.dart';
 
 import '../../../../../core/common/widget/card_general.dart';
 import '../../../../../core/common/widget/shimmer_loading.dart';
-import '../../../../../core/theme/theme.dart';
+import '../../../../../app/theme/theme.dart';
 import '../../../../../core/utils/dashed_divider.dart';
 import '../../../../../core/utils/size_extension.dart';
 

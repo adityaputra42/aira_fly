@@ -1,7 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:pss_app/core/common/widget/shimmer_loading.dart';
-import 'package:pss_app/core/theme/theme.dart';
+import 'package:pss_app/app/theme/theme.dart';
 import 'package:pss_app/core/common/widget/card_general.dart';
 import 'package:pss_app/core/utils/size_extension.dart';
 import '../widget/app_bar_home.dart';

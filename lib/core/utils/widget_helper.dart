@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../theme/app_font.dart';
+import '../../app/theme/app_font.dart';
 
 class WidgetHelper {
   static AppBar appBar({

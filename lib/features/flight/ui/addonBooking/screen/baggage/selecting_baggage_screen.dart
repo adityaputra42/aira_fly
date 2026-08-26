@@ -6,7 +6,7 @@ import 'package:pss_app/features/flight/ui/addonBooking/widget/custom_tab_bar_pa
 import 'package:pss_app/features/flight/ui/flightResult/screen/flight_result_screen.dart';
 
 import '../../../../../../core/common/widget/primary_button.dart';
-import '../../../../../../core/theme/theme.dart';
+import '../../../../../../app/theme/theme.dart';
 import '../../../../../../core/utils/size_extension.dart';
 import '../../../../../../core/utils/widget_helper.dart';
 

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
-import '../../theme/theme.dart';
+import '../../../app/theme/theme.dart';
 
 class ShimmerLoading extends StatelessWidget {
   const ShimmerLoading({

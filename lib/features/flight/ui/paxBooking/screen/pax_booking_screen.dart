@@ -8,8 +8,8 @@ import 'package:pss_app/core/common/widget/card_general.dart';
 import 'package:pss_app/core/common/widget/input_text.dart';
 
 import '../../../../../core/common/widget/primary_button.dart';
-import '../../../../../core/routes/route_names.dart';
-import '../../../../../core/theme/theme.dart';
+import '../../../../../app/routes/route_names.dart';
+import '../../../../../app/theme/theme.dart';
 import '../../../../../core/utils/dashed_divider.dart';
 import '../../../../../core/utils/size_extension.dart';
 import '../../../../../core/utils/widget_helper.dart';

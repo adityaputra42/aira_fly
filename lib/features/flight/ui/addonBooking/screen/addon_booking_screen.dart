@@ -5,10 +5,10 @@ import 'package:iconify_flutter_plus/icons/material_symbols.dart';
 import 'package:iconify_flutter_plus/icons/mdi.dart';
 import 'package:intl/intl.dart';
 import 'package:pss_app/core/common/widget/card_general.dart';
-import 'package:pss_app/core/theme/theme.dart';
+import 'package:pss_app/app/theme/theme.dart';
 
 import '../../../../../core/common/widget/primary_button.dart';
-import '../../../../../core/routes/route_names.dart';
+import '../../../../../app/routes/route_names.dart';
 import '../../../../../core/utils/dashed_divider.dart';
 import '../../../../../core/utils/size_extension.dart';
 import '../../../../../core/utils/widget_helper.dart';

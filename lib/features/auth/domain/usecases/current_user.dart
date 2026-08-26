@@ -1,16 +1,17 @@
 import 'package:fpdart/fpdart.dart';
 
-import '../../../../core/common/entities/user.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/usecase/usecase.dart';
+import '../entities/user_entities.dart';
 import '../repository/auth_repository.dart';
 
-class CurrentUser implements UseCase<User, NoParams> {
+class CurrentUser implements UseCase<UserEntity, NoParams> {
   final AuthRepository authRepository;
-  CurrentUser(this.authRepository);
+
+  const CurrentUser(this.authRepository);
 
   @override
-  Future<Either<Failure, User>> call(NoParams params) async {
-    return await authRepository.currentUser();
+  Future<Either<Failure, UserEntity>> call(NoParams params) {
+    return authRepository.currentUser();
   }
 }

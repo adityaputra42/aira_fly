@@ -10,12 +10,12 @@ import 'package:iconify_flutter_plus/icons/mdi.dart';
 import 'package:intl/intl.dart';
 import 'package:pss_app/core/common/widget/card_general.dart';
 import 'package:pss_app/core/common/widget/primary_button.dart';
-import 'package:pss_app/core/theme/theme.dart';
+import 'package:pss_app/app/theme/theme.dart';
 import 'package:pss_app/core/utils/widget_helper.dart';
 import 'package:timelines_plus/timelines_plus.dart';
 
 import '../../../../../core/common/widget/shimmer_loading.dart';
-import '../../../../../core/routes/route_names.dart';
+import '../../../../../app/routes/route_names.dart';
 import '../../../../../core/utils/dashed_divider.dart';
 import '../../../../../core/utils/size_extension.dart';
 
