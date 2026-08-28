@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pss_app/features/home/presentation/screen/home_screen.dart';
 import 'package:pss_app/features/setting/ui/screen/setting_screen.dart';
 import 'package:pss_app/features/ticket/presentation/screen/ticket_screen.dart';
-import 'package:pss_app/features/wallet/ui/screen/wallet_screen.dart';
+import 'package:pss_app/features/wallet/presentation/screen/wallet_screen.dart';
 import '../cubit/main_cubit.dart';
 import '../widget/custom_bottom_navbar.dart';
 

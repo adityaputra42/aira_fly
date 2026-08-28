@@ -32,4 +32,13 @@ class Endpoint {
   // ===== Flight ===== //
   static const flightSearch = "flights/search";
   static const flightInstances = "flights/instances";
+
+  // ===== Checkin ===== //
+  static const checkin = "checkin";
+  static const boardingPass = "checkin/borading-pass";
+
+  // ===== Wallet ===== //
+  static const walletBalance = "wallet/balance";
+  static const walletTransaction = "wallet/transactions";
+  static const walletTopup = "wallet/topup";
 }
