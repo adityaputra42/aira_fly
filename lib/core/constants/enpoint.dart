@@ -17,7 +17,7 @@ class Endpoint {
   static const getAncillariesPurchaseByPnr = "ancillaries/purchases/pnr/";
 
   // ===== Booking ===== //
-  static const createPnr = "bookings/pnrs";
+  static const pnr = "bookings/pnrs";
 
   // ===== Aircrafts ===== //
   static const getAircrafts = "flights/aircrafts";
@@ -31,4 +31,5 @@ class Endpoint {
 
   // ===== Flight ===== //
   static const flightSearch = "flights/search";
+  static const flightInstances = "flights/instances";
 }

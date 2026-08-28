@@ -4,7 +4,7 @@ import 'package:pss_app/core/common/widget/primary_button.dart';
 import '../../../../app/theme/theme.dart';
 import '../../../../core/utils/size_extension.dart';
 import '../../../../core/utils/widget_helper.dart';
-import '../../../flight/ui/bookingPayment/screen/booking_detail_screen.dart';
+import '../../../flight/presentation/bookingPayment/screen/booking_detail_screen.dart';
 
 class TicketDetailScreen extends StatelessWidget {
   const TicketDetailScreen({super.key});

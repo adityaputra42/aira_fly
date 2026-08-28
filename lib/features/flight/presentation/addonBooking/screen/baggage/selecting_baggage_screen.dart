@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:pss_app/core/common/widget/card_general.dart';
-import 'package:pss_app/features/flight/ui/addonBooking/widget/custom_tab_bar_pax.dart';
-import 'package:pss_app/features/flight/ui/flightResult/screen/flight_result_screen.dart';
+import 'package:pss_app/features/flight/presentation/addonBooking/widget/custom_tab_bar_pax.dart';
+import 'package:pss_app/features/flight/presentation/flightResult/screen/flight_result_screen.dart';
 
 import '../../../../../../core/common/widget/primary_button.dart';
 import '../../../../../../app/theme/theme.dart';

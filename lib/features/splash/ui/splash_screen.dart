@@ -26,7 +26,7 @@ class SplashScreen extends StatelessWidget {
         return BlocListener<SplashCubit, SplashState>(
           listener: (context, state) {
             if (state is SplashToOnboarding) {
-              context.pushReplacementNamed(RouteNames.signin);
+              context.pushReplacementNamed(RouteNames.main);
             } else if (state is SplashToHome) {
               context.pushReplacementNamed(RouteNames.main);
             }
@@ -40,9 +40,7 @@ class SplashScreen extends StatelessWidget {
                   height(12),
                   Text(
                     "Aira Fly",
-                    style: AppFont.semibold18.copyWith(
-                      color: AppColor.primaryColor,
-                    ),
+                    style: AppFont.semibold18.copyWith(color: AppColor.primaryColor),
                   ),
                 ],
               ),

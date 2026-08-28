@@ -2,22 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:pss_app/app/routes/route_names.dart';
-import 'package:pss_app/features/flight/ui/addonBooking/widget/card_flight_addon.dart';
+import 'package:pss_app/features/flight/presentation/addonBooking/widget/card_flight_addon.dart';
 
 import '../../../../../../core/common/widget/primary_button.dart';
 import '../../../../../../app/theme/theme.dart';
 import '../../../../../../core/utils/size_extension.dart';
 import '../../../../../../core/utils/widget_helper.dart';
 
-class AddonMealScreen extends StatelessWidget {
-  const AddonMealScreen({super.key});
+class AddonBagageScreen extends StatelessWidget {
+  const AddonBagageScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: WidgetHelper.appBar(
         context: context,
-        title: "Addon Meal",
+        title: "Addon Baggage",
         color: AppColor.primaryColor,
         titleColor: AppColor.darkText1,
       ),
@@ -32,13 +32,7 @@ class AddonMealScreen extends StatelessWidget {
                 height(8),
                 CardFlightAddon(
                   onTap: () {
-                    context.pushNamed(RouteNames.selectingMeal);
-                  },
-                ),
-                height(8),
-                CardFlightAddon(
-                  onTap: () {
-                    context.pushNamed(RouteNames.selectingMeal);
+                    context.pushNamed(RouteNames.selectingBaggage);
                   },
                 ),
               ],
@@ -52,14 +46,7 @@ class AddonMealScreen extends StatelessWidget {
                 CardFlightAddon(
                   isReturn: true,
                   onTap: () {
-                    context.pushNamed(RouteNames.selectingMeal);
-                  },
-                ),
-                height(8),
-                CardFlightAddon(
-                  isReturn: true,
-                  onTap: () {
-                    context.pushNamed(RouteNames.selectingMeal);
+                    context.pushNamed(RouteNames.selectingBaggage);
                   },
                 ),
               ],
@@ -67,6 +54,7 @@ class AddonMealScreen extends StatelessWidget {
           ],
         ),
       ),
+
       bottomNavigationBar: SafeArea(
         top: false,
         child: Container(
@@ -105,7 +93,7 @@ class AddonMealScreen extends StatelessWidget {
                 ],
               ),
               PrimaryButton(
-                title: "Add Meal",
+                title: "Add Baggage",
                 onPressed: () {
                   context.pop();
                 },
