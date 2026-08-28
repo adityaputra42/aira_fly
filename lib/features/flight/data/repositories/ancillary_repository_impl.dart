@@ -134,10 +134,10 @@ class AncillaryRepositoryImpl implements AncillaryRepository {
 
       final body = {
         'pnr_id': pnrId,
-        if (passengerId != null) 'passenger_id': passengerId,
-        if (segmentId != null) 'segment_id': segmentId,
+        'passenger_id': ?passengerId,
+        'segment_id': ?segmentId,
         'ancillary_id': ancillaryId,
-        if (flightId != null) 'flight_id': flightId,
+        'flight_id': ?flightId,
         'quantity': quantity,
       };
 

@@ -17,4 +17,5 @@ class RouteNames {
   static const selectingSeat = 'selectingSeat';
   static const bookingDetail = 'bookingDetail';
   static const ticketDetail = 'ticketDetail';
+  static const selectDate = 'selectDate';
 }

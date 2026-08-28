@@ -37,6 +37,10 @@ class Endpoint {
   static const checkin = "checkin";
   static const boardingPass = "checkin/borading-pass";
 
+  // ===== payment ===== //
+  static const payment = "payments";
+  static const paymentPnr = "payments/pnr";
+
   // ===== Wallet ===== //
   static const walletBalance = "wallet/balance";
   static const walletTransaction = "wallet/transactions";

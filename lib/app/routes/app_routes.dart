@@ -7,6 +7,7 @@ import 'package:pss_app/features/flight/presentation/addonBooking/screen/meal/ad
 import 'package:pss_app/features/flight/presentation/bookingPayment/screen/booking_detail_screen.dart';
 import 'package:pss_app/features/flight/presentation/flightSelecting/screen/flight_selecting_screen.dart';
 import 'package:pss_app/features/flight/presentation/searchAirport/screen/search_airport_screen.dart';
+import 'package:pss_app/features/home/presentation/widget/date_picker_screen.dart';
 import 'package:pss_app/features/ticket/presentation/screen/ticket_detail.dart';
 
 import '../../features/flight/presentation/addonBooking/screen/addon_booking_screen.dart';
@@ -63,6 +64,18 @@ class AppRouter {
               child: const TicketDetailScreen(),
               transition: PageTransitionType.fadeScale,
             ),
+          ),
+          GoRoute(
+            path: RouteNames.selectDate,
+            name: RouteNames.selectDate,
+            pageBuilder: (context, state) {
+              final arguments = state.extra as DatePickerArguments;
+              return buildPageWithTransition(
+                key: state.pageKey,
+                child: DatePickerScreen(arguments: arguments),
+                transition: PageTransitionType.fadeScale,
+              );
+            },
           ),
           GoRoute(
             path: RouteNames.searchAirport,

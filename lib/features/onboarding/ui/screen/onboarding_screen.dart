@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../init_dependencies.dart';
+import '../../../../app/init_dependencies.dart';
 import '../../cubit/onboarding_cubit.dart';
 
 class OnboardingScreen extends StatelessWidget {

@@ -1,3 +1,4 @@
+import 'package:intl/intl.dart';
 import 'package:paged_vertical_calendar/utils/date_models.dart';
 
 abstract class DateUtils {
@@ -133,9 +134,6 @@ abstract class DateUtils {
     return (validDates);
   }
 
-  /// This method returns the number of spaces required before first valid based of the hidden weekdays.
-  /// For example, if the first valid date falls on a Tuesday, that means that the weekday "monday"
-  /// is hidden, which makes the first valid date index "1"
   static int getNoOfSpaceRequiredBeforeFirstValidDate(
     List<int> weekdaysToHide,
     int weekdayValueForFirstValidDay, [
@@ -170,5 +168,150 @@ extension DateUtilsExtensions on DateTime {
 
   DateTime addDays(int daysToAdd) {
     return DateTime(year, month, day + daysToAdd, hour, minute, second, millisecond, microsecond);
+  }
+}
+
+/// Date format: HH:mm (Example: 15:30)
+const String hourMinutes24 = "HH:mm";
+
+/// Date format: d MMM (Example: 20 Jul)
+const String shortD = "d";
+
+/// Date format: d MMM (Example: 20 Jul)
+const String shortDM = "d MMM";
+
+/// Date format: dd MMM yyyy(Example: 20 Jul 2023)
+const String shortDDMY = "dd MMM yyyy";
+
+/// Date format: dd MMMM yyyy(Example: 20 July 2023)
+const String shortDDMMY = "dd MMMM yyyy";
+
+/// Date format: MMM d, yyyy (Example: July 20, 2023)
+const String shortMDY = "MMMM d, yyyy";
+
+/// Date format: MMM d, yyyy (Example: Jul 20, 2023)
+const String shortMDYAbbr = "MMM d, yyyy";
+
+/// Date format: EEEE, MMMM d, yyyy (Example: Thursday, July 20, 2023)
+const String weekdayMDY = "EEEE, MMMM d, yyyy";
+
+/// Date format: EEEE, MMM d, yyyy (Example: Thursday, Jul 20, 2023)
+const String weekdayMDYAbbr = "EEEE, MMM d, yyyy";
+
+/// Date format: MMM d, yyyy HH:mm:ss (Example: Jul 20, 2023 15:30:45)
+const String shortMDYTime = "MMM d, yyyy HH:mm:ss";
+
+/// Date format: EEEE, MMMM d, yyyy HH:mm:ss (Example: Thursday, July 20, 2023 15:30:45)
+const String weekdayMDYTime = "EEEE, MMMM d, yyyy HH:mm:ss";
+
+/// Date format: EEEE, MMM d, yyyy HH:mm:ss (Example: Thursday, Jul 20, 2023 15:30:45)
+const String weekdayMDYTimeAbbr = "EEEE, MMM d, yyyy HH:mm:ss";
+
+/// Date format: MMMM d, yyyy h:mm a (Example: July 20, 2023 3:30 PM)
+const String longMDYTime = "MMMM d, yyyy h:mm a";
+
+/// Date format: MMM d, yyyy h:mm a (Example: Jul 20, 2023 3:30 PM)
+const String shortMDYTimeWithTimezone = "MMM d, yyyy h:mm a";
+
+/// Date format: EEE, MMM d, ''yy (Example: Thu, Jul 20, '23)
+const String shortWeekdayMDY = "EEE, MMM d, ''yy";
+
+/// Date format: dd-MMM-yyyy (Example: 15-AUG-2023)
+const String flightFormatDate = "dd-MMM-yyyy";
+
+/// Date format: dd-MMM-yyyy (Example: 2023-10-15)
+const String flightFormatDateReversed = "yyyy-MM-dd";
+
+const String flightFormatDateReversed2 = "yyyy-MM-dd HH:mm";
+
+/// Date format: dd MMM yyyy (Example: 15-AUG-2023)
+const String flightFormatDate2 = "dd MMM yyyy";
+
+extension DateTimeExtensions on DateTime {
+  String toFormattedString(String format, {String? locale}) {
+    var formatter = DateFormat(format, locale);
+    return formatter.format(this);
+  }
+
+  String toISO8601String() {
+    String y = (year >= -9999 && year <= 9999) ? _fourDigits(year) : _sixDigits(year);
+    String m = twoDigits(n: month);
+    String d = twoDigits(n: day);
+    return "$y-$m-$d";
+  }
+
+  String dateFormatRange(DateTime checkinDate, DateTime checkoutDate) {
+    String y = checkoutDate.year.toString();
+    String checkInDay = checkinDate.day.toString();
+    String checkOutDay = checkoutDate.day.toString();
+    String mIn = DateFormat("MMM").format(checkinDate);
+    String mOut = DateFormat("MMM").format(checkoutDate);
+    if (checkInDay.length == 1) {
+      checkInDay = '0$checkInDay';
+    }
+    if (checkOutDay.length == 1) {
+      checkOutDay = '0$checkOutDay';
+    }
+    var date = '';
+    if (mOut == mIn) {
+      date = "$checkInDay - $checkOutDay $mOut $y";
+    } else {
+      date = "$checkInDay $mIn - $checkOutDay $mOut $y";
+    }
+    return date;
+  }
+
+  String distanceFromDate(DateTime toDate) {
+    String journeyDate = '${toFormattedString(shortDDMY)} - ${toDate.toFormattedString(shortDDMY)}';
+    if (isSameMonth(toDate) && isSameYear(toDate)) {
+      journeyDate = '${twoDigits()} - ${toDate.toFormattedString(shortDDMMY)}';
+    }
+    return journeyDate;
+  }
+
+  bool isBeforeDate(DateTime date) {
+    return isBefore(date) && !isSameDay(date);
+  }
+
+  bool isNotSameDay(DateTime other) =>
+      year == other.year && month == other.month && day != other.day;
+
+  bool isSameYear(DateTime date) {
+    return year == date.year;
+  }
+
+  bool isAfterAndBefore(DateTime after, DateTime before) {
+    bool isAfter = this.isAfter(after) || isAtSameMomentAs(after);
+    bool isBefore = this.isBefore(before) || isAtSameMomentAs(before);
+    return isAfter && isBefore;
+  }
+
+  static String _fourDigits(int n) {
+    int absN = n.abs();
+    String sign = n < 0 ? "-" : "";
+    if (absN >= 1000) return "$n";
+    if (absN >= 100) return "${sign}0$absN";
+    if (absN >= 10) return "${sign}00$absN";
+    return "${sign}000$absN";
+  }
+
+  static String _sixDigits(int n) {
+    assert(n < -9999 || n > 9999);
+    int absN = n.abs();
+    String sign = n < 0 ? "-" : "+";
+    if (absN >= 100000) return "$sign$absN";
+    return "${sign}0$absN";
+  }
+
+  static String threeDigits(int n) {
+    if (n >= 100) return "$n";
+    if (n >= 10) return "0$n";
+    return "00$n";
+  }
+
+  String twoDigits({int? n}) {
+    n = n ?? day;
+    if (n >= 10) return "$n";
+    return "0$n";
   }
 }
