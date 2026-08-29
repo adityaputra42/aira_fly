@@ -13,33 +13,31 @@ abstract interface class AuthLocalDataSource {
 }
 
 class AuthLocalDataSourceImpl implements AuthLocalDataSource {
-  final PrefHelper prefHelper;
-
-  const AuthLocalDataSourceImpl(this.prefHelper);
+  const AuthLocalDataSourceImpl();
 
   @override
   Future<void> saveAccessToken(String token) async {
-    await prefHelper.saveAccessToken(token);
+    await PrefHelper.instance.saveAccessToken(token);
   }
 
   @override
   Future<void> saveRefreshToken(String token) async {
-    await prefHelper.saveRefreshToken(token);
+    await PrefHelper.instance.saveRefreshToken(token);
   }
 
   @override
   Future<String?> getAccessToken() async {
-    return prefHelper.accessToken;
+    return PrefHelper.instance.accessToken;
   }
 
   @override
   Future<String?> getRefreshToken() async {
-    return prefHelper.refreshToken;
+    return PrefHelper.instance.refreshToken;
   }
 
   @override
   Future<void> clearTokens() async {
-    await prefHelper.removeAccessToken();
-    await prefHelper.removeRefreshToken();
+    await PrefHelper.instance.removeAccessToken();
+    await PrefHelper.instance.removeRefreshToken();
   }
 }
