@@ -15,7 +15,7 @@ class App extends StatelessWidget {
           routerConfig: AppRouter.router,
           debugShowCheckedModeBanner: false,
           title: "Aira Fly",
-          theme: Styles.themeData(!isDarkMode, context),
+          theme: Styles.themeData(isDarkMode, context),
         );
       },
     );

@@ -4,7 +4,9 @@ import 'package:go_router/go_router.dart';
 import 'package:iconify_flutter_plus/iconify_flutter_plus.dart';
 import 'package:iconify_flutter_plus/icons/mdi.dart';
 import 'package:pss_app/app/routes/route_names.dart';
+import 'package:pss_app/core/utils/show_dialog_zoom.dart';
 import 'package:pss_app/core/utils/size_extension.dart';
+import 'package:pss_app/features/home/presentation/widget/pax_selection.dart';
 
 import '../../../../app/theme/app_color.dart';
 import '../../../../app/theme/app_font.dart';
@@ -446,6 +448,16 @@ class _SearchFlightFormState extends State<SearchFlightForm> {
                                 children: [
                                   Expanded(
                                     child: InputText(
+                                      ontaped: () {
+                                        showZoomDialog(
+                                          context: context,
+                                          child: PaxSelectionDialog(
+                                            amountAdult: amountAdult,
+                                            amountChild: amountChild,
+                                            amountInfant: amountInfant,
+                                          ),
+                                        );
+                                      },
                                       prefixIcon: Row(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
