@@ -1,10 +1,51 @@
 part of '../screen/flight_result_screen.dart';
 
 class CardInfoFlight extends StatelessWidget {
-  const CardInfoFlight({super.key, this.isReturn = false});
+  const CardInfoFlight({
+    super.key,
+    this.itinerary,
+    this.originAirport,
+    this.destinationAirport,
+    this.isReturn = false,
+  });
+
+  final ItineraryEntity? itinerary;
+  final AirportEntity? originAirport;
+  final AirportEntity? destinationAirport;
   final bool isReturn;
+
+  String _formatDateTime(DateTime? dt) =>
+      dt == null ? '-' : DateFormat("dd MMM yyyy, HH:mm").format(dt);
+
   @override
   Widget build(BuildContext context) {
+    final segments = itinerary?.segments ?? const <SegmentEntity>[];
+    final first = segments.isNotEmpty ? segments.first : null;
+    final last = segments.isNotEmpty ? segments.last : null;
+
+    final hasRealData = itinerary != null && originAirport != null && destinationAirport != null;
+
+    final departureTimeText = hasRealData
+        ? _formatDateTime(first?.departureTime)
+        : DateFormat(
+            "dd MMM yyyy, HH:mm",
+          ).format(isReturn ? DateTime.now().add(Duration(days: 5)) : DateTime.now());
+    final arrivalTimeText = hasRealData
+        ? _formatDateTime(last?.arrivalTime)
+        : DateFormat("dd MMM yyyy, HH:mm").format(
+            isReturn
+                ? DateTime.now().add(Duration(days: 5, hours: 2, minutes: 45))
+                : DateTime.now().add(Duration(hours: 2, minutes: 45)),
+          );
+    final originCode = hasRealData ? (originAirport!.code ?? '-') : (isReturn ? "DPS" : "CGK");
+    final originCity = hasRealData ? (originAirport!.city ?? '-') : (isReturn ? "Denpasar" : "Jakarta");
+    final destinationCode = hasRealData
+        ? (destinationAirport!.code ?? '-')
+        : (isReturn ? "CGK" : "DPS");
+    final destinationCity = hasRealData
+        ? (destinationAirport!.city ?? '-')
+        : (isReturn ? "Jakarta" : "Denpasar");
+
     return CardGeneral(
       margin: EdgeInsets.symmetric(horizontal: 16),
       padding: EdgeInsets.all(12),
@@ -18,9 +59,7 @@ class CardInfoFlight extends StatelessWidget {
                   Iconify(Mdi.airplane_takeoff, size: 16, color: AppColor.secondaryColor),
                   width(4),
                   Text(
-                    DateFormat(
-                      "dd MMM yyyy, HH:mm",
-                    ).format(isReturn ? DateTime.now().add(Duration(days: 5)) : DateTime.now()),
+                    departureTimeText,
                     style: AppFont.reguler12.copyWith(color: Theme.of(context).hintColor),
                   ),
                 ],
@@ -30,11 +69,7 @@ class CardInfoFlight extends StatelessWidget {
                   Iconify(Mdi.airplane_landing, size: 16, color: AppColor.secondaryColor),
                   width(4),
                   Text(
-                    DateFormat("dd MMM yyyy, HH:mm").format(
-                      isReturn
-                          ? DateTime.now().add(Duration(days: 5, hours: 2, minutes: 45))
-                          : DateTime.now().add(Duration(hours: 2, minutes: 45)),
-                    ),
+                    arrivalTimeText,
                     style: AppFont.reguler12.copyWith(color: Theme.of(context).hintColor),
                   ),
                 ],
@@ -47,10 +82,10 @@ class CardInfoFlight extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(isReturn ? "DPS" : "CGK", style: AppFont.semibold20),
+                  Text(originCode, style: AppFont.semibold20),
                   height(2),
                   Text(
-                    isReturn ? "Denpasar" : "Jakarta",
+                    originCity,
                     style: AppFont.reguler12.copyWith(color: Theme.of(context).hintColor),
                   ),
                 ],
@@ -77,10 +112,10 @@ class CardInfoFlight extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text(isReturn ? "CGK" : "DPS", style: AppFont.semibold20),
+                  Text(destinationCode, style: AppFont.semibold20),
                   height(2),
                   Text(
-                    isReturn ? "Jakarta" : "Denpasar",
+                    destinationCity,
                     style: AppFont.reguler12.copyWith(color: Theme.of(context).hintColor),
                   ),
                 ],

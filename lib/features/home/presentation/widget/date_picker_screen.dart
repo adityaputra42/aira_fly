@@ -318,7 +318,7 @@ class _DatePickerScreenState extends State<DatePickerScreen> {
           height: isRangeDate ? 143.2 : 124.2,
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 15),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Theme.of(context).cardColor,
             border: Border(top: BorderSide(color: Theme.of(context).canvasColor, width: 1.2)),
           ),
           child: Column(

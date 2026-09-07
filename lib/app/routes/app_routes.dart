@@ -1,8 +1,5 @@
-import 'dart:io';
-
-import 'package:animations/animations.dart';
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:pss_app/core/animation/page_transition.dart';
 import 'package:pss_app/features/flight/presentation/addonBooking/screen/meal/addon_meal_screen.dart';
 import 'package:pss_app/features/flight/presentation/bookingPayment/screen/booking_detail_screen.dart';
 import 'package:pss_app/features/flight/presentation/flightSelecting/screen/flight_selecting_screen.dart';
@@ -82,7 +79,7 @@ class AppRouter {
             name: RouteNames.searchAirport,
             pageBuilder: (context, state) => buildPageWithTransition(
               key: state.pageKey,
-              child: const SearchAirportScreen(),
+              child: SearchAirportScreen(arguments: state.extra as SearchAirportArguments?),
               transition: PageTransitionType.fadeScale,
             ),
           ),
@@ -91,7 +88,7 @@ class AppRouter {
             name: RouteNames.flightSelecting,
             pageBuilder: (context, state) => buildPageWithTransition(
               key: state.pageKey,
-              child: const FlightSelectingScreen(),
+              child: FlightSelectingScreen(arguments: state.extra as FlightSelectingArguments),
               transition: PageTransitionType.fadeScale,
             ),
             routes: [
@@ -100,7 +97,7 @@ class AppRouter {
                 name: RouteNames.flightResult,
                 pageBuilder: (context, state) => buildPageWithTransition(
                   key: state.pageKey,
-                  child: const FlightResultScreen(),
+                  child: FlightResultScreen(arguments: state.extra as FlightResultArguments),
                   transition: PageTransitionType.fadeScale,
                 ),
                 routes: [
@@ -222,83 +219,5 @@ class AppRouter {
         ],
       ),
     ],
-  );
-}
-
-enum PageTransitionType {
-  fade,
-  fadeScale,
-  fadeThrough,
-  sharedAxisHorizontal,
-  sharedAxisVertical,
-  sharedAxisScaled,
-}
-
-CustomTransitionPage buildPageWithTransition({
-  required Widget child,
-  required LocalKey key,
-  PageTransitionType transition = PageTransitionType.fade,
-}) {
-  final isAndroid = Platform.isAndroid;
-  final duration = isAndroid
-      ? const Duration(milliseconds: 800)
-      : const Duration(milliseconds: 600);
-
-  return CustomTransitionPage(
-    key: key,
-    child: child,
-    transitionDuration: duration,
-    reverseTransitionDuration: Duration(milliseconds: (duration.inMilliseconds * 0.75).round()),
-    transitionsBuilder: (context, animation, secondaryAnimation, child) {
-      final curvedAnimation = CurvedAnimation(parent: animation, curve: Curves.easeInOutCubic);
-
-      final curvedSecondaryAnimation = CurvedAnimation(
-        parent: secondaryAnimation,
-        curve: Curves.easeInOutCubic,
-      );
-
-      switch (transition) {
-        case PageTransitionType.fade:
-          return FadeTransition(opacity: curvedAnimation, child: child);
-
-        case PageTransitionType.fadeScale:
-          return FadeScaleTransition(animation: curvedAnimation, child: child);
-
-        case PageTransitionType.fadeThrough:
-          return FadeThroughTransition(
-            animation: curvedAnimation,
-            secondaryAnimation: curvedSecondaryAnimation,
-            fillColor: Colors.transparent,
-            child: child,
-          );
-
-        case PageTransitionType.sharedAxisHorizontal:
-          return SharedAxisTransition(
-            animation: curvedAnimation,
-            secondaryAnimation: curvedSecondaryAnimation,
-            transitionType: SharedAxisTransitionType.horizontal,
-            fillColor: Colors.transparent,
-            child: child,
-          );
-
-        case PageTransitionType.sharedAxisVertical:
-          return SharedAxisTransition(
-            animation: curvedAnimation,
-            secondaryAnimation: curvedSecondaryAnimation,
-            transitionType: SharedAxisTransitionType.vertical,
-            fillColor: Colors.transparent,
-            child: child,
-          );
-
-        case PageTransitionType.sharedAxisScaled:
-          return SharedAxisTransition(
-            animation: curvedAnimation,
-            secondaryAnimation: curvedSecondaryAnimation,
-            transitionType: SharedAxisTransitionType.scaled,
-            fillColor: Colors.transparent,
-            child: child,
-          );
-      }
-    },
   );
 }

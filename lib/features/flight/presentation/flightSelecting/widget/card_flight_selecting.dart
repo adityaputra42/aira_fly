@@ -1,14 +1,31 @@
 part of '../screen/flight_selecting_screen.dart';
 
 class CardFlightSelecting extends StatelessWidget {
-  const CardFlightSelecting({super.key});
+  const CardFlightSelecting({
+    super.key,
+    required this.itinerary,
+    required this.pax,
+    required this.onTap,
+  });
+
+  final ItineraryEntity itinerary;
+  final PaxCount pax;
+  final VoidCallback onTap;
+
+  String _formatTime(DateTime? dt) => dt == null ? '--:--' : DateFormat('HH:mm').format(dt);
+  String _formatDate(DateTime? dt) =>
+      dt == null ? '-' : DateFormat('EEE, dd MMM yyyy').format(dt);
 
   @override
   Widget build(BuildContext context) {
+    final segments = itinerary.segments ?? const <SegmentEntity>[];
+    final firstSegment = segments.isNotEmpty ? segments.first : null;
+    final lastSegment = segments.isNotEmpty ? segments.last : null;
+    final fare = FareCalculator.cheapestFare(itinerary.fares, pax);
+    final total = fare != null ? FareCalculator.totalForFare(fare, pax) : null;
+
     return InkWell(
-      onTap: () {
-        context.pushNamed(RouteNames.flightResult);
-      },
+      onTap: onTap,
       child: Column(
         children: [
           ClipPath(
@@ -21,33 +38,26 @@ class CardFlightSelecting extends StatelessWidget {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      CachedNetworkImage(
+                      Container(
                         width: 40,
                         height: 40,
-                        fit: BoxFit.cover,
-                        fadeInDuration: const Duration(milliseconds: 100),
-
-                        imageUrl:
-                            "https://static.vecteezy.com/system/resources/thumbnails/055/210/906/small/garuda-indonesia-logo-square-rounded-garuda-indonesia-logo-garuda-indonesia-logo-free-download-free-png.png",
-                        imageBuilder: (context, imageProvider) => Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8),
-                            image: DecorationImage(image: imageProvider, fit: BoxFit.cover),
-                          ),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          color: AppColor.secondaryColor.withValues(alpha: 0.1),
                         ),
-                        placeholder: (context, url) => ShimmerLoading(radius: 8),
-                        errorWidget: (context, url, error) => Icon(Icons.error),
+                        child: Center(
+                          child: Iconify(Bx.bxs_plane, color: AppColor.secondaryColor, size: 20),
+                        ),
                       ),
-
                       width(12),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text("Garuda Indonesia", style: AppFont.semibold14),
+                            Text(firstSegment?.flightNumber ?? '-', style: AppFont.semibold14),
                             height(2),
                             Text(
-                              "GA-123",
+                              formatStops(itinerary.stops),
                               style: AppFont.reguler12.copyWith(color: Theme.of(context).hintColor),
                             ),
                           ],
@@ -59,7 +69,7 @@ class CardFlightSelecting extends StatelessWidget {
                         color: Theme.of(context).colorScheme.onSurface,
                       ),
                       width(8),
-                      Text("2h 45m", style: AppFont.reguler12),
+                      Text(formatFlightDuration(itinerary.durationMinutes), style: AppFont.reguler12),
                     ],
                   ),
                   height(16),
@@ -68,9 +78,9 @@ class CardFlightSelecting extends StatelessWidget {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text("09:00", style: AppFont.medium32),
+                          Text(_formatTime(firstSegment?.departureTime), style: AppFont.medium32),
                           Text(
-                            DateFormat("EEE, dd MMM yyyy").format(DateTime.now()),
+                            _formatDate(firstSegment?.departureTime),
                             style: AppFont.reguler12.copyWith(color: Theme.of(context).hintColor),
                           ),
                         ],
@@ -103,9 +113,9 @@ class CardFlightSelecting extends StatelessWidget {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          Text("11:45", style: AppFont.medium32),
+                          Text(_formatTime(lastSegment?.arrivalTime), style: AppFont.medium32),
                           Text(
-                            DateFormat("EEE, dd MMM yyyy").format(DateTime.now()),
+                            _formatDate(lastSegment?.arrivalTime),
                             style: AppFont.reguler12.copyWith(color: Theme.of(context).hintColor),
                           ),
                         ],
@@ -123,41 +133,30 @@ class CardFlightSelecting extends StatelessWidget {
             child: CardGeneral(
               margin: EdgeInsets.zero,
               padding: EdgeInsets.all(12),
-              child: Column(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.connecting_airports,
-                            size: 16,
-                            color: Theme.of(context).hintColor,
-                          ),
-                          width(4),
-                          Text(
-                            "Non Stop",
-                            style: AppFont.reguler12.copyWith(color: Theme.of(context).hintColor),
-                          ),
-                        ],
+                      Icon(Icons.connecting_airports, size: 16, color: Theme.of(context).hintColor),
+                      width(4),
+                      Text(
+                        '${firstSegment?.departureAirportCode ?? '-'} - ${lastSegment?.arrivalAirportCode ?? '-'}',
+                        style: AppFont.reguler12.copyWith(color: Theme.of(context).hintColor),
                       ),
-                      Row(
-                        children: [
-                          Text(
-                            NumberFormat.currency(
-                              locale: "id_ID",
-                              symbol: "Rp ",
-                              decimalDigits: 0,
-                            ).format(1250000),
-                            style: AppFont.semibold16.copyWith(color: AppColor.greenColor),
-                          ),
-                          Text(
-                            " / pax",
-                            style: AppFont.reguler12.copyWith(color: Theme.of(context).hintColor),
-                          ),
-                        ],
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Text(
+                        total != null ? formatIDR(total) : 'Price unavailable',
+                        style: AppFont.semibold16.copyWith(color: AppColor.greenColor),
                       ),
+                      if (total != null)
+                        Text(
+                          " total",
+                          style: AppFont.reguler12.copyWith(color: Theme.of(context).hintColor),
+                        ),
                     ],
                   ),
                 ],

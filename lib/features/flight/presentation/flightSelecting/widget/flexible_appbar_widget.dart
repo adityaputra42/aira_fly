@@ -1,8 +1,11 @@
 part of '../screen/flight_selecting_screen.dart';
 
 class FlexibleAppBarWidget extends StatelessWidget {
-  const FlexibleAppBarWidget({super.key, required this.isCollapsed});
+  const FlexibleAppBarWidget({super.key, required this.isCollapsed, required this.arguments});
+
   final bool isCollapsed;
+  final FlightSelectingArguments arguments;
+
   @override
   Widget build(BuildContext context) {
     return ListView(
@@ -10,9 +13,7 @@ class FlexibleAppBarWidget extends StatelessWidget {
         Row(
           children: [
             InkWell(
-              onTap: () {
-                context.pop();
-              },
+              onTap: () => context.pop(),
               child: Container(
                 padding: EdgeInsets.all(6),
                 decoration: BoxDecoration(
@@ -31,14 +32,20 @@ class FlexibleAppBarWidget extends StatelessWidget {
             width(8),
             Expanded(
               child: Text(
-                isCollapsed ? "CGK - DPS" : "Departure Flight",
+                isCollapsed
+                    ? "${arguments.originCode} - ${arguments.destinationCode}"
+                    : arguments.legLabel,
                 style: AppFont.semibold16.copyWith(color: AppColor.darkText1),
                 textAlign: TextAlign.center,
               ),
             ),
             width(8),
             InkWell(
-              onTap: () {},
+              // "Edit" -- goes back to the search form, same as the
+              // back arrow. There's nowhere else for it to go: this
+              // screen doesn't carry an editable copy of the search
+              // form to jump into.
+              onTap: () => context.pop(),
               child: Container(
                 padding: EdgeInsets.all(6),
                 decoration: BoxDecoration(
@@ -55,7 +62,7 @@ class FlexibleAppBarWidget extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text("CGK", style: AppFont.semibold20.copyWith(color: AppColor.darkText1)),
+            Text(arguments.originCode, style: AppFont.semibold20.copyWith(color: AppColor.darkText1)),
             width(8),
             generateDashedDivider(context.w(0.25), dashColor: AppColor.darkText1),
             width(8),
@@ -70,14 +77,18 @@ class FlexibleAppBarWidget extends StatelessWidget {
             width(8),
             generateDashedDivider(context.w(0.25), dashColor: AppColor.darkText1),
             width(8),
-            Text("DPS", style: AppFont.semibold20.copyWith(color: AppColor.darkText1)),
+            Text(
+              arguments.destinationCode,
+              style: AppFont.semibold20.copyWith(color: AppColor.darkText1),
+            ),
           ],
         ),
         height(12),
         DateSlider(
-          departureDate: DateTime.now().add(Duration(days: 2)),
+          departureDate: arguments.dateForLeg,
           startDate: DateTime.now(),
           endDate: DateTime.now().add(Duration(days: 100)),
+          canUpdate: false,
           onPageChange: (index, date) {},
         ),
       ],

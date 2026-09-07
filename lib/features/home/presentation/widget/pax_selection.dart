@@ -161,7 +161,7 @@ class PaxSelectionDialogState extends State<PaxSelectionDialog> {
             PrimaryButton(
               title: "Save",
               onPressed: () {
-                Navigator.of(context).pop();
+                Navigator.of(context).pop([amountAdult, amountChild, amountInfant]);
               },
             ),
           ],

@@ -1,7 +1,9 @@
 part of '../screen/flight_result_screen.dart';
 
 class FlightTimeline extends StatelessWidget {
-  const FlightTimeline({super.key});
+  const FlightTimeline({super.key, required this.segments});
+
+  final List<SegmentEntity> segments;
 
   @override
   Widget build(BuildContext context) {
@@ -10,15 +12,65 @@ class FlightTimeline extends StatelessWidget {
         margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         padding: EdgeInsets.all(12),
         child: SingleChildScrollView(
-          child: Column(children: [CardTimeline(), height(16), CardTimeline()]),
+          child: segments.isEmpty
+              ? Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 24),
+                  child: Text(
+                    "No segment details available",
+                    style: AppFont.reguler12.copyWith(color: Theme.of(context).hintColor),
+                  ),
+                )
+              : Column(
+                  children: [
+                    for (var i = 0; i < segments.length; i++) ...[
+                      CardTimeline(segment: segments[i]),
+                      if (i != segments.length - 1) ...[
+                        height(12),
+                        _LayoverBanner(arrival: segments[i], departure: segments[i + 1]),
+                        height(12),
+                      ],
+                    ],
+                  ],
+                ),
         ),
       ),
     );
   }
 }
 
+/// Shown between two segments on a connecting itinerary (stops > 0).
+/// There was no concept of multiple segments in the original hardcoded
+/// version -- it just showed the same single CardTimeline twice.
+class _LayoverBanner extends StatelessWidget {
+  const _LayoverBanner({required this.arrival, required this.departure});
+
+  final SegmentEntity arrival;
+  final SegmentEntity departure;
+
+  @override
+  Widget build(BuildContext context) {
+    final layoverMinutes = (arrival.arrivalTime != null && departure.departureTime != null)
+        ? departure.departureTime!.difference(arrival.arrivalTime!).inMinutes
+        : null;
+
+    return CardGeneral(
+      background: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.15),
+      useShadow: false,
+      radius: 4,
+      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      child: Text(
+        "Layover ${formatFlightDuration(layoverMinutes)} in "
+        "${arrival.arrivalAirportCode ?? '-'}",
+        style: AppFont.reguler12.copyWith(color: Theme.of(context).colorScheme.onSurface),
+      ),
+    );
+  }
+}
+
 class CardTimeline extends StatelessWidget {
-  const CardTimeline({super.key});
+  const CardTimeline({super.key, required this.segment});
+
+  final SegmentEntity segment;
 
   @override
   Widget build(BuildContext context) {
@@ -26,26 +78,24 @@ class CardTimeline extends StatelessWidget {
       return index == 0 || index == 4;
     }
 
+    final durationMinutes = (segment.departureTime != null && segment.arrivalTime != null)
+        ? segment.arrivalTime!.difference(segment.departureTime!).inMinutes
+        : null;
+
     return Column(
       children: [
         Row(
           children: [
-            CachedNetworkImage(
+            // No airline logo field exists on SegmentEntity -- a
+            // generic plane icon replaces the hardcoded airline image.
+            Container(
               width: 40,
               height: 40,
-              fit: BoxFit.cover,
-              fadeInDuration: const Duration(milliseconds: 100),
-
-              imageUrl:
-                  "https://static.vecteezy.com/system/resources/thumbnails/055/210/906/small/garuda-indonesia-logo-square-rounded-garuda-indonesia-logo-garuda-indonesia-logo-free-download-free-png.png",
-              imageBuilder: (context, imageProvider) => Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8),
-                  image: DecorationImage(image: imageProvider, fit: BoxFit.cover),
-                ),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                color: AppColor.secondaryColor.withValues(alpha: 0.1),
               ),
-              placeholder: (context, url) => ShimmerLoading(radius: 8),
-              errorWidget: (context, url, error) => Icon(Icons.error),
+              child: Center(child: Iconify(Bx.bxs_plane, color: AppColor.secondaryColor, size: 20)),
             ),
             width(8),
             Expanded(
@@ -54,7 +104,7 @@ class CardTimeline extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      Text("CGK", style: AppFont.medium12),
+                      Text(segment.departureAirportCode ?? '-', style: AppFont.medium12),
                       width(8),
                       Icon(
                         Icons.arrow_forward_rounded,
@@ -62,13 +112,15 @@ class CardTimeline extends StatelessWidget {
                         color: Theme.of(context).colorScheme.onSurface,
                       ),
                       width(8),
-                      Text("DPS", style: AppFont.medium12),
+                      Text(segment.arrivalAirportCode ?? '-', style: AppFont.medium12),
                     ],
                   ),
                   height(2),
                   Text(
-                    "Jakarta to Denpasar",
+                    '${segment.departureAirportName ?? '-'} to ${segment.arrivalAirportName ?? '-'}',
                     style: AppFont.reguler10.copyWith(color: Theme.of(context).hintColor),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
@@ -83,12 +135,22 @@ class CardTimeline extends StatelessWidget {
                       size: 16,
                       color: Theme.of(context).hintColor,
                     ),
-                    height(2),
-                    Text(DateFormat("dd MMM yyyy").format(DateTime.now()), style: AppFont.medium12),
+                    // Was `height(2)` in the original -- a vertical
+                    // spacer used inside a horizontal Row, which does
+                    // nothing (Row ignores a child's height-only
+                    // SizedBox for layout spacing). `width(4)` is what
+                    // this was almost certainly meant to be.
+                    width(4),
+                    Text(
+                      segment.departureTime != null
+                          ? DateFormat("dd MMM yyyy").format(segment.departureTime!)
+                          : '-',
+                      style: AppFont.medium12,
+                    ),
                   ],
                 ),
                 Text(
-                  "GA-123",
+                  segment.flightNumber ?? '-',
                   style: AppFont.reguler10.copyWith(color: Theme.of(context).hintColor),
                 ),
               ],
@@ -122,24 +184,24 @@ class CardTimeline extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text("Jakarta (CGK)", style: AppFont.medium12),
-                          Text("09:00", style: AppFont.reguler12),
-                        ],
-                      ),
-                      height(2),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            "Soekarno Hatta Intl. Airport",
-                            style: AppFont.reguler10.copyWith(color: Theme.of(context).hintColor),
+                          Flexible(
+                            child: Text(
+                              '${segment.departureAirportName ?? '-'} (${segment.departureAirportCode ?? '-'})',
+                              style: AppFont.medium12,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
                           Text(
-                            "Terminal 3",
-                            style: AppFont.reguler10.copyWith(color: Theme.of(context).hintColor),
+                            segment.departureTime != null
+                                ? DateFormat("HH:mm").format(segment.departureTime!)
+                                : '--:--',
+                            style: AppFont.reguler12,
                           ),
                         ],
                       ),
+                      // Terminal info removed -- SegmentEntity has no
+                      // terminal field, unlike the hardcoded
+                      // "Terminal 3" this replaced.
                     ],
                   ),
                 );
@@ -152,7 +214,7 @@ class CardTimeline extends StatelessWidget {
                   useShadow: false,
                   radius: 4,
                   child: Text(
-                    "Duration: 2h 45m",
+                    "Duration: ${formatFlightDuration(durationMinutes)}",
                     style: AppFont.reguler12.copyWith(
                       color: Theme.of(context).colorScheme.onSurface,
                     ),
@@ -168,21 +230,18 @@ class CardTimeline extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text("Denpasar (DPS)", style: AppFont.medium14),
-                          Text("11:45", style: AppFont.reguler14),
-                        ],
-                      ),
-                      height(2),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            "Ngurah Rai Intl. Airport",
-                            style: AppFont.reguler10.copyWith(color: Theme.of(context).hintColor),
+                          Flexible(
+                            child: Text(
+                              '${segment.arrivalAirportName ?? '-'} (${segment.arrivalAirportCode ?? '-'})',
+                              style: AppFont.medium14,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
                           Text(
-                            "Terminal 1",
-                            style: AppFont.reguler10.copyWith(color: Theme.of(context).hintColor),
+                            segment.arrivalTime != null
+                                ? DateFormat("HH:mm").format(segment.arrivalTime!)
+                                : '--:--',
+                            style: AppFont.reguler14,
                           ),
                         ],
                       ),

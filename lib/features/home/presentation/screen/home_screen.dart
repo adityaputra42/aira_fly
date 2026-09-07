@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:pss_app/core/animation/animations.dart';
 import 'package:pss_app/core/common/widget/shimmer_loading.dart';
 import 'package:pss_app/app/theme/theme.dart';
 import 'package:pss_app/core/common/widget/card_general.dart';
@@ -16,7 +17,9 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
-      providers: [BlocProvider(create: (context) => serviceLocator<FlightBloc>())],
+      providers: [
+        BlocProvider.value(value: serviceLocator<FlightBloc>()),
+      ],
       child: Scaffold(
         body: SafeArea(
           top: false,
@@ -64,33 +67,36 @@ class HomeScreen extends StatelessWidget {
                       child: ListView.builder(
                         itemCount: 10,
                         scrollDirection: Axis.horizontal,
-                        itemBuilder: (context, index) => CardGeneral(
-                          padding: EdgeInsets.zero,
-                          radius: 12,
-                          margin: EdgeInsets.only(
-                            left: index == 0 ? 16 : 0,
-                            right: 16,
-                            top: 1,
-                            bottom: 1,
-                          ),
-                          width: context.w(0.6),
-                          child: ClipRRect(
-                            borderRadius: BorderRadiusGeometry.circular(8),
-                            child: CachedNetworkImage(
-                              width: context.w(0.6),
-                              fit: BoxFit.cover,
-                              fadeInDuration: const Duration(milliseconds: 100),
-                              height: 68,
-                              imageUrl:
-                                  'https://news.atlasbeachfest.com/wp-content/uploads/2023/05/18-Gambar-Utama.webp',
-                              imageBuilder: (context, imageProvider) => Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(8),
-                                  image: DecorationImage(image: imageProvider, fit: BoxFit.cover),
+                        itemBuilder: (context, index) => StaggerItem(
+                          index: index,
+                          child: CardGeneral(
+                            padding: EdgeInsets.zero,
+                            radius: 12,
+                            margin: EdgeInsets.only(
+                              left: index == 0 ? 16 : 0,
+                              right: 16,
+                              top: 1,
+                              bottom: 1,
+                            ),
+                            width: context.w(0.6),
+                            child: ClipRRect(
+                              borderRadius: BorderRadiusGeometry.circular(8),
+                              child: CachedNetworkImage(
+                                width: context.w(0.6),
+                                fit: BoxFit.cover,
+                                fadeInDuration: const Duration(milliseconds: 100),
+                                height: 68,
+                                imageUrl:
+                                    'https://news.atlasbeachfest.com/wp-content/uploads/2023/05/18-Gambar-Utama.webp',
+                                imageBuilder: (context, imageProvider) => Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(8),
+                                    image: DecorationImage(image: imageProvider, fit: BoxFit.cover),
+                                  ),
                                 ),
+                                placeholder: (context, url) => ShimmerLoading(radius: 8),
+                                errorWidget: (context, url, error) => Icon(Icons.error),
                               ),
-                              placeholder: (context, url) => ShimmerLoading(radius: 8),
-                              errorWidget: (context, url, error) => Icon(Icons.error),
                             ),
                           ),
                         ),

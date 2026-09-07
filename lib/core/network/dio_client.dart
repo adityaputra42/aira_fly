@@ -4,6 +4,7 @@ import 'dart:developer';
 
 import 'package:dio/dio.dart';
 
+import '../constants/environment.dart';
 import 'logging_interceptor.dart';
 
 class DioClient {
@@ -34,7 +35,7 @@ class DioClient {
   static Dio _createDio() {
     return Dio(
       BaseOptions(
-        baseUrl: '',
+        baseUrl: Environment.getApiBaseUrl(),
         connectTimeout: const Duration(seconds: 30),
         receiveTimeout: const Duration(seconds: 30),
         responseType: ResponseType.json,

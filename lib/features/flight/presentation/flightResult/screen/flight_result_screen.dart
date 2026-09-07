@@ -1,6 +1,5 @@
 import 'dart:math' as math;
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconify_flutter_plus/iconify_flutter_plus.dart';
@@ -12,9 +11,11 @@ import 'package:pss_app/core/common/widget/card_general.dart';
 import 'package:pss_app/core/common/widget/primary_button.dart';
 import 'package:pss_app/app/theme/theme.dart';
 import 'package:pss_app/core/utils/widget_helper.dart';
+import 'package:pss_app/features/flight/domain/entities/airport_entity.dart';
+import 'package:pss_app/features/flight/domain/entities/itinerary_entity.dart';
+import 'package:pss_app/features/flight/presentation/utils/flight_display_utils.dart';
 import 'package:timelines_plus/timelines_plus.dart';
 
-import '../../../../../core/common/widget/shimmer_loading.dart';
 import '../../../../../app/routes/route_names.dart';
 import '../../../../../core/utils/dashed_divider.dart';
 import '../../../../../core/utils/size_extension.dart';
@@ -24,11 +25,53 @@ part '../widget/card_info_flight.dart';
 part '../widget/price_detail.dart';
 part '../widget/flight_timeline.dart';
 
+class FlightResultArguments {
+  final ItineraryEntity departure;
+  final ItineraryEntity? returnItinerary; // null for one-way
+  final AirportEntity departureAirport;
+  final AirportEntity arrivalAirport;
+  final String tripType; // 'one_way' | 'round_trip'
+  final int amountAdult;
+  final int amountChild;
+  final int amountInfant;
+
+  const FlightResultArguments({
+    required this.departure,
+    this.returnItinerary,
+    required this.departureAirport,
+    required this.arrivalAirport,
+    required this.tripType,
+    required this.amountAdult,
+    required this.amountChild,
+    required this.amountInfant,
+  });
+
+  bool get isRoundTrip => tripType == 'round_trip';
+
+  PaxCount get pax => PaxCount(adult: amountAdult, child: amountChild, infant: amountInfant);
+}
+
 class FlightResultScreen extends StatelessWidget {
-  const FlightResultScreen({super.key});
+  const FlightResultScreen({super.key, required this.arguments});
+
+  final FlightResultArguments arguments;
 
   @override
   Widget build(BuildContext context) {
+    final tabCount = arguments.isRoundTrip ? 3 : 2;
+
+    // No fare-class picker exists anywhere in this app -- see the
+    // doc comment on FareCalculator.cheapestFare for why "cheapest"
+    // is the explicit, disclosed default rather than a real choice.
+    final departureFare = FareCalculator.cheapestFare(arguments.departure.fares, arguments.pax);
+    final returnFare = arguments.returnItinerary != null
+        ? FareCalculator.cheapestFare(arguments.returnItinerary!.fares, arguments.pax)
+        : null;
+
+    final total =
+        (departureFare != null ? FareCalculator.totalForFare(departureFare, arguments.pax) : 0) +
+        (returnFare != null ? FareCalculator.totalForFare(returnFare, arguments.pax) : 0);
+
     return Scaffold(
       appBar: WidgetHelper.appBar(
         context: context,
@@ -36,12 +79,12 @@ class FlightResultScreen extends StatelessWidget {
         height: 132,
         color: AppColor.primaryColor,
         titleColor: AppColor.darkText1,
-        bottomWidet: WidgetAppBarResult(),
+        bottomWidet: WidgetAppBarResult(arguments: arguments),
       ),
       body: SafeArea(
         top: false,
         child: DefaultTabController(
-          length: 3,
+          length: tabCount,
           child: Column(
             children: [
               height(8),
@@ -50,7 +93,6 @@ class FlightResultScreen extends StatelessWidget {
                 width: double.infinity,
                 height: 42,
                 padding: EdgeInsets.all(2),
-
                 child: TabBar(
                   physics: const NeverScrollableScrollPhysics(),
                   automaticIndicatorColorAdjustment: false,
@@ -67,11 +109,10 @@ class FlightResultScreen extends StatelessWidget {
                   unselectedLabelColor: Theme.of(context).hintColor,
                   unselectedLabelStyle: AppFont.reguler12,
                   indicatorSize: TabBarIndicatorSize.tab,
-                  onTap: (index) {},
-                  tabs: const [
-                    Tab(child: Text("Departure")),
-                    Tab(child: Text("Return")),
-                    Tab(child: Text("Price")),
+                  tabs: [
+                    const Tab(child: Text("Departure")),
+                    if (arguments.isRoundTrip) const Tab(child: Text("Return")),
+                    const Tab(child: Text("Price")),
                   ],
                 ),
               ),
@@ -79,9 +120,35 @@ class FlightResultScreen extends StatelessWidget {
               Expanded(
                 child: TabBarView(
                   children: [
-                    Column(children: [CardInfoFlight(), FlightTimeline()]),
-                    Column(children: [CardInfoFlight(isReturn: true), FlightTimeline()]),
-                    PriceDetail(),
+                    Column(
+                      children: [
+                        CardInfoFlight(
+                          itinerary: arguments.departure,
+                          originAirport: arguments.departureAirport,
+                          destinationAirport: arguments.arrivalAirport,
+                        ),
+                        FlightTimeline(segments: arguments.departure.segments ?? const []),
+                      ],
+                    ),
+                    if (arguments.isRoundTrip)
+                      Column(
+                        children: [
+                          CardInfoFlight(
+                            itinerary: arguments.returnItinerary!,
+                            originAirport: arguments.arrivalAirport,
+                            destinationAirport: arguments.departureAirport,
+                            isReturn: true,
+                          ),
+                          FlightTimeline(
+                            segments: arguments.returnItinerary!.segments ?? const [],
+                          ),
+                        ],
+                      ),
+                    PriceDetail(
+                      pax: arguments.pax,
+                      departureFare: departureFare,
+                      returnFare: returnFare,
+                    ),
                   ],
                 ),
               ),
@@ -114,14 +181,7 @@ class FlightResultScreen extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text("Total Price", style: AppFont.reguler12),
-                      Text(
-                        NumberFormat.currency(
-                          locale: "id_ID",
-                          symbol: "Rp ",
-                          decimalDigits: 0,
-                        ).format(4500000),
-                        style: AppFont.medium14,
-                      ),
+                      Text(formatIDR(total), style: AppFont.medium14),
                     ],
                   ),
                 ],
@@ -129,7 +189,13 @@ class FlightResultScreen extends StatelessWidget {
               PrimaryButton(
                 title: "Continue",
                 onPressed: () {
-                  context.pushNamed(RouteNames.paxBooking);
+                  // paxBooking itself is out of scope for this change
+                  // (the "Booking + Payment" flow, not "Flight search
+                  // & hasil pencarian") -- but the itinerary/fare/pax
+                  // context is passed along via `extra` so whoever
+                  // wires that screen next has it on hand instead of
+                  // starting from nothing.
+                  context.pushNamed(RouteNames.paxBooking, extra: arguments);
                 },
                 width: context.w(0.4),
                 borderRadius: 8,
