@@ -1,5 +1,15 @@
 import 'package:flutter/material.dart';
 
+/// Repeats a gentle scale pulse for as long as the widget is mounted.
+///
+/// This is the odd one out in this folder: everything else in
+/// `core/animation` plays once and stops (a widget "appearing"). This
+/// one loops forever, so it needs a real [AnimationController] rather
+/// than the implicit-animation-widget trick the others use -- hence
+/// the explicit dispose. Reach for it for things that are ongoing, not
+/// things that just appeared: a "LIVE" badge, an unread-notification
+/// dot, a recording indicator. Don't use it on something that should
+/// settle down after entering -- that's [FadeIn] or [ScaleIn].
 class Pulse extends StatefulWidget {
   const Pulse({
     super.key,

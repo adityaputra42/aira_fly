@@ -38,7 +38,9 @@ class CardInfoFlight extends StatelessWidget {
                 : DateTime.now().add(Duration(hours: 2, minutes: 45)),
           );
     final originCode = hasRealData ? (originAirport!.code ?? '-') : (isReturn ? "DPS" : "CGK");
-    final originCity = hasRealData ? (originAirport!.city ?? '-') : (isReturn ? "Denpasar" : "Jakarta");
+    final originCity = hasRealData
+        ? (originAirport!.city ?? '-')
+        : (isReturn ? "Denpasar" : "Jakarta");
     final destinationCode = hasRealData
         ? (destinationAirport!.code ?? '-')
         : (isReturn ? "CGK" : "DPS");

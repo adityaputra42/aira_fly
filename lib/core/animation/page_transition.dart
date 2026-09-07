@@ -21,17 +21,13 @@ CustomTransitionPage buildPageWithTransition({
   PageTransitionType transition = PageTransitionType.fade,
 }) {
   final isAndroid = Platform.isAndroid;
-  final duration = isAndroid
-      ? const Duration(milliseconds: 800)
-      : AppAnimationDuration.slow;
+  final duration = isAndroid ? const Duration(milliseconds: 800) : AppAnimationDuration.slow;
 
   return CustomTransitionPage(
     key: key,
     child: child,
     transitionDuration: duration,
-    reverseTransitionDuration: Duration(
-      milliseconds: (duration.inMilliseconds * 0.75).round(),
-    ),
+    reverseTransitionDuration: Duration(milliseconds: (duration.inMilliseconds * 0.75).round()),
     transitionsBuilder: (context, animation, secondaryAnimation, child) {
       final curvedAnimation = CurvedAnimation(
         parent: animation,

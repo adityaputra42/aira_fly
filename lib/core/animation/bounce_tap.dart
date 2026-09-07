@@ -2,6 +2,17 @@ import 'package:flutter/material.dart';
 
 import 'app_animation_config.dart';
 
+/// Wraps [child] so it shrinks slightly on press and springs back on
+/// release -- tactile feedback for anything tappable that isn't
+/// already a Material button with its own ink/ripple feedback (a
+/// custom card, an icon, a whole list tile you built from scratch).
+///
+/// This is a gesture + feedback wrapper, not a Material button
+/// replacement -- it has no ripple, no disabled styling, no loading
+/// state. If you need those, use [ButtonLoading]/`primary_button.dart`
+/// /`secondary_button.dart` in `core/common/widget` instead. Reach for
+/// this specifically when you want a plain custom widget to feel
+/// pressable.
 class BounceTap extends StatefulWidget {
   const BounceTap({
     super.key,
@@ -15,6 +26,7 @@ class BounceTap extends StatefulWidget {
   final Widget child;
   final VoidCallback? onTap;
 
+  /// Scale while pressed, 0-1. Smaller = more pronounced squash.
   final double scaleDown;
   final Duration duration;
   final HitTestBehavior behavior;

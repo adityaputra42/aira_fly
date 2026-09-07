@@ -2,6 +2,14 @@ import 'package:flutter/material.dart';
 
 import 'app_animation_config.dart';
 
+/// Scales a widget up from [beginScale] while fading it in -- good for
+/// things that should feel like they "pop" into place: a success icon,
+/// a badge, a card inside a modal, a bottom-sheet's content.
+///
+/// For the dialog/bottom-sheet TRANSITION itself (the container sliding
+/// or fading onto the screen), use [showZoomDialog] in
+/// `show_dialog_zoom.dart` -- this widget is for content appearing
+/// *inside* an already-visible surface.
 class ScaleIn extends StatefulWidget {
   const ScaleIn({
     super.key,
@@ -17,6 +25,8 @@ class ScaleIn extends StatefulWidget {
   final Duration delay;
   final Curve curve;
 
+  /// Starting scale, 0-1. Closer to 1 reads as a subtle pop; closer to
+  /// 0 reads as a more dramatic zoom-in.
   final double beginScale;
 
   @override

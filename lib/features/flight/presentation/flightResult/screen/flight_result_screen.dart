@@ -59,10 +59,6 @@ class FlightResultScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tabCount = arguments.isRoundTrip ? 3 : 2;
-
-    // No fare-class picker exists anywhere in this app -- see the
-    // doc comment on FareCalculator.cheapestFare for why "cheapest"
-    // is the explicit, disclosed default rather than a real choice.
     final departureFare = FareCalculator.cheapestFare(arguments.departure.fares, arguments.pax);
     final returnFare = arguments.returnItinerary != null
         ? FareCalculator.cheapestFare(arguments.returnItinerary!.fares, arguments.pax)
@@ -139,9 +135,7 @@ class FlightResultScreen extends StatelessWidget {
                             destinationAirport: arguments.departureAirport,
                             isReturn: true,
                           ),
-                          FlightTimeline(
-                            segments: arguments.returnItinerary!.segments ?? const [],
-                          ),
+                          FlightTimeline(segments: arguments.returnItinerary!.segments ?? const []),
                         ],
                       ),
                     PriceDetail(
@@ -189,12 +183,6 @@ class FlightResultScreen extends StatelessWidget {
               PrimaryButton(
                 title: "Continue",
                 onPressed: () {
-                  // paxBooking itself is out of scope for this change
-                  // (the "Booking + Payment" flow, not "Flight search
-                  // & hasil pencarian") -- but the itinerary/fare/pax
-                  // context is passed along via `extra` so whoever
-                  // wires that screen next has it on hand instead of
-                  // starting from nothing.
                   context.pushNamed(RouteNames.paxBooking, extra: arguments);
                 },
                 width: context.w(0.4),

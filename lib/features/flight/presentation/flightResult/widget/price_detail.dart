@@ -1,12 +1,7 @@
 part of '../screen/flight_result_screen.dart';
 
 class PriceDetail extends StatelessWidget {
-  const PriceDetail({
-    super.key,
-    required this.pax,
-    required this.departureFare,
-    this.returnFare,
-  });
+  const PriceDetail({super.key, required this.pax, required this.departureFare, this.returnFare});
 
   final PaxCount pax;
   final ItineraryFareEntity? departureFare;
@@ -59,11 +54,8 @@ class PriceDetail extends StatelessWidget {
               )
             else ...[
               for (final row in rows) ...[row, height(8)],
-  
-              SizedBox(
-                height: 1,
-                child: Divider(thickness: 1, color: Theme.of(context).hintColor),
-              ),
+
+              SizedBox(height: 1, child: Divider(thickness: 1, color: Theme.of(context).hintColor)),
               height(8),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,

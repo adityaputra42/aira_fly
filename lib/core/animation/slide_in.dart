@@ -2,8 +2,16 @@ import 'package:flutter/material.dart';
 
 import 'app_animation_config.dart';
 
+/// Direction a [SlideIn] enters from.
 enum SlideInDirection { fromTop, fromBottom, fromLeft, fromRight }
 
+/// Slides a widget in from off its final position, without fading it.
+///
+/// Use this over [FadeIn] when you specifically want directional
+/// movement without an opacity change -- e.g. a filter panel sliding
+/// down from the top, a snackbar-like banner sliding up from the
+/// bottom. If you want both fade and slide, [FadeIn] already does both
+/// and is the better default for most "this widget just appeared" cases.
 class SlideIn extends StatefulWidget {
   const SlideIn({
     super.key,
@@ -21,6 +29,7 @@ class SlideIn extends StatefulWidget {
   final Duration delay;
   final Curve curve;
 
+  /// How far the widget travels, as a fraction of its own size.
   final double distance;
 
   @override

@@ -3,9 +3,15 @@ import 'package:go_router/go_router.dart';
 import 'package:iconify_flutter_plus/iconify_flutter_plus.dart';
 import 'package:iconify_flutter_plus/icons/material_symbols.dart';
 import 'package:iconify_flutter_plus/icons/mdi.dart';
-import 'package:intl/intl.dart';
 import 'package:pss_app/core/common/widget/card_general.dart';
 import 'package:pss_app/core/common/widget/input_text.dart';
+import 'package:pss_app/core/utils/show_dialog_zoom.dart';
+import 'package:pss_app/core/utils/show_snackbar.dart';
+import 'package:pss_app/features/flight/domain/repository/booking_repository.dart';
+import 'package:pss_app/features/flight/presentation/flightResult/screen/flight_result_screen.dart';
+import 'package:pss_app/features/flight/presentation/paxBooking/widget/contact_information_dialog.dart';
+import 'package:pss_app/features/flight/presentation/paxBooking/widget/passenger_information_dialog.dart';
+import 'package:pss_app/features/flight/presentation/utils/flight_display_utils.dart';
 
 import '../../../../../core/common/widget/primary_button.dart';
 import '../../../../../app/routes/route_names.dart';
@@ -16,11 +22,111 @@ import '../../../../../core/utils/widget_helper.dart';
 
 part "../widget/appbar_pax_booking.dart";
 
-class PaxBookingScreen extends StatelessWidget {
-  const PaxBookingScreen({super.key});
+typedef _PassengerSlot = ({String type, String label});
+class PaxBookingResult {
+  final FlightResultArguments searchArguments;
+  final ContactInput contact;
+  final List<PassengerInput> passengers;
+
+  const PaxBookingResult({
+    required this.searchArguments,
+    required this.contact,
+    required this.passengers,
+  });
+}
+
+class PaxBookingScreen extends StatefulWidget {
+  const PaxBookingScreen({super.key, required this.arguments});
+
+  final FlightResultArguments arguments;
+
+  @override
+  State<PaxBookingScreen> createState() => _PaxBookingScreenState();
+}
+
+class _PaxBookingScreenState extends State<PaxBookingScreen> {
+  late final List<_PassengerSlot> _slots;
+  late List<PassengerInput?> _passengers;
+  ContactInput? _contact;
+
+  @override
+  void initState() {
+    super.initState();
+    _slots = _buildSlots();
+    _passengers = List<PassengerInput?>.filled(_slots.length, null);
+  }
+
+  List<_PassengerSlot> _buildSlots() {
+    final args = widget.arguments;
+    return [
+      for (var i = 1; i <= args.amountAdult; i++) (type: 'ADT', label: 'Adult $i'),
+      for (var i = 1; i <= args.amountChild; i++) (type: 'CHD', label: 'Child $i'),
+      for (var i = 1; i <= args.amountInfant; i++) (type: 'INF', label: 'Infant $i'),
+    ];
+  }
+
+  bool get _isComplete => _contact != null && _passengers.every((p) => p != null);
+
+  String _passengerDisplayName(PassengerInput passenger) {
+    final parts = [
+      if (passenger.title != null) passenger.title,
+      passenger.firstName,
+      if (passenger.lastName != null) passenger.lastName,
+    ];
+    return parts.whereType<String>().join(' ');
+  }
+
+  Future<void> _editContact() async {
+    final result = await showZoomDialog<ContactInput>(
+      context: context,
+      child: ContactInformationDialog(initial: _contact),
+    );
+    if (result == null || !mounted) return;
+    setState(() => _contact = result);
+  }
+
+  Future<void> _editPassenger(int index) async {
+    final slot = _slots[index];
+    final result = await showZoomDialog<PassengerInput>(
+      context: context,
+      child: PassengerInformationDialog(
+        passengerType: slot.type,
+        label: slot.label,
+        initial: _passengers[index],
+      ),
+    );
+    if (result == null || !mounted) return;
+    setState(() => _passengers[index] = result);
+  }
+
+  void _onContinue() {
+    if (!_isComplete) {
+      showSnackBar(context, 'Please fill in contact and all passenger details first.');
+      return;
+    }
+
+    context.pushNamed(
+      RouteNames.addonBooking,
+      extra: PaxBookingResult(
+        searchArguments: widget.arguments,
+        contact: _contact!,
+        passengers: _passengers.whereType<PassengerInput>().toList(),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    final args = widget.arguments;
+
+    final departureFare = FareCalculator.cheapestFare(args.departure.fares, args.pax);
+    final returnFare = args.returnItinerary != null
+        ? FareCalculator.cheapestFare(args.returnItinerary!.fares, args.pax)
+        : null;
+    final total =
+        (departureFare != null ? FareCalculator.totalForFare(departureFare, args.pax) : 0) +
+        (returnFare != null ? FareCalculator.totalForFare(returnFare, args.pax) : 0);
+
     return Scaffold(
       appBar: WidgetHelper.appBar(
         context: context,
@@ -28,17 +134,17 @@ class PaxBookingScreen extends StatelessWidget {
         height: 132,
         color: AppColor.primaryColor,
         titleColor: AppColor.darkText1,
-        bottomWidet: AppbarPaxBooking(),
+        bottomWidet: AppbarPaxBooking(arguments: args),
       ),
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: EdgeInsets.symmetric(horizontal: 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              height(16),
+              widget.height(16),
               Text("Contact Information", style: AppFont.semibold16),
-              height(8),
+              widget.height(8),
               CardGeneral(
                 margin: EdgeInsets.zero,
                 padding: EdgeInsets.all(12),
@@ -46,25 +152,38 @@ class PaxBookingScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text("Aditya Pratama", style: AppFont.medium14),
-                          height(4),
-                          Text(
-                            "aditya27@gmail.com",
-                            style: AppFont.reguler12.copyWith(color: Theme.of(context).hintColor),
-                          ),
-                          height(4),
-                          Text(
-                            "(+62) 812 3456 7890",
-                            style: AppFont.reguler12.copyWith(color: Theme.of(context).hintColor),
-                          ),
-                        ],
-                      ),
+                      child: _contact == null
+                          ? Text(
+                              "No contact set yet. Tap Edit to add who we should reach about this booking.",
+                              style: AppFont.reguler12.copyWith(
+                                color: Theme.of(context).hintColor,
+                              ),
+                            )
+                          : Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(_contact!.fullName, style: AppFont.medium14),
+                                widget.height(4),
+                                if (_contact!.email != null)
+                                  Text(
+                                    _contact!.email!,
+                                    style: AppFont.reguler12.copyWith(
+                                      color: Theme.of(context).hintColor,
+                                    ),
+                                  ),
+                                widget.height(4),
+                                Text(
+                                  _contact!.phone,
+                                  style: AppFont.reguler12.copyWith(
+                                    color: Theme.of(context).hintColor,
+                                  ),
+                                ),
+                              ],
+                            ),
                     ),
+                    widget.width(8),
                     InkWell(
-                      onTap: () {},
+                      onTap: _editContact,
                       child: Container(
                         padding: EdgeInsets.symmetric(vertical: 4, horizontal: 12),
                         decoration: BoxDecoration(
@@ -73,7 +192,7 @@ class PaxBookingScreen extends StatelessWidget {
                           border: Border.all(color: AppColor.secondaryColor, width: 0.5),
                         ),
                         child: Text(
-                          "Edit",
+                          _contact == null ? "Add" : "Edit",
                           style: AppFont.medium14.copyWith(color: AppColor.secondaryColor),
                         ),
                       ),
@@ -81,41 +200,26 @@ class PaxBookingScreen extends StatelessWidget {
                   ],
                 ),
               ),
-              height(16),
+              widget.height(16),
               Text("Passenger Information", style: AppFont.semibold16),
-              height(12),
-              InputText(
-                hintText: "Please input adult 1",
-                title: "Adult 1",
-                controller: TextEditingController(text: "Mr. Aditya Pratama"),
-                filled: true,
-                readOnly: true,
-                cursor: false,
-                icon: Icon(Icons.arrow_forward_ios_rounded, size: 16),
-                filledColor: Theme.of(context).cardColor,
-              ),
-              height(12),
-              InputText(
-                hintText: "Please input adult 2",
-                title: "Adult 2",
-                controller: TextEditingController(text: "Mrs. Gita Prigi"),
-                filled: true,
-                readOnly: true,
-                cursor: false,
-                icon: Icon(Icons.arrow_forward_ios_rounded, size: 16),
-                filledColor: Theme.of(context).cardColor,
-              ),
-              height(12),
-              InputText(
-                hintText: "Please input child 1",
-                title: "Child 1",
-                controller: TextEditingController(text: "Mstr. Zayn Rayyan"),
-                filled: true,
-                readOnly: true,
-                cursor: false,
-                icon: Icon(Icons.arrow_forward_ios_rounded, size: 16),
-                filledColor: Theme.of(context).cardColor,
-              ),
+              widget.height(12),
+              for (var i = 0; i < _slots.length; i++) ...[
+                InputText(
+                  hintText: "Tap to fill in ${_slots[i].label.toLowerCase()}'s details",
+                  title: _slots[i].label,
+                  controller: TextEditingController(
+                    text: _passengers[i] != null ? _passengerDisplayName(_passengers[i]!) : '',
+                  ),
+                  filled: true,
+                  readOnly: true,
+                  cursor: false,
+                  ontaped: () => _editPassenger(i),
+                  icon: Icon(Icons.arrow_forward_ios_rounded, size: 16),
+                  filledColor: Theme.of(context).cardColor,
+                ),
+                if (i != _slots.length - 1) widget.height(12),
+              ],
+              widget.height(16),
             ],
           ),
         ),
@@ -145,29 +249,14 @@ class PaxBookingScreen extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text("Total Price", style: AppFont.reguler12),
-                      Text(
-                        NumberFormat.currency(
-                          locale: "id_ID",
-                          symbol: "Rp ",
-                          decimalDigits: 0,
-                        ).format(4500000),
-                        style: AppFont.medium14,
-                      ),
+                      Text(formatIDR(total), style: AppFont.medium14),
                     ],
-                  ),
-                  width(4),
-                  Iconify(
-                    Mdi.expand_more,
-                    color: Theme.of(context).colorScheme.onSurface,
-                    size: 28,
                   ),
                 ],
               ),
               PrimaryButton(
                 title: "Continue",
-                onPressed: () {
-                  context.pushNamed(RouteNames.addonBooking);
-                },
+                onPressed: _onContinue,
                 width: context.w(0.4),
                 borderRadius: 8,
               ),

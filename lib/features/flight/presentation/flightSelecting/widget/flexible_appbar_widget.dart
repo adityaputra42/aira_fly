@@ -41,10 +41,6 @@ class FlexibleAppBarWidget extends StatelessWidget {
             ),
             width(8),
             InkWell(
-              // "Edit" -- goes back to the search form, same as the
-              // back arrow. There's nowhere else for it to go: this
-              // screen doesn't carry an editable copy of the search
-              // form to jump into.
               onTap: () => context.pop(),
               child: Container(
                 padding: EdgeInsets.all(6),
@@ -62,7 +58,10 @@ class FlexibleAppBarWidget extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(arguments.originCode, style: AppFont.semibold20.copyWith(color: AppColor.darkText1)),
+            Text(
+              arguments.originCode,
+              style: AppFont.semibold20.copyWith(color: AppColor.darkText1),
+            ),
             width(8),
             generateDashedDivider(context.w(0.25), dashColor: AppColor.darkText1),
             width(8),

@@ -16,20 +16,31 @@ import 'package:flutter/animation.dart';
 class AppAnimationDuration {
   const AppAnimationDuration._();
 
+  /// Micro-interactions: button press feedback, tap scale.
   static const fast = Duration(milliseconds: 150);
 
+  /// Default for most widget-appear animations (fade/slide/scale-in).
   static const normal = Duration(milliseconds: 400);
 
+  /// Page transitions, larger surfaces (bottom sheets, dialogs).
   static const slow = Duration(milliseconds: 600);
 
+  /// Per-item delay step inside a staggered list.
   static const staggerStep = Duration(milliseconds: 60);
 }
 
 class AppAnimationCurves {
   const AppAnimationCurves._();
 
+  /// Default curve for anything entering the screen.
   static const entrance = Curves.easeOutCubic;
 
+  /// Default curve for anything leaving the screen.
   static const exit = Curves.easeInCubic;
+
+  /// Symmetric curve, used by page transitions
+  /// (kept as its own constant since app_routes.dart already shipped
+  /// with this exact curve before this file existed -- changing it
+  /// would change the feel of every existing route transition).
   static const pageTransition = Curves.easeInOutCubic;
 }

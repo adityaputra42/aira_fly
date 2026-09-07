@@ -106,7 +106,7 @@ class AppRouter {
                     name: RouteNames.paxBooking,
                     pageBuilder: (context, state) => buildPageWithTransition(
                       key: state.pageKey,
-                      child: const PaxBookingScreen(),
+                      child: PaxBookingScreen(arguments: state.extra as FlightResultArguments),
                       transition: PageTransitionType.fadeScale,
                     ),
                     routes: [
