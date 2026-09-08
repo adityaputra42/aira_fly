@@ -18,11 +18,6 @@ import '../../../../../app/init_dependencies.dart';
 import '../../../../../core/utils/widget_helper.dart';
 part '../widget/card_search_airport.dart';
 
-/// Passed via `state.extra` when navigating to this route.
-///
-/// [excludeAirportId] lets the caller (the "To" field) hide whichever
-/// airport was already picked for "From" -- without it, nothing stops
-/// someone from booking a flight from Jakarta to Jakarta.
 class SearchAirportArguments {
   final int? excludeAirportId;
 

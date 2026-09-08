@@ -58,10 +58,7 @@ class FlexibleAppBarWidget extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-              arguments.originCode,
-              style: AppFont.semibold20.copyWith(color: AppColor.darkText1),
-            ),
+            Text(arguments.originCode, style: AppFont.semibold20.copyWith(color: AppColor.darkText1)),
             width(8),
             generateDashedDivider(context.w(0.25), dashColor: AppColor.darkText1),
             width(8),

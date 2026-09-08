@@ -6,7 +6,6 @@ class PriceDetail extends StatelessWidget {
   final PaxCount pax;
   final ItineraryFareEntity? departureFare;
 
-  /// Present only for round trips.
   final ItineraryFareEntity? returnFare;
 
   @override
@@ -54,7 +53,6 @@ class PriceDetail extends StatelessWidget {
               )
             else ...[
               for (final row in rows) ...[row, height(8)],
-
               SizedBox(height: 1, child: Divider(thickness: 1, color: Theme.of(context).hintColor)),
               height(8),
               Row(

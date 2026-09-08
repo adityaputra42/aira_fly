@@ -29,15 +29,8 @@ import '../../../../../core/utils/size_extension.dart';
 part '../widget/flexible_appbar_widget.dart';
 part '../widget/card_flight_selecting.dart';
 
-/// Which leg of the trip this screen instance is showing a list for.
-///
-/// A single `SearchFlightsRequested` call already returns BOTH legs at
-/// once (`FlightSearchResultEntity.departure` and `.returnItineraries`)
-/// -- so picking a return leg does not re-search, it just re-reads the
-/// same [FlightSearchLoaded] state for the other list.
 enum FlightLeg { departure, returnLeg }
 
-/// Passed via `state.extra` when navigating to this route.
 class FlightSelectingArguments {
   final AirportEntity departureAirport;
   final AirportEntity arrivalAirport;
@@ -48,10 +41,6 @@ class FlightSelectingArguments {
   final int amountChild;
   final int amountInfant;
   final FlightLeg leg;
-
-  /// Set once the departure leg has been picked, when [leg] is
-  /// [FlightLeg.returnLeg] -- carried forward so flight_result_screen
-  /// gets both legs together.
   final ItineraryEntity? selectedDeparture;
 
   const FlightSelectingArguments({
@@ -110,9 +99,6 @@ class _FlightSelectingScreenState extends State<FlightSelectingScreen> {
   var expandedBarHeight = 200.0;
   var collapsedBarHeight = 60.0;
 
-  // See the matching comment in search_airport_screen.dart -- resolved
-  // once here, provided via BlocProvider.value below, never
-  // BlocProvider(create:), because this is a shared singleton.
   late final FlightBloc _flightBloc;
 
   @override
@@ -130,10 +116,6 @@ class _FlightSelectingScreenState extends State<FlightSelectingScreen> {
     });
   }
 
-  /// Re-runs the ORIGINAL search (both legs, one call) after a
-  /// [FlightError]. Always uses the outbound departure/arrival, date,
-  /// and trip type from [widget.arguments] regardless of which leg is
-  /// currently displayed -- that's how the search endpoint is shaped.
   void _retrySearch() {
     final args = widget.arguments;
     context.read<FlightBloc>().add(
@@ -152,9 +134,6 @@ class _FlightSelectingScreenState extends State<FlightSelectingScreen> {
     final args = widget.arguments;
 
     if (args.isRoundTrip && args.leg == FlightLeg.departure) {
-      // One leg down -- push this same screen again for the return
-      // leg. No new dispatch: the return itineraries are already
-      // sitting in the current FlightSearchLoaded state.
       context.pushNamed(RouteNames.flightSelecting, extra: args.forReturnLeg(itinerary));
       return;
     }
@@ -230,8 +209,6 @@ class _FlightSelectingScreenState extends State<FlightSelectingScreen> {
                       }
 
                       if (state is! FlightSearchLoaded) {
-                        // FlightSearchLoading, or a brief FlightInitial
-                        // gap right after this screen mounts.
                         return SliverList.builder(
                           itemCount: 4,
                           itemBuilder: (context, index) => Padding(
@@ -249,8 +226,7 @@ class _FlightSelectingScreenState extends State<FlightSelectingScreen> {
                         return SliverFillRemaining(
                           hasScrollBody: false,
                           child: Empty(
-                            title:
-                                "No flights found for ${args.originCode} \u2192 ${args.destinationCode} "
+                            title: "No flights found for ${args.originCode} \u2192 ${args.destinationCode} "
                                 "on ${args.dateForLeg.toFormattedString(shortDDMMY)}.",
                           ),
                         );

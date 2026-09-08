@@ -27,9 +27,8 @@ class CardInfoFlight extends StatelessWidget {
 
     final departureTimeText = hasRealData
         ? _formatDateTime(first?.departureTime)
-        : DateFormat(
-            "dd MMM yyyy, HH:mm",
-          ).format(isReturn ? DateTime.now().add(Duration(days: 5)) : DateTime.now());
+        : DateFormat("dd MMM yyyy, HH:mm")
+              .format(isReturn ? DateTime.now().add(Duration(days: 5)) : DateTime.now());
     final arrivalTimeText = hasRealData
         ? _formatDateTime(last?.arrivalTime)
         : DateFormat("dd MMM yyyy, HH:mm").format(

@@ -23,6 +23,7 @@ import '../../../../../core/utils/widget_helper.dart';
 part "../widget/appbar_pax_booking.dart";
 
 typedef _PassengerSlot = ({String type, String label});
+
 class PaxBookingResult {
   final FlightResultArguments searchArguments;
   final ContactInput contact;
