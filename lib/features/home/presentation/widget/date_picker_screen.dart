@@ -10,6 +10,7 @@ import 'package:pss_app/core/constants/images.dart';
 
 import '../../../../core/utils/date_extension.dart';
 import '../../../../core/utils/global_function.dart';
+import '../../../../core/utils/size_extension.dart';
 import '../../../../core/utils/widget_helper.dart';
 
 class DatePickerArguments {
@@ -91,9 +92,9 @@ class _DatePickerScreenState extends State<DatePickerScreen> {
     bool isWeekend = date.weekday == DateTime.sunday;
 
     if (isSelected(date)) {
-      textColor = Theme.of(context).colorScheme.onSurface;
+      textColor = Theme.of(context).colorScheme.secondary;
     } else if (isPrice && isInRanged(date) && isRangeDate) {
-      textColor = Theme.of(context).colorScheme.onSurface;
+      textColor = Theme.of(context).colorScheme.secondary;
     } else if (isPrice) {
       textColor = Colors.green;
     } else if (isWeekend) {
@@ -208,7 +209,7 @@ class _DatePickerScreenState extends State<DatePickerScreen> {
                   ),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.only(left: 18, right: 18, top: 15, bottom: 10),
+                  padding: const EdgeInsets.only(left: 16, right: 16, top: 15, bottom: 10),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -247,7 +248,7 @@ class _DatePickerScreenState extends State<DatePickerScreen> {
                     minDate: minDate,
                     maxDate: DateTime.now().add(Duration(days: 365)),
                     initialDate: widget.arguments.startDate ?? DateTime.now(),
-                    listPadding: const EdgeInsets.all(18),
+                    listPadding: const EdgeInsets.all(16),
                     invisibleMonthsThreshold: 1,
                     startWeekWithSunday: true,
                     monthBuilder: (context, month, year) {
@@ -315,13 +316,13 @@ class _DatePickerScreenState extends State<DatePickerScreen> {
       ),
       bottomNavigationBar: SafeArea(
         child: Container(
-          height: isRangeDate ? 143.2 : 124.2,
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 15),
+          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
           decoration: BoxDecoration(
-            color: Theme.of(context).scaffoldBackgroundColor,
-            border: Border(top: BorderSide(color: Theme.of(context).canvasColor, width: 1.2)),
+            color: Theme.of(context).cardColor,
+            border: Border(top: BorderSide(color: Theme.of(context).canvasColor, width: 1)),
           ),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Row(
@@ -351,8 +352,8 @@ class _DatePickerScreenState extends State<DatePickerScreen> {
                       child: Row(
                         children: [
                           const Icon(Icons.add_rounded),
-                          const SizedBox(width: 5),
-                          Text("Add Return Date"),
+                          widget.width(4),
+                          Text("Add Return Date", style: AppFont.reguler12),
                         ],
                       ),
                     ),
@@ -441,23 +442,23 @@ class _DetailTravel extends StatelessWidget {
     this.endDate,
   });
 
-  String _getDetailPax(BuildContext context) {
-    String totalAdult = "0";
-    String totalChild = "0";
+  // String _getDetailPax(BuildContext context) {
+  //   String totalAdult = "0";
+  //   String totalChild = "0";
 
-    String totalInfant = "0";
+  //   String totalInfant = "0";
 
-    String paxDetail = totalAdult;
+  //   String paxDetail = totalAdult;
 
-    if (amountChild > 0) {
-      paxDetail += ', $totalChild';
-    }
-    if (amountInfant > 0) {
-      paxDetail += ', $totalInfant';
-    }
+  //   if (amountChild > 0) {
+  //     paxDetail += ', $totalChild';
+  //   }
+  //   if (amountInfant > 0) {
+  //     paxDetail += ', $totalInfant';
+  //   }
 
-    return paxDetail;
-  }
+  //   return paxDetail;
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -520,15 +521,15 @@ class _DetailTravel extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: AppFont.medium14.copyWith(fontSize: 15, color: Colors.white),
           ),
-        const SizedBox(height: 5),
+        height(4),
         Text(
           endDate != null
               ? startDate.distanceFromDate(endDate!)
               : startDate.toFormattedString(shortDDMY),
           style: AppFont.reguler12.copyWith(color: Colors.white),
         ),
-        if (amountAdult > 0)
-          Text(_getDetailPax(context), style: AppFont.reguler12.copyWith(color: Colors.white)),
+        // if (amountAdult > 0)
+        //   Text(_getDetailPax(context), style: AppFont.reguler12.copyWith(color: Colors.white)),
       ],
     );
   }

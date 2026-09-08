@@ -127,7 +127,7 @@ class AppRouter {
                             name: RouteNames.bookingDetail,
                             pageBuilder: (context, state) => buildPageWithTransition(
                               key: state.pageKey,
-                              child: const BookingDetailScreen(),
+                              child: BookingDetailScreen(result: state.extra as AddonBookingResult),
                               transition: PageTransitionType.fadeScale,
                             ),
                           ),

@@ -29,6 +29,8 @@ import '../../../../../core/utils/size_extension.dart';
 part '../widget/flexible_appbar_widget.dart';
 part '../widget/card_flight_selecting.dart';
 
+part '../widget/card_flight_sekleton.dart';
+
 enum FlightLeg { departure, returnLeg }
 
 class FlightSelectingArguments {
@@ -211,10 +213,7 @@ class _FlightSelectingScreenState extends State<FlightSelectingScreen> {
                       if (state is! FlightSearchLoaded) {
                         return SliverList.builder(
                           itemCount: 4,
-                          itemBuilder: (context, index) => Padding(
-                            padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-                            child: ShimmerLoading(height: 190, radius: 12),
-                          ),
+                          itemBuilder: (context, index) => const FlightSearchSkeleton(),
                         );
                       }
 
