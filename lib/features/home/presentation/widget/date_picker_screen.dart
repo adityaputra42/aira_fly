@@ -91,7 +91,7 @@ class _DatePickerScreenState extends State<DatePickerScreen> {
     bool isWeekend = date.weekday == DateTime.sunday;
 
     if (isSelected(date)) {
-      textColor = Colors.white;
+      textColor = Theme.of(context).colorScheme.onSurface;
     } else if (isPrice && isInRanged(date) && isRangeDate) {
       textColor = Theme.of(context).colorScheme.onSurface;
     } else if (isPrice) {
@@ -105,7 +105,7 @@ class _DatePickerScreenState extends State<DatePickerScreen> {
   }
 
   Color getBackgroundColor(DateTime date) {
-    Color backgroundColor = Colors.white;
+    Color backgroundColor = Theme.of(context).cardColor;
 
     if (isSelected(date)) {
       backgroundColor = AppColor.primaryColor;
@@ -318,7 +318,7 @@ class _DatePickerScreenState extends State<DatePickerScreen> {
           height: isRangeDate ? 143.2 : 124.2,
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 15),
           decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
+            color: Theme.of(context).scaffoldBackgroundColor,
             border: Border(top: BorderSide(color: Theme.of(context).canvasColor, width: 1.2)),
           ),
           child: Column(

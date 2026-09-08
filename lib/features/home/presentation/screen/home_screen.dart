@@ -18,6 +18,13 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
+        // .value, not BlocProvider(create: ...) -- FlightBloc is a
+        // shared lazySingleton (init_dependencies.dart), and `create:`
+        // closes whatever it creates when this widget is disposed.
+        // Since search_airport_screen.dart and flight_selecting_screen.dart
+        // resolve this exact same instance, that close() would kill the
+        // bloc for the whole flow, not just Home. See the fuller
+        // explanation in search_airport_screen.dart.
         BlocProvider.value(value: serviceLocator<FlightBloc>()),
       ],
       child: Scaffold(
@@ -69,6 +76,10 @@ class HomeScreen extends StatelessWidget {
                         scrollDirection: Axis.horizontal,
                         itemBuilder: (context, index) => StaggerItem(
                           index: index,
+                          // Tips list is 10 items on one screen -- no
+                          // horizontal scroll offscreen items need to
+                          // skip their delay for, unlike a long
+                          // vertical list.
                           child: CardGeneral(
                             padding: EdgeInsets.zero,
                             radius: 12,

@@ -1,24 +1,47 @@
 part of '../screen/addon_booking_screen.dart';
 
 class CardDetailFlight extends StatelessWidget {
-  const CardDetailFlight({super.key});
+  const CardDetailFlight({super.key, required this.searchArguments});
+
+  final FlightResultArguments searchArguments;
 
   @override
   Widget build(BuildContext context) {
+    final departureSegments = searchArguments.departure.segments ?? const [];
+    final firstDeparture = departureSegments.isNotEmpty ? departureSegments.first : null;
+
+    final returnSegments = searchArguments.returnItinerary?.segments ?? const [];
+
+    final startDate = firstDeparture?.departureTime;
+    final endDate = searchArguments.isRoundTrip
+        ? returnSegments.isNotEmpty
+              ? returnSegments.last.arrivalTime
+              : null
+        : (departureSegments.isNotEmpty ? departureSegments.last.arrivalTime : null);
+
     return CardGeneral(
       margin: EdgeInsets.symmetric(vertical: 16),
       child: Column(
         children: [
           Row(
             children: [
-              Text(DateFormat('dd MMM yyyy').format(DateTime.now()), style: AppFont.reguler12),
-              width(8),
-              Iconify(MaterialSymbols.swap_horiz_rounded, color: AppColor.secondaryColor, size: 20),
-              width(8),
               Text(
-                DateFormat('dd MMM yyyy').format(DateTime.now().add(Duration(days: 5))),
+                startDate != null ? DateFormat('dd MMM yyyy').format(startDate) : '-',
                 style: AppFont.reguler12,
               ),
+              if (searchArguments.isRoundTrip) ...[
+                width(8),
+                Iconify(
+                  MaterialSymbols.swap_horiz_rounded,
+                  color: AppColor.secondaryColor,
+                  size: 20,
+                ),
+                width(8),
+                Text(
+                  endDate != null ? DateFormat('dd MMM yyyy').format(endDate) : '-',
+                  style: AppFont.reguler12,
+                ),
+              ],
             ],
           ),
           height(8),
@@ -27,9 +50,9 @@ class CardDetailFlight extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("CGK", style: AppFont.semibold20),
+                  Text(searchArguments.departureAirport.code ?? '-', style: AppFont.semibold20),
                   height(2),
-                  Text("Jakarta", style: AppFont.reguler12),
+                  Text(searchArguments.departureAirport.city ?? '-', style: AppFont.reguler12),
                 ],
               ),
               Expanded(
@@ -55,9 +78,9 @@ class CardDetailFlight extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text("DPS", style: AppFont.semibold20),
+                  Text(searchArguments.arrivalAirport.code ?? '-', style: AppFont.semibold20),
                   height(2),
-                  Text("Denpasar", style: AppFont.reguler12),
+                  Text(searchArguments.arrivalAirport.city ?? '-', style: AppFont.reguler12),
                 ],
               ),
             ],
@@ -67,7 +90,7 @@ class CardDetailFlight extends StatelessWidget {
             children: [
               Iconify(Mdi.person, size: 16, color: AppColor.secondaryColor),
               width(6),
-              Text("2 Adult", style: AppFont.medium12),
+              Text("${searchArguments.amountAdult} Adult", style: AppFont.medium12),
               width(12),
               SizedBox(
                 width: 1,
@@ -77,7 +100,7 @@ class CardDetailFlight extends StatelessWidget {
               width(12),
               Iconify(Mdi.human_child, size: 16, color: AppColor.secondaryColor),
               width(6),
-              Text("1 Child", style: AppFont.medium12),
+              Text("${searchArguments.amountChild} Child", style: AppFont.medium12),
               width(12),
               SizedBox(
                 width: 1,
@@ -87,7 +110,7 @@ class CardDetailFlight extends StatelessWidget {
               width(12),
               Iconify(Mdi.emoticon_baby_outline, size: 16, color: AppColor.secondaryColor),
               width(6),
-              Text("0 Infant", style: AppFont.medium12),
+              Text("${searchArguments.amountInfant} Infant", style: AppFont.medium12),
             ],
           ),
         ],

@@ -13,6 +13,7 @@ import '../../features/flight/presentation/addonBooking/screen/baggage/selecting
 import '../../features/flight/presentation/addonBooking/screen/meal/selecting_meal_screen.dart';
 import '../../features/flight/presentation/addonBooking/screen/seat/addon_seat_screen.dart';
 import '../../features/flight/presentation/addonBooking/screen/seat/selecting_seat_screen.dart';
+import '../../features/flight/presentation/addonBooking/utils/addon_models.dart';
 import '../../features/flight/presentation/flightResult/screen/flight_result_screen.dart';
 import '../../features/flight/presentation/paxBooking/screen/pax_booking_screen.dart';
 import '../../features/main/ui/screen/main_screen.dart';
@@ -115,7 +116,9 @@ class AppRouter {
                         name: RouteNames.addonBooking,
                         pageBuilder: (context, state) => buildPageWithTransition(
                           key: state.pageKey,
-                          child: const AddonBookingScreen(),
+                          child: AddonBookingScreen(
+                            paxBookingResult: state.extra as PaxBookingResult,
+                          ),
                           transition: PageTransitionType.fadeScale,
                         ),
                         routes: [
@@ -133,7 +136,9 @@ class AppRouter {
                             name: RouteNames.addonBaggage,
                             pageBuilder: (context, state) => buildPageWithTransition(
                               key: state.pageKey,
-                              child: const AddonBagageScreen(),
+                              child: AddonBagageScreen(
+                                arguments: state.extra as AncillaryHubArguments,
+                              ),
                               transition: PageTransitionType.fadeScale,
                             ),
                             routes: [
@@ -142,7 +147,9 @@ class AppRouter {
                                 name: RouteNames.selectingBaggage,
                                 pageBuilder: (context, state) => buildPageWithTransition(
                                   key: state.pageKey,
-                                  child: const SelectingBaggageScreen(),
+                                  child: SelectingBaggageScreen(
+                                    arguments: state.extra as AncillaryPickerArguments,
+                                  ),
                                   transition: PageTransitionType.fadeScale,
                                 ),
                               ),
@@ -153,7 +160,9 @@ class AppRouter {
                             name: RouteNames.addonMeal,
                             pageBuilder: (context, state) => buildPageWithTransition(
                               key: state.pageKey,
-                              child: const AddonMealScreen(),
+                              child: AddonMealScreen(
+                                arguments: state.extra as AncillaryHubArguments,
+                              ),
                               transition: PageTransitionType.fadeScale,
                             ),
                             routes: [
@@ -162,7 +171,9 @@ class AppRouter {
                                 name: RouteNames.selectingMeal,
                                 pageBuilder: (context, state) => buildPageWithTransition(
                                   key: state.pageKey,
-                                  child: const SelectingMealScreen(),
+                                  child: SelectingMealScreen(
+                                    arguments: state.extra as AncillaryPickerArguments,
+                                  ),
                                   transition: PageTransitionType.fadeScale,
                                 ),
                               ),
@@ -173,7 +184,7 @@ class AppRouter {
                             name: RouteNames.addonSeat,
                             pageBuilder: (context, state) => buildPageWithTransition(
                               key: state.pageKey,
-                              child: const AddonSeatScreen(),
+                              child: AddonSeatScreen(arguments: state.extra as SeatHubArguments),
                               transition: PageTransitionType.fadeScale,
                             ),
                             routes: [
@@ -182,7 +193,9 @@ class AppRouter {
                                 name: RouteNames.selectingSeat,
                                 pageBuilder: (context, state) => buildPageWithTransition(
                                   key: state.pageKey,
-                                  child: const SelectingSeatScreen(),
+                                  child: SelectingSeatScreen(
+                                    arguments: state.extra as SeatPickerArguments,
+                                  ),
                                   transition: PageTransitionType.fadeScale,
                                 ),
                               ),

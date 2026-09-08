@@ -6,37 +6,58 @@ import 'package:pss_app/core/utils/size_extension.dart';
 import 'package:pss_app/core/utils/widget_helper.dart';
 import 'package:pss_app/features/flight/presentation/addonBooking/utils/addon_models.dart';
 import 'package:pss_app/features/flight/presentation/addonBooking/widget/card_flight_addon.dart';
+import 'package:pss_app/features/flight/presentation/paxBooking/screen/pax_booking_screen.dart';
+import 'package:pss_app/features/flight/presentation/utils/flight_display_utils.dart';
 
-import '../../../../../../app/routes/route_names.dart';
+import '../../../../../app/routes/route_names.dart';
 
-class AddonSeatScreen extends StatefulWidget {
-  const AddonSeatScreen({super.key, required this.arguments});
+class AncillaryHubScreen extends StatefulWidget {
+  const AncillaryHubScreen({
+    super.key,
+    required this.kind,
+    required this.title,
+    required this.paxBookingResult,
+    required this.currentSelections,
+  });
 
-  final SeatHubArguments arguments;
+  final AncillaryKind kind;
+  final String title;
+  final PaxBookingResult paxBookingResult;
+  final List<SelectedAncillary> currentSelections;
 
   @override
-  State<AddonSeatScreen> createState() => _AddonSeatScreenState();
+  State<AncillaryHubScreen> createState() => _AncillaryHubScreenState();
 }
 
-class _AddonSeatScreenState extends State<AddonSeatScreen> {
-  late List<SelectedSeat> _selections;
+class _AncillaryHubScreenState extends State<AncillaryHubScreen> {
+  late List<SelectedAncillary> _selections;
   late final List<AddonLeg> _legs;
 
   @override
   void initState() {
     super.initState();
-    _selections = List.of(widget.arguments.currentSelections);
-    _legs = buildAddonLegs(widget.arguments.paxBookingResult.searchArguments);
+    _selections = List.of(widget.currentSelections);
+    _legs = buildAddonLegs(widget.paxBookingResult.searchArguments);
   }
 
-  int _countForLeg(int flightId) => _selections.where((s) => s.flightId == flightId).length;
+  String get _unitLabel => widget.kind == AncillaryKind.baggage ? "Baggage" : "Meal";
+
+  int _countForLeg(int flightId) =>
+      _selections.where((s) => s.flightId == flightId).length;
+
+  double get _total => sumAncillaryPrices(_selections);
 
   Future<void> _openLeg(AddonLeg leg) async {
-    final result = await context.pushNamed<List<SelectedSeat>>(
-      RouteNames.selectingSeat,
-      extra: SeatPickerArguments(
+    final routeName = widget.kind == AncillaryKind.baggage
+        ? RouteNames.selectingBaggage
+        : RouteNames.selectingMeal;
+
+    final result = await context.pushNamed<List<SelectedAncillary>>(
+      routeName,
+      extra: AncillaryPickerArguments(
+        kind: widget.kind,
         leg: leg,
-        passengers: widget.arguments.paxBookingResult.passengers,
+        passengers: widget.paxBookingResult.passengers,
         currentSelections: _selections.where((s) => s.flightId == leg.flightId).toList(),
       ),
     );
@@ -44,18 +65,19 @@ class _AddonSeatScreenState extends State<AddonSeatScreen> {
     if (result == null || !mounted) return;
 
     setState(() {
-      _selections = [..._selections.where((s) => s.flightId != leg.flightId), ...result];
+      _selections = [
+        ..._selections.where((s) => s.flightId != leg.flightId),
+        ...result,
+      ];
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final totalPassengers = widget.arguments.paxBookingResult.passengers.length;
-
     return Scaffold(
       appBar: WidgetHelper.appBar(
         context: context,
-        title: "Addon Seat",
+        title: widget.title,
         color: AppColor.primaryColor,
         titleColor: AppColor.darkText1,
       ),
@@ -78,7 +100,8 @@ class _AddonSeatScreenState extends State<AddonSeatScreen> {
                       leg: leg,
                       isSelected: _countForLeg(leg.flightId) > 0,
                       subtitle: _countForLeg(leg.flightId) > 0
-                          ? "Seat assigned for ${_countForLeg(leg.flightId)} of $totalPassengers passenger(s)"
+                          ? "$_unitLabel selected for ${_countForLeg(leg.flightId)} of "
+                                "${widget.paxBookingResult.passengers.length} passenger(s)"
                           : null,
                       onTap: () => _openLeg(leg),
                     ),
@@ -109,12 +132,12 @@ class _AddonSeatScreenState extends State<AddonSeatScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text("Seats Selected", style: AppFont.reguler12),
-                  Text("${_selections.length} of $totalPassengers", style: AppFont.medium14),
+                  Text("Total Price", style: AppFont.reguler12),
+                  Text(formatIDR(_total), style: AppFont.medium14),
                 ],
               ),
               PrimaryButton(
-                title: "Done",
+                title: "Add $_unitLabel",
                 onPressed: () => context.pop(_selections),
                 width: context.w(0.4),
                 borderRadius: 8,

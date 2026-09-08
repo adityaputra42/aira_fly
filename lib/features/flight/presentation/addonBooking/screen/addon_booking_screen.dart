@@ -6,21 +6,80 @@ import 'package:iconify_flutter_plus/icons/mdi.dart';
 import 'package:intl/intl.dart';
 import 'package:pss_app/core/common/widget/card_general.dart';
 import 'package:pss_app/app/theme/theme.dart';
+import 'package:pss_app/features/flight/presentation/addonBooking/utils/addon_models.dart';
+import 'package:pss_app/features/flight/presentation/paxBooking/screen/pax_booking_screen.dart';
+import 'package:pss_app/features/flight/presentation/utils/flight_display_utils.dart';
 
 import '../../../../../core/common/widget/primary_button.dart';
 import '../../../../../app/routes/route_names.dart';
 import '../../../../../core/utils/dashed_divider.dart';
 import '../../../../../core/utils/size_extension.dart';
 import '../../../../../core/utils/widget_helper.dart';
+import '../../flightResult/screen/flight_result_screen.dart';
 
 part '../widget/card_detail_flight.dart';
 part '../widget/card_menu_addon.dart';
 
-class AddonBookingScreen extends StatelessWidget {
-  const AddonBookingScreen({super.key});
+class AddonBookingScreen extends StatefulWidget {
+  const AddonBookingScreen({super.key, required this.paxBookingResult});
+
+  final PaxBookingResult paxBookingResult;
+
+  @override
+  State<AddonBookingScreen> createState() => _AddonBookingScreenState();
+}
+
+class _AddonBookingScreenState extends State<AddonBookingScreen> {
+  List<SelectedAncillary> _baggage = [];
+  List<SelectedAncillary> _meals = [];
+  List<SelectedSeat> _seats = [];
+
+  Future<void> _openBaggage() async {
+    final result = await context.pushNamed<List<SelectedAncillary>>(
+      RouteNames.addonBaggage,
+      extra: AncillaryHubArguments(
+        paxBookingResult: widget.paxBookingResult,
+        currentSelections: _baggage,
+      ),
+    );
+    if (result != null && mounted) setState(() => _baggage = result);
+  }
+
+  Future<void> _openMeal() async {
+    final result = await context.pushNamed<List<SelectedAncillary>>(
+      RouteNames.addonMeal,
+      extra: AncillaryHubArguments(
+        paxBookingResult: widget.paxBookingResult,
+        currentSelections: _meals,
+      ),
+    );
+    if (result != null && mounted) setState(() => _meals = result);
+  }
+
+  Future<void> _openSeat() async {
+    final result = await context.pushNamed<List<SelectedSeat>>(
+      RouteNames.addonSeat,
+      extra: SeatHubArguments(paxBookingResult: widget.paxBookingResult, currentSelections: _seats),
+    );
+    if (result != null && mounted) setState(() => _seats = result);
+  }
+
+  double get _addonTotal => sumAncillaryPrices(_baggage) + sumAncillaryPrices(_meals);
+
+  double get _fareTotal {
+    final args = widget.paxBookingResult.searchArguments;
+    final departureFare = FareCalculator.cheapestFare(args.departure.fares, args.pax);
+    final returnFare = args.returnItinerary != null
+        ? FareCalculator.cheapestFare(args.returnItinerary!.fares, args.pax)
+        : null;
+    return (departureFare != null ? FareCalculator.totalForFare(departureFare, args.pax) : 0) +
+        (returnFare != null ? FareCalculator.totalForFare(returnFare, args.pax) : 0);
+  }
 
   @override
   Widget build(BuildContext context) {
+    final total = _fareTotal + _addonTotal;
+
     return Scaffold(
       appBar: WidgetHelper.appBar(
         context: context,
@@ -28,40 +87,42 @@ class AddonBookingScreen extends StatelessWidget {
         color: AppColor.primaryColor,
         titleColor: AppColor.darkText1,
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: EdgeInsets.symmetric(horizontal: 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            CardDetailFlight(),
+            CardDetailFlight(searchArguments: widget.paxBookingResult.searchArguments),
             Text("Addon Service", style: AppFont.medium14),
-            height(12),
+            widget.height(12),
             CardMenuAddon(
-              onTap: () {
-                context.pushNamed(RouteNames.addonBaggage);
-              },
+              onTap: _openBaggage,
               title: 'Baggage',
-              description: 'Permit 20kg baggage for each passenger',
+              description: _baggage.isEmpty
+                  ? 'Add extra baggage allowance for each passenger'
+                  : '${_baggage.length} passenger-leg selection(s) added',
               icon: Mdi.bag_suitcase,
-              isSelected: true,
+              isSelected: _baggage.isNotEmpty,
             ),
-            height(16),
+            widget.height(16),
             CardMenuAddon(
-              onTap: () {
-                context.pushNamed(RouteNames.addonMeal);
-              },
+              onTap: _openMeal,
               title: 'In-flight Meal',
-              description: 'Pre-order your meal and enjoy it on board',
+              description: _meals.isEmpty
+                  ? 'Pre-order your meal and enjoy it on board'
+                  : '${_meals.length} passenger-leg selection(s) added',
               icon: Mdi.food,
+              isSelected: _meals.isNotEmpty,
             ),
-            height(16),
+            widget.height(16),
             CardMenuAddon(
-              onTap: () {
-                context.pushNamed(RouteNames.addonSeat);
-              },
+              onTap: _openSeat,
               title: 'Seat Selection',
-              description: 'Select your preferred seat',
+              description: _seats.isEmpty
+                  ? 'Select your preferred seat'
+                  : '${_seats.length} passenger-leg seat(s) assigned',
               icon: Mdi.seat_passenger,
+              isSelected: _seats.isNotEmpty,
             ),
           ],
         ),
@@ -84,35 +145,26 @@ class AddonBookingScreen extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text("Total Price", style: AppFont.reguler12),
-                      Text(
-                        NumberFormat.currency(
-                          locale: "id_ID",
-                          symbol: "Rp ",
-                          decimalDigits: 0,
-                        ).format(4500000),
-                        style: AppFont.medium14,
-                      ),
-                    ],
-                  ),
-                  width(4),
-                  Iconify(
-                    Mdi.expand_more,
-                    color: Theme.of(context).colorScheme.onSurface,
-                    size: 28,
-                  ),
+                  Text("Total Price", style: AppFont.reguler12),
+                  Text(formatIDR(total), style: AppFont.medium14),
                 ],
               ),
               PrimaryButton(
                 title: "Book Now",
                 onPressed: () {
-                  context.pushNamed(RouteNames.bookingDetail);
+                  context.pushNamed(
+                    RouteNames.bookingDetail,
+                    extra: AddonBookingResult(
+                      paxBookingResult: widget.paxBookingResult,
+                      baggage: _baggage,
+                      meals: _meals,
+                      seats: _seats,
+                    ),
+                  );
                 },
                 width: context.w(0.4),
                 borderRadius: 8,

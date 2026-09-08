@@ -13,8 +13,7 @@ class CardFlightSelecting extends StatelessWidget {
   final VoidCallback onTap;
 
   String _formatTime(DateTime? dt) => dt == null ? '--:--' : DateFormat('HH:mm').format(dt);
-  String _formatDate(DateTime? dt) =>
-      dt == null ? '-' : DateFormat('EEE, dd MMM yyyy').format(dt);
+  String _formatDate(DateTime? dt) => dt == null ? '-' : DateFormat('EEE, dd MMM yyyy').format(dt);
 
   @override
   Widget build(BuildContext context) {
@@ -69,7 +68,10 @@ class CardFlightSelecting extends StatelessWidget {
                         color: Theme.of(context).colorScheme.onSurface,
                       ),
                       width(8),
-                      Text(formatFlightDuration(itinerary.durationMinutes), style: AppFont.reguler12),
+                      Text(
+                        formatFlightDuration(itinerary.durationMinutes),
+                        style: AppFont.reguler12,
+                      ),
                     ],
                   ),
                   height(16),

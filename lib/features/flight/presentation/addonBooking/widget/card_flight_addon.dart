@@ -1,6 +1,5 @@
 import 'dart:math' as math;
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:iconify_flutter_plus/iconify_flutter_plus.dart';
 import 'package:iconify_flutter_plus/icons/bx.dart';
@@ -8,18 +7,36 @@ import 'package:iconify_flutter_plus/icons/mdi.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../../core/common/widget/card_general.dart';
-import '../../../../../core/common/widget/shimmer_loading.dart';
 import '../../../../../app/theme/theme.dart';
 import '../../../../../core/utils/dashed_divider.dart';
 import '../../../../../core/utils/size_extension.dart';
+import '../../utils/flight_display_utils.dart';
+import '../utils/addon_models.dart';
 
 class CardFlightAddon extends StatelessWidget {
-  const CardFlightAddon({super.key, this.isReturn = false, this.isSelected = false, this.onTap});
-  final bool isReturn;
+  const CardFlightAddon({
+    super.key,
+    required this.leg,
+    this.isSelected = false,
+    this.subtitle,
+    this.onTap,
+  });
+
+  final AddonLeg leg;
   final bool isSelected;
-  final Function()? onTap;
+
+  final String? subtitle;
+  final VoidCallback? onTap;
+
   @override
   Widget build(BuildContext context) {
+    final segments = leg.itinerary.segments ?? const [];
+    final first = segments.isNotEmpty ? segments.first : null;
+    final last = segments.isNotEmpty ? segments.last : null;
+
+    String formatTime(DateTime? dt) =>
+        dt == null ? '-' : DateFormat("dd MMM yyyy, HH:mm").format(dt);
+
     return InkWell(
       onTap: onTap,
       child: CardGeneral(
@@ -33,31 +50,24 @@ class CardFlightAddon extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      CachedNetworkImage(
+                      Container(
                         width: 32,
                         height: 32,
-                        fit: BoxFit.cover,
-                        fadeInDuration: const Duration(milliseconds: 100),
-
-                        imageUrl:
-                            "https://static.vecteezy.com/system/resources/thumbnails/055/210/906/small/garuda-indonesia-logo-square-rounded-garuda-indonesia-logo-garuda-indonesia-logo-free-download-free-png.png",
-                        imageBuilder: (context, imageProvider) => Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(4),
-                            image: DecorationImage(image: imageProvider, fit: BoxFit.cover),
-                          ),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(4),
+                          color: AppColor.secondaryColor.withValues(alpha: 0.1),
                         ),
-                        placeholder: (context, url) => ShimmerLoading(radius: 4),
-                        errorWidget: (context, url, error) => Icon(Icons.error),
+                        child: Center(
+                          child: Iconify(Bx.bxs_plane, color: AppColor.secondaryColor, size: 18),
+                        ),
                       ),
                       width(6),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text("Garuda Indonesia", style: AppFont.reguler12),
-
+                          Text(first?.flightNumber ?? '-', style: AppFont.reguler12),
                           Text(
-                            "GA-123",
+                            formatStops(leg.itinerary.stops),
                             style: AppFont.reguler10.copyWith(color: Theme.of(context).hintColor),
                           ),
                         ],
@@ -65,9 +75,8 @@ class CardFlightAddon extends StatelessWidget {
                     ],
                   ),
                 ),
-                Visibility(
-                  visible: isSelected,
-                  child: Container(
+                if (isSelected)
+                  Container(
                     padding: EdgeInsets.symmetric(vertical: 4, horizontal: 12),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(6),
@@ -79,53 +88,53 @@ class CardFlightAddon extends StatelessWidget {
                       style: AppFont.medium12.copyWith(color: AppColor.greenColor),
                     ),
                   ),
-                ),
               ],
             ),
-
             height(8),
             Row(
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(isReturn ? "DPS" : "CGK", style: AppFont.medium14),
-                    height(2),
-                    Text(
-                      isReturn ? "Denpasar" : "Jakarta",
-                      style: AppFont.reguler12.copyWith(color: Theme.of(context).hintColor),
-                    ),
-                  ],
-                ),
                 Expanded(
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          generateDashedDivider(context.w(0.2), dashColor: AppColor.secondaryColor),
-                          width(8),
-                          Transform.rotate(
-                            angle: -math.pi / 0.66,
-                            child: Iconify(Bx.bxs_plane, color: AppColor.secondaryColor, size: 20),
-                          ),
-                          width(8),
-                          generateDashedDivider(context.w(0.2), dashColor: AppColor.secondaryColor),
-                        ],
+                      Text(first?.departureAirportCode ?? '-', style: AppFont.medium14),
+                      height(2),
+                      Text(
+                        first?.departureAirportName ?? '-',
+                        style: AppFont.reguler12.copyWith(color: Theme.of(context).hintColor),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
                 ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
+                Row(
                   children: [
-                    Text(isReturn ? "CGK" : "DPS", style: AppFont.medium14),
-                    height(2),
-                    Text(
-                      isReturn ? "Jakarta" : "Denpasar",
-                      style: AppFont.reguler12.copyWith(color: Theme.of(context).hintColor),
+                    generateDashedDivider(context.w(0.12), dashColor: AppColor.secondaryColor),
+                    width(8),
+                    Transform.rotate(
+                      angle: -math.pi / 0.66,
+                      child: Iconify(Bx.bxs_plane, color: AppColor.secondaryColor, size: 20),
                     ),
+                    width(8),
+                    generateDashedDivider(context.w(0.12), dashColor: AppColor.secondaryColor),
                   ],
+                ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(last?.arrivalAirportCode ?? '-', style: AppFont.medium14),
+                      height(2),
+                      Text(
+                        last?.arrivalAirportName ?? '-',
+                        style: AppFont.reguler12.copyWith(color: Theme.of(context).hintColor),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.right,
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -138,9 +147,7 @@ class CardFlightAddon extends StatelessWidget {
                     Iconify(Mdi.airplane_takeoff, size: 16, color: AppColor.secondaryColor),
                     width(4),
                     Text(
-                      DateFormat(
-                        "dd MMM yyyy, HH:mm",
-                      ).format(isReturn ? DateTime.now().add(Duration(days: 5)) : DateTime.now()),
+                      formatTime(first?.departureTime),
                       style: AppFont.reguler12.copyWith(color: Theme.of(context).hintColor),
                     ),
                   ],
@@ -150,17 +157,23 @@ class CardFlightAddon extends StatelessWidget {
                     Iconify(Mdi.airplane_landing, size: 16, color: AppColor.secondaryColor),
                     width(4),
                     Text(
-                      DateFormat("dd MMM yyyy, HH:mm").format(
-                        isReturn
-                            ? DateTime.now().add(Duration(days: 5, hours: 2, minutes: 45))
-                            : DateTime.now().add(Duration(hours: 2, minutes: 45)),
-                      ),
+                      formatTime(last?.arrivalTime),
                       style: AppFont.reguler12.copyWith(color: Theme.of(context).hintColor),
                     ),
                   ],
                 ),
               ],
             ),
+            if (subtitle != null) ...[
+              height(8),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  subtitle!,
+                  style: AppFont.medium12.copyWith(color: AppColor.secondaryColor),
+                ),
+              ),
+            ],
           ],
         ),
       ),

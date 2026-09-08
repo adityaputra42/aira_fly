@@ -27,10 +27,10 @@ part '../widget/flight_timeline.dart';
 
 class FlightResultArguments {
   final ItineraryEntity departure;
-  final ItineraryEntity? returnItinerary; // null for one-way
+  final ItineraryEntity? returnItinerary;
   final AirportEntity departureAirport;
   final AirportEntity arrivalAirport;
-  final String tripType; // 'one_way' | 'round_trip'
+  final String tripType;
   final int amountAdult;
   final int amountChild;
   final int amountInfant;

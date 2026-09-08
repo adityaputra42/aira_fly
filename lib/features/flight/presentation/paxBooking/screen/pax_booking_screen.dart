@@ -156,9 +156,7 @@ class _PaxBookingScreenState extends State<PaxBookingScreen> {
                       child: _contact == null
                           ? Text(
                               "No contact set yet. Tap Edit to add who we should reach about this booking.",
-                              style: AppFont.reguler12.copyWith(
-                                color: Theme.of(context).hintColor,
-                              ),
+                              style: AppFont.reguler12.copyWith(color: Theme.of(context).hintColor),
                             )
                           : Column(
                               crossAxisAlignment: CrossAxisAlignment.start,

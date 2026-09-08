@@ -226,7 +226,8 @@ class _FlightSelectingScreenState extends State<FlightSelectingScreen> {
                         return SliverFillRemaining(
                           hasScrollBody: false,
                           child: Empty(
-                            title: "No flights found for ${args.originCode} \u2192 ${args.destinationCode} "
+                            title:
+                                "No flights found for ${args.originCode} \u2192 ${args.destinationCode} "
                                 "on ${args.dateForLeg.toFormattedString(shortDDMMY)}.",
                           ),
                         );

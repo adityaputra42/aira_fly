@@ -80,7 +80,7 @@ class FlightRemoteDataSourceImpl implements FlightRemoteDataSource {
   @override
   Future<ApiResponse?> getFlightSeats(int flightId) async {
     try {
-      var response = await dio.get('${Endpoint.flightInstances}$flightId/seats');
+      var response = await dio.get('${Endpoint.flightInstances}/$flightId/seats');
       if (response.data == null) {
         return ApiResponse.withError(response, response.statusMessage, null);
       }

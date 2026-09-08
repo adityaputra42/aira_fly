@@ -122,6 +122,10 @@ class _SearchFlightFormState extends State<SearchFlightForm> {
     }
   }
 
+  /// Opens the pax-count dialog and applies whatever the user actually
+  /// picked. Previously the dialog's "Save" button popped without a
+  /// value, so nothing typed here ever reached [onChangeTotalPassenger]
+  /// -- fixed in pax_selection.dart alongside this call site.
   Future<void> onSelectPax() async {
     final result = await showZoomDialog<List<int>>(
       context: context,
@@ -136,6 +140,11 @@ class _SearchFlightFormState extends State<SearchFlightForm> {
     setState(() => onChangeTotalPassenger(result));
   }
 
+  /// Opens the airport picker for either the "From" or "To" field.
+  ///
+  /// Passes the OTHER field's selection as `excludeAirportId` so the
+  /// list doesn't offer the same airport twice -- previously there was
+  /// nothing stopping "Jakarta to Jakarta".
   Future<void> onSelectAirport({required bool isDeparture}) async {
     final excludeId = isDeparture ? arrivalAirport?.id : departureAirport?.id;
 
@@ -226,6 +235,12 @@ class _SearchFlightFormState extends State<SearchFlightForm> {
     super.dispose();
   }
 
+  /// The One Way and Round Trip tabs used to be ~180 lines of
+  /// hand-duplicated `InputText`s each -- identical except for the
+  /// return-date field. That meant every fix (like the ones in this
+  /// change) had to be applied twice and could silently drift apart.
+  /// This builds both from one source; [showReturnDate] is the only
+  /// thing that varies.
   Widget _buildSearchCard({required bool showReturnDate}) {
     return CardGeneral(
       margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -321,6 +336,13 @@ class _SearchFlightFormState extends State<SearchFlightForm> {
               widget.width(8),
               Expanded(
                 child: InputText(
+                  // Deliberately left without an `ontaped` handler:
+                  // there is no seat-class list endpoint/usecase behind
+                  // this app yet (FlightBloc only knows airports,
+                  // flights, and seats-per-flight). Wiring this up to
+                  // fake static classes would look done while quietly
+                  // sending seatClassId as null regardless of what's
+                  // shown -- worse than leaving it visibly inert.
                   prefixIcon: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [

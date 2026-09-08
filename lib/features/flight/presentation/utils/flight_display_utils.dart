@@ -48,14 +48,10 @@ class FareCalculator {
   }
 }
 
-/// `NumberFormat.currency(locale: "id_ID", symbol: "Rp ", decimalDigits: 0)`
-/// was being constructed fresh at every call site across the flight
-/// screens. One formatter, one place to change the currency/locale.
 String formatIDR(num value) {
   return NumberFormat.currency(locale: "id_ID", symbol: "Rp ", decimalDigits: 0).format(value);
 }
 
-/// Formats itinerary duration minutes as e.g. "2h 45m", "45m", "3h".
 String formatFlightDuration(int? minutes) {
   if (minutes == null) return '-';
   final hours = minutes ~/ 60;
