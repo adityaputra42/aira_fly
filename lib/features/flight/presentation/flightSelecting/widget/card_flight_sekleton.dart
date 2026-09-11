@@ -34,39 +34,34 @@ class FlightSearchSkeleton extends StatelessWidget {
                           child: Iconify(Bx.bxs_plane, color: AppColor.secondaryColor, size: 20),
                         ),
                       ),
-
-                      const SizedBox(width: 12),
-
+                      height(8),
                       Expanded(
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             ShimmerLoading(height: 20, radius: 4, width: context.w(0.4)),
-                            SizedBox(height: 2),
+                            height(2),
                             ShimmerLoading(height: 14, radius: 4, width: context.w(0.4)),
                           ],
                         ),
                       ),
 
                       Icon(Icons.schedule_rounded, size: 16),
-
-                      const SizedBox(width: 8),
-
+                      width(8),
                       ShimmerLoading(height: 14, radius: 4, width: context.w(0.4)),
                     ],
                   ),
-
-                  height(16),
-
+                  height(12),
                   Row(
                     children: [
                       Column(
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          ShimmerLoading(height: 36, radius: 8, width: context.w(0.2)),
-                          ShimmerLoading(height: 14, radius: 4, width: context.w(0.15)),
+                          ShimmerLoading(height: 36, radius: 8, width: context.w(0.15)),
+                          height(2),
+                          ShimmerLoading(height: 14, radius: 4, width: context.w(0.25)),
                         ],
                       ),
 
@@ -104,14 +99,15 @@ class FlightSearchSkeleton extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          ShimmerLoading(height: 36, radius: 8, width: context.w(0.2)),
-                          ShimmerLoading(height: 14, radius: 4, width: context.w(0.1)),
+                          ShimmerLoading(height: 36, radius: 8, width: context.w(0.15)),
+                          height(2),
+                          ShimmerLoading(height: 14, radius: 4, width: context.w(0.25)),
                         ],
                       ),
                     ],
                   ),
 
-                  const SizedBox(height: 16),
+                  height(12),
 
                   generateDashedDivider(context.w(0.82)),
                 ],
@@ -130,8 +126,7 @@ class FlightSearchSkeleton extends StatelessWidget {
                   Row(
                     children: [
                       Icon(Icons.connecting_airports, size: 16, color: hintColor),
-
-                      const SizedBox(width: 4),
+                      width(4),
 
                       ShimmerLoading(height: 14, radius: 4, width: context.w(0.12)),
                     ],
@@ -140,7 +135,7 @@ class FlightSearchSkeleton extends StatelessWidget {
                   Row(
                     children: [
                       ShimmerLoading(height: 20, radius: 4, width: context.w(0.12)),
-                      SizedBox(width: 4),
+                      width(4),
                       ShimmerLoading(height: 14, radius: 4, width: context.w(0.1)),
                     ],
                   ),

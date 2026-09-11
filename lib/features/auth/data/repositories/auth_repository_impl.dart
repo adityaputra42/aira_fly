@@ -1,7 +1,7 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:pss_app/features/auth/data/models/user_model.dart';
-import 'package:pss_app/features/auth/domain/entities/user_entities.dart';
 
+import '../../../../core/common/entities/user.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/utils/connection_checker.dart';
@@ -17,7 +17,7 @@ class AuthRepositoryImpl implements AuthRepository {
   const AuthRepositoryImpl(this.remoteDataSource, this.localDataSource, this.connectionChecker);
 
   @override
-  Future<Either<Failure, UserEntity>> signUpWithEmailPassword({
+  Future<Either<Failure, User>> signUpWithEmailPassword({
     required String name,
     required String email,
     required String password,
@@ -53,7 +53,7 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, UserEntity>> currentUser() async {
+  Future<Either<Failure, User>> currentUser() async {
     try {
       if (!await connectionChecker.isConnected) {
         return left(Failure('No internet connection'));
@@ -74,7 +74,7 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, UserEntity>> loginWithEmailPassword({
+  Future<Either<Failure, User>> loginWithEmailPassword({
     required String email,
     required String password,
   }) async {

@@ -99,28 +99,25 @@ class _SearchAirportScreenState extends State<SearchAirportScreen> {
                 return ListView.builder(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                   itemCount: 10,
-                  itemBuilder: (context, index) => Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: CardGeneral(
-                      padding: const EdgeInsets.all(8),
-                      margin: const EdgeInsets.only(bottom: 12),
-                      child: Row(
-                        children: [
-                          ShimmerLoading(width: 42, height: 42, radius: 4),
+                  itemBuilder: (context, index) => CardGeneral(
+                    padding: const EdgeInsets.all(8),
+                    margin: const EdgeInsets.only(bottom: 12),
+                    child: Row(
+                      children: [
+                        ShimmerLoading(width: 42, height: 42, radius: 4),
 
-                          widget.width(12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                ShimmerLoading(height: 20, radius: 4, width: context.w(0.3)),
-                                widget.height(4),
-                                ShimmerLoading(height: 14, width: context.w(0.6), radius: 4),
-                              ],
-                            ),
+                        widget.width(12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              ShimmerLoading(height: 20, radius: 4, width: context.w(0.3)),
+                              widget.height(4),
+                              ShimmerLoading(height: 14, width: context.w(0.6), radius: 4),
+                            ],
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                 );

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:pss_app/core/common/cubit/user_cubit.dart';
 import 'package:pss_app/core/utils/pref_helper.dart';
+import 'package:pss_app/features/auth/presentation/bloc/auth_bloc.dart';
 
 import 'app/app.dart';
 import 'app/init_dependencies.dart';
@@ -18,6 +20,8 @@ void main() async {
       providers: [
         BlocProvider(create: (context) => serviceLocator<MainCubit>()),
         BlocProvider(create: (context) => serviceLocator<ThemeCubit>()..loadTheme()),
+        BlocProvider(create: (context) => serviceLocator<AuthBloc>()),
+        BlocProvider(create: (context) => serviceLocator<UserCubit>()),
       ],
       child: const App(),
     ),

@@ -1,17 +1,17 @@
 import 'package:fpdart/fpdart.dart';
 
+import '../../../../core/common/entities/user.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/usecase/usecase.dart';
-import '../entities/user_entities.dart';
 import '../repository/auth_repository.dart';
 
-class UserLogin implements UseCase<UserEntity, UserLoginParams> {
+class UserLogin implements UseCase<User, UserLoginParams> {
   final AuthRepository authRepository;
 
   const UserLogin(this.authRepository);
 
   @override
-  Future<Either<Failure, UserEntity>> call(UserLoginParams params) {
+  Future<Either<Failure, User>> call(UserLoginParams params) {
     return authRepository.loginWithEmailPassword(email: params.email, password: params.password);
   }
 }

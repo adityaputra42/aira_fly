@@ -34,6 +34,8 @@ class FlightResultArguments {
   final int amountAdult;
   final int amountChild;
   final int amountInfant;
+  final ItineraryFareEntity departureFare; // NEW — wajib, bukan optional
+  final ItineraryFareEntity? returnFare; // NEW
 
   const FlightResultArguments({
     required this.departure,
@@ -44,6 +46,8 @@ class FlightResultArguments {
     required this.amountAdult,
     required this.amountChild,
     required this.amountInfant,
+    required this.departureFare, // NEW
+    this.returnFare, // NEW
   });
 
   bool get isRoundTrip => tripType == 'round_trip';
@@ -59,15 +63,13 @@ class FlightResultScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tabCount = arguments.isRoundTrip ? 3 : 2;
-    final departureFare = FareCalculator.cheapestFare(arguments.departure.fares, arguments.pax);
-    final returnFare = arguments.returnItinerary != null
-        ? FareCalculator.cheapestFare(arguments.returnItinerary!.fares, arguments.pax)
-        : null;
+    final departureFare =
+        arguments.departureFare;
+    final returnFare = arguments.returnFare;
 
     final total =
-        (departureFare != null ? FareCalculator.totalForFare(departureFare, arguments.pax) : 0) +
+        FareCalculator.totalForFare(departureFare, arguments.pax) +
         (returnFare != null ? FareCalculator.totalForFare(returnFare, arguments.pax) : 0);
-
     return Scaffold(
       appBar: WidgetHelper.appBar(
         context: context,

@@ -14,11 +14,13 @@ import 'package:pss_app/app/theme/theme.dart';
 import 'package:pss_app/core/common/widget/empty.dart';
 import 'package:pss_app/core/utils/clipper.dart';
 import 'package:pss_app/core/utils/dashed_divider.dart';
+import 'package:pss_app/core/utils/show_dialog_zoom.dart';
 import 'package:pss_app/features/flight/domain/entities/airport_entity.dart';
 import 'package:pss_app/features/flight/domain/entities/itinerary_entity.dart';
 import 'package:pss_app/features/flight/presentation/bloc/flight/flight_bloc.dart';
 import 'package:pss_app/features/flight/presentation/flightResult/screen/flight_result_screen.dart';
 import 'package:pss_app/features/flight/presentation/utils/flight_display_utils.dart';
+import 'package:pss_app/features/home/presentation/widget/search_flight_form.dart';
 
 import '../../../../../app/init_dependencies.dart';
 import '../../../../../core/common/widget/shimmer_loading.dart';
@@ -44,6 +46,7 @@ class FlightSelectingArguments {
   final int amountInfant;
   final FlightLeg leg;
   final ItineraryEntity? selectedDeparture;
+  final ItineraryFareEntity? selectedDepartureFare; // NEW
 
   const FlightSelectingArguments({
     required this.departureAirport,
@@ -56,6 +59,7 @@ class FlightSelectingArguments {
     required this.amountInfant,
     this.leg = FlightLeg.departure,
     this.selectedDeparture,
+    this.selectedDepartureFare, // NEW
   });
 
   bool get isRoundTrip => tripType == 'round_trip';
@@ -70,11 +74,15 @@ class FlightSelectingArguments {
       leg == FlightLeg.departure ? departureDate : (returnDate ?? departureDate);
   String get legLabel => leg == FlightLeg.departure ? "Departure Flight" : "Return Flight";
 
-  FlightSelectingArguments forReturnLeg(ItineraryEntity departure) {
+  FlightSelectingArguments forReturnLeg(
+    ItineraryEntity departure,
+    ItineraryFareEntity departureFare, { // NEW required param
+    DateTime? departureDate,
+  }) {
     return FlightSelectingArguments(
       departureAirport: departureAirport,
       arrivalAirport: arrivalAirport,
-      departureDate: departureDate,
+      departureDate: departureDate ?? this.departureDate,
       returnDate: returnDate,
       tripType: tripType,
       amountAdult: amountAdult,
@@ -82,6 +90,7 @@ class FlightSelectingArguments {
       amountInfant: amountInfant,
       leg: FlightLeg.returnLeg,
       selectedDeparture: departure,
+      selectedDepartureFare: departureFare, // NEW
     );
   }
 }
@@ -100,14 +109,21 @@ class _FlightSelectingScreenState extends State<FlightSelectingScreen> {
   var isCollapsed = false;
   var expandedBarHeight = 200.0;
   var collapsedBarHeight = 60.0;
-
+  bool _firstLoading = true;
+  FlightSearchLoaded? _lastLoaded;
   late final FlightBloc _flightBloc;
+
+  late DateTime _departureDate;
+  DateTime? _returnDate;
 
   @override
   void initState() {
     super.initState();
     _flightBloc = serviceLocator<FlightBloc>();
+    _departureDate = widget.arguments.departureDate;
+    _returnDate = widget.arguments.returnDate;
     scrollController.addListener(() => _onScroll());
+    _retrySearch();
   }
 
   void _onScroll() {
@@ -118,25 +134,41 @@ class _FlightSelectingScreenState extends State<FlightSelectingScreen> {
     });
   }
 
-  void _retrySearch() {
+  void _retrySearch({DateTime? newDate}) {
     final args = widget.arguments;
-    context.read<FlightBloc>().add(
+
+    if (newDate != null) {
+      setState(() {
+        if (args.leg == FlightLeg.departure) {
+          _departureDate = newDate;
+        } else {
+          _returnDate = newDate;
+        }
+      });
+    }
+
+    _flightBloc.add(
       SearchFlightsRequested(
         departureAirportId: args.departureAirport.id!,
         arrivalAirportId: args.arrivalAirport.id!,
-        date: args.departureDate.toFormattedString(flightFormatDateReversed),
+        date: _departureDate.toFormattedString(flightFormatDateReversed),
         tripType: args.tripType,
-        returnDate: args.returnDate?.toFormattedString(flightFormatDateReversed),
+        returnDate: args.isRoundTrip
+            ? _returnDate?.toFormattedString(flightFormatDateReversed)
+            : null,
         totalPax: args.pax.total,
       ),
     );
   }
 
-  void _onSelectItinerary(ItineraryEntity itinerary) {
+  void _onSelectItinerary(ItineraryEntity itinerary, ItineraryFareEntity fare) {
     final args = widget.arguments;
 
     if (args.isRoundTrip && args.leg == FlightLeg.departure) {
-      context.pushNamed(RouteNames.flightSelecting, extra: args.forReturnLeg(itinerary));
+      context.pushNamed(
+        RouteNames.flightSelecting,
+        extra: args.forReturnLeg(itinerary, fare, departureDate: _departureDate),
+      );
       return;
     }
 
@@ -151,6 +183,8 @@ class _FlightSelectingScreenState extends State<FlightSelectingScreen> {
         amountAdult: args.amountAdult,
         amountChild: args.amountChild,
         amountInfant: args.amountInfant,
+        departureFare: args.leg == FlightLeg.returnLeg ? args.selectedDepartureFare! : fare,
+        returnFare: args.leg == FlightLeg.returnLeg ? fare : null,
       ),
     );
   }
@@ -158,6 +192,10 @@ class _FlightSelectingScreenState extends State<FlightSelectingScreen> {
   @override
   Widget build(BuildContext context) {
     final args = widget.arguments;
+    final currentLegDate = args.leg == FlightLeg.departure
+        ? _departureDate
+        : (_returnDate ?? args.dateForLeg);
+    final minSelectableDate = args.leg == FlightLeg.returnLeg ? _departureDate : DateTime.now();
 
     return BlocProvider.value(
       value: _flightBloc,
@@ -193,13 +231,38 @@ class _FlightSelectingScreenState extends State<FlightSelectingScreen> {
                       ),
                       titlePadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                       expandedTitleScale: 1,
-                      title: FlexibleAppBarWidget(isCollapsed: isCollapsed, arguments: args),
+                      title: FlexibleAppBarWidget(
+                        isCollapsed: isCollapsed,
+                        arguments: args,
+                        currentDate: currentLegDate,
+                        minDate: minSelectableDate,
+                        onDateChanged: (date) => _retrySearch(newDate: date),
+                      ),
                     ),
                   ),
+                  BlocConsumer<FlightBloc, FlightState>(
+                    listener: (context, state) {
+                      if (state is FlightSearchLoaded) {
+                        setState(() {
+                          _lastLoaded = state;
+                          _firstLoading = false;
+                        });
+                      } else if (state is FlightError) {
+                        if (_firstLoading) {
+                          setState(() => _firstLoading = false);
+                        }
 
-                  BlocBuilder<FlightBloc, FlightState>(
+                        if (_lastLoaded != null) {
+                          ScaffoldMessenger.of(context)
+                            ..hideCurrentSnackBar()
+                            ..showSnackBar(SnackBar(content: Text(state.message)));
+                        }
+                      }
+                    },
                     builder: (context, state) {
-                      if (state is FlightError) {
+                      final isRefetching = state is! FlightSearchLoaded && state is! FlightError;
+
+                      if (state is FlightError && _lastLoaded == null) {
                         return SliverFillRemaining(
                           hasScrollBody: false,
                           child: Empty(
@@ -210,16 +273,21 @@ class _FlightSelectingScreenState extends State<FlightSelectingScreen> {
                         );
                       }
 
-                      if (state is! FlightSearchLoaded) {
+                      if (_firstLoading) {
                         return SliverList.builder(
                           itemCount: 4,
                           itemBuilder: (context, index) => const FlightSearchSkeleton(),
                         );
                       }
 
+                      final loaded = _lastLoaded;
+                      if (loaded == null) {
+                        return const SliverToBoxAdapter(child: SizedBox.shrink());
+                      }
+
                       final itineraries = args.leg == FlightLeg.departure
-                          ? state.result.departure
-                          : state.result.returnItineraries;
+                          ? loaded.result.departure
+                          : loaded.result.returnItineraries;
 
                       if (itineraries == null || itineraries.isEmpty) {
                         return SliverFillRemaining(
@@ -232,26 +300,18 @@ class _FlightSelectingScreenState extends State<FlightSelectingScreen> {
                         );
                       }
 
-                      return SliverList.builder(
-                        itemCount: itineraries.length,
-                        itemBuilder: (context, index) {
-                          return Padding(
-                            padding: EdgeInsets.fromLTRB(
-                              16,
-                              12,
-                              16,
-                              index == itineraries.length - 1 ? 76 : 0,
-                            ),
-                            child: StaggerItem(
-                              index: index,
-                              child: CardFlightSelecting(
-                                itinerary: itineraries[index],
-                                pax: args.pax,
-                                onTap: () => _onSelectItinerary(itineraries[index]),
-                              ),
-                            ),
-                          );
-                        },
+                      return SliverList(
+                        delegate: SliverChildBuilderDelegate((context, index) {
+                          if (isRefetching && index == 0) {
+                            return Column(
+                              children: [
+                                const LinearProgressIndicator(minHeight: 2),
+                                _buildFlightCard(itineraries[0], 0, itineraries.length),
+                              ],
+                            );
+                          }
+                          return _buildFlightCard(itineraries[index], index, itineraries.length);
+                        }, childCount: itineraries.length),
                       );
                     },
                   ),
@@ -307,6 +367,20 @@ class _FlightSelectingScreenState extends State<FlightSelectingScreen> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFlightCard(ItineraryEntity itinerary, int index, int length) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(16, 12, 16, index == length - 1 ? 76 : 0),
+      child: StaggerItem(
+        index: index,
+        child: CardFlightSelecting(
+          itinerary: itinerary,
+          pax: widget.arguments.pax,
+          onFareSelected: (fare) => _onSelectItinerary(itinerary, fare),
         ),
       ),
     );

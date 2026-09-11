@@ -19,13 +19,14 @@ import '../../../../app/theme/app_font.dart';
 import '../../../../core/common/widget/card_general.dart';
 import '../../../../core/common/widget/input_text.dart';
 import '../../../../core/common/widget/primary_button.dart';
-import '../../../../core/constants/images.dart';
 import '../../../../core/utils/date_extension.dart';
 import 'date_picker_screen.dart';
 
 class SearchFlightForm extends StatefulWidget {
-  const SearchFlightForm({super.key});
-
+  const SearchFlightForm({super.key, this.param, this.margin, this.fromSelectingFlight = false});
+  final FlightSelectingArguments? param;
+  final EdgeInsets? margin;
+  final bool fromSelectingFlight;
   @override
   State<SearchFlightForm> createState() => _SearchFlightFormState();
 }
@@ -112,20 +113,16 @@ class _SearchFlightFormState extends State<SearchFlightForm> {
     String totalChild = (amountChild).toString();
     String totalInfant = (amountInfant).toString();
 
-    paxTextController.text = totalAdult;
+    paxTextController.text = "$totalAdult Adult";
 
     if (amountChild > 0) {
-      paxTextController.text += ', $totalChild';
+      paxTextController.text += ', $totalChild Child';
     }
     if (amountInfant > 0) {
-      paxTextController.text += ', $totalInfant';
+      paxTextController.text += ', $totalInfant Infant';
     }
   }
 
-  /// Opens the pax-count dialog and applies whatever the user actually
-  /// picked. Previously the dialog's "Save" button popped without a
-  /// value, so nothing typed here ever reached [onChangeTotalPassenger]
-  /// -- fixed in pax_selection.dart alongside this call site.
   Future<void> onSelectPax() async {
     final result = await showZoomDialog<List<int>>(
       context: context,
@@ -140,11 +137,6 @@ class _SearchFlightFormState extends State<SearchFlightForm> {
     setState(() => onChangeTotalPassenger(result));
   }
 
-  /// Opens the airport picker for either the "From" or "To" field.
-  ///
-  /// Passes the OTHER field's selection as `excludeAirportId` so the
-  /// list doesn't offer the same airport twice -- previously there was
-  /// nothing stopping "Jakarta to Jakarta".
   Future<void> onSelectAirport({required bool isDeparture}) async {
     final excludeId = isDeparture ? arrivalAirport?.id : departureAirport?.id;
 
@@ -172,56 +164,85 @@ class _SearchFlightFormState extends State<SearchFlightForm> {
       showSnackBar(context, 'Please select both departure and arrival airports.');
       return;
     }
-
     if (departureAirport!.id == arrivalAirport!.id) {
       showSnackBar(context, 'Departure and arrival airports cannot be the same.');
       return;
     }
-
     if (isReturn && returnDate == null) {
       showSnackBar(context, 'Please select a return date.');
       return;
     }
-
     if (amountAdult < 1) {
       showSnackBar(context, 'At least one adult passenger is required.');
       return;
     }
 
     final tripType = isReturn ? 'round_trip' : 'one_way';
-
-    context.read<FlightBloc>().add(
-      SearchFlightsRequested(
-        departureAirportId: departureAirport!.id!,
-        arrivalAirportId: arrivalAirport!.id!,
-        date: departureDate.toFormattedString(flightFormatDateReversed),
-        tripType: tripType,
-        returnDate: isReturn ? returnDate?.toFormattedString(flightFormatDateReversed) : null,
-        totalPax: amountAdult + amountChild + amountInfant,
-      ),
+    final args = FlightSelectingArguments(
+      departureAirport: departureAirport!,
+      arrivalAirport: arrivalAirport!,
+      departureDate: departureDate,
+      returnDate: isReturn ? returnDate : null,
+      tripType: tripType,
+      amountAdult: amountAdult,
+      amountChild: amountChild,
+      amountInfant: amountInfant,
     );
 
-    context.pushNamed(
-      RouteNames.flightSelecting,
-      extra: FlightSelectingArguments(
-        departureAirport: departureAirport!,
-        arrivalAirport: arrivalAirport!,
-        departureDate: departureDate,
-        returnDate: isReturn ? returnDate : null,
-        tripType: tripType,
-        amountAdult: amountAdult,
-        amountChild: amountChild,
-        amountInfant: amountInfant,
-      ),
-    );
+    if (widget.fromSelectingFlight) {
+      context.read<FlightBloc>().add(
+        SearchFlightsRequested(
+          departureAirportId: args.departureAirport.id!,
+          arrivalAirportId: args.arrivalAirport.id!,
+          date: args.departureDate.toFormattedString(flightFormatDateReversed),
+          tripType: args.tripType,
+          returnDate: args.isRoundTrip
+              ? args.returnDate?.toFormattedString(flightFormatDateReversed)
+              : null,
+          totalPax: args.pax.total,
+        ),
+      );
+      context.pop(args);
+    } else {
+      context.pushNamed(RouteNames.flightSelecting, extra: args);
+    }
   }
 
   @override
   void initState() {
     super.initState();
-    departureDate = DateTime.now();
-    departureDateTextController.text = departureDate.toFormattedString(shortDDMMY);
-    paxTextController.text = amountAdult.toString();
+
+    final param = widget.param;
+
+    if (param != null) {
+      departureAirport = param.departureAirport;
+      arrivalAirport = param.arrivalAirport;
+      departureDate = param.departureDate;
+      returnDate = param.returnDate;
+
+      isReturn = param.isRoundTrip;
+      selectedTab = isReturn ? 1 : 0;
+
+      amountAdult = param.amountAdult;
+      amountChild = param.amountChild;
+      amountInfant = param.amountInfant;
+
+      departureTextController.text =
+          '${param.departureAirport.city ?? '-'} (${param.departureAirport.code ?? '-'})';
+      arrivalTextController.text =
+          '${param.arrivalAirport.city ?? '-'} (${param.arrivalAirport.code ?? '-'})';
+      departureDateTextController.text = departureDate.toFormattedString(shortDDMMY);
+
+      if (isReturn && returnDate != null) {
+        returnDateTextController.text = returnDate!.toFormattedString(shortDDMMY);
+      }
+
+      onChangeTotalPassenger([amountAdult, amountChild, amountInfant]);
+    } else {
+      departureDate = DateTime.now();
+      departureDateTextController.text = departureDate.toFormattedString(shortDDMMY);
+      paxTextController.text = "$amountAdult Adult";
+    }
   }
 
   @override
@@ -235,17 +256,12 @@ class _SearchFlightFormState extends State<SearchFlightForm> {
     super.dispose();
   }
 
-  /// The One Way and Round Trip tabs used to be ~180 lines of
-  /// hand-duplicated `InputText`s each -- identical except for the
-  /// return-date field. That meant every fix (like the ones in this
-  /// change) had to be applied twice and could silently drift apart.
-  /// This builds both from one source; [showReturnDate] is the only
-  /// thing that varies.
   Widget _buildSearchCard({required bool showReturnDate}) {
     return CardGeneral(
-      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      margin: EdgeInsets.zero,
       padding: EdgeInsets.all(12),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           InputText(
             prefixIcon: Row(
@@ -336,13 +352,6 @@ class _SearchFlightFormState extends State<SearchFlightForm> {
               widget.width(8),
               Expanded(
                 child: InputText(
-                  // Deliberately left without an `ontaped` handler:
-                  // there is no seat-class list endpoint/usecase behind
-                  // this app yet (FlightBloc only knows airports,
-                  // flights, and seats-per-flight). Wiring this up to
-                  // fake static classes would look done while quietly
-                  // sending seatClassId as null regardless of what's
-                  // shown -- worse than leaving it visibly inert.
                   prefixIcon: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -387,89 +396,57 @@ class _SearchFlightFormState extends State<SearchFlightForm> {
 
   @override
   Widget build(BuildContext context) {
-    return SliverToBoxAdapter(
-      child: Stack(
-        children: [
-          Container(
-            width: context.w(1),
-            height: context.w(0.65),
-            decoration: BoxDecoration(
-              color: AppColor.primaryColor,
-              borderRadius: BorderRadius.vertical(bottom: Radius.circular(8)),
-            ),
-            child: SafeArea(
-              child: Align(
-                alignment: Alignment.topCenter,
-                child: Image.asset(
-                  AppImages.map,
-                  width: context.w(1),
-                  color: AppColor.cardLight.withValues(alpha: .5),
+    return Form(
+      key: formKey,
+      child: DefaultTabController(
+        length: 2,
+        initialIndex: selectedTab,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            CardGeneral(
+              margin: EdgeInsets.zero,
+              width: double.infinity,
+              height: 42,
+              padding: EdgeInsets.all(2),
+              child: TabBar(
+                physics: const NeverScrollableScrollPhysics(),
+                automaticIndicatorColorAdjustment: false,
+                indicator: BoxDecoration(
+                  color: AppColor.primaryColor,
+                  borderRadius: BorderRadius.circular(6),
                 ),
-              ),
-            ),
-          ),
-          Form(
-            key: formKey,
-            child: DefaultTabController(
-              length: 2,
-              initialIndex: selectedTab,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  widget.height(8),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Text(
-                      "Securely Book \nYour Flight Ticket",
-                      style: AppFont.semibold24.copyWith(color: AppColor.darkText1),
-                    ),
-                  ),
-                  widget.height(16),
-                  CardGeneral(
-                    margin: EdgeInsets.symmetric(horizontal: 16),
-                    width: double.infinity,
-                    height: 42,
-                    padding: EdgeInsets.all(2),
-                    child: TabBar(
-                      physics: const NeverScrollableScrollPhysics(),
-                      automaticIndicatorColorAdjustment: false,
-                      indicator: BoxDecoration(
-                        color: AppColor.primaryColor,
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      isScrollable: false,
-                      dividerColor: Colors.transparent,
-                      indicatorColor: Theme.of(context).colorScheme.surface,
-                      labelColor: AppColor.darkText1,
-                      labelPadding: EdgeInsets.zero,
-                      labelStyle: AppFont.medium14,
-                      unselectedLabelColor: Theme.of(context).hintColor,
-                      unselectedLabelStyle: AppFont.reguler14,
-                      indicatorSize: TabBarIndicatorSize.tab,
-                      onTap: (index) {
-                        changeTab(index);
-                      },
-                      tabs: const [
-                        Tab(child: Text("One Way")),
-                        Tab(child: Text("Round Trip")),
-                      ],
-                    ),
-                  ),
-                  SizedBox(
-                    height: context.h(0.47),
-                    child: TabBarView(
-                      children: [
-                        _buildSearchCard(showReturnDate: false),
-                        _buildSearchCard(showReturnDate: true),
-                      ],
-                    ),
-                  ),
+                isScrollable: false,
+                dividerColor: Colors.transparent,
+                indicatorColor: Theme.of(context).colorScheme.surface,
+                labelColor: AppColor.darkText1,
+                labelPadding: EdgeInsets.zero,
+                labelStyle: AppFont.medium14,
+                unselectedLabelColor: Theme.of(context).hintColor,
+                unselectedLabelStyle: AppFont.reguler14,
+                indicatorSize: TabBarIndicatorSize.tab,
+                onTap: (index) {
+                  changeTab(index);
+                },
+                tabs: const [
+                  Tab(child: Text("One Way")),
+                  Tab(child: Text("Round Trip")),
                 ],
               ),
             ),
-          ),
-        ],
+            widget.height(12),
+            SizedBox(
+              height: context.h(0.45),
+              child: TabBarView(
+                children: [
+                  _buildSearchCard(showReturnDate: false),
+                  _buildSearchCard(showReturnDate: true),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -52,12 +52,7 @@ class ItineraryFareEntity extends Equatable {
   final String? currency;
   final int? availableSeats;
 
-  const ItineraryFareEntity({
-    this.fareClassId,
-    this.prices,
-    this.currency,
-    this.availableSeats,
-  });
+  const ItineraryFareEntity({this.fareClassId, this.prices, this.currency, this.availableSeats});
 
   @override
   List<Object?> get props => [fareClassId, prices, currency, availableSeats];
@@ -79,13 +74,7 @@ class ItineraryEntity extends Equatable {
   });
 
   @override
-  List<Object?> get props => [
-    stops,
-    aircraftChanged,
-    durationMinutes,
-    segments,
-    fares,
-  ];
+  List<Object?> get props => [stops, aircraftChanged, durationMinutes, segments, fares];
 }
 
 class FlightSearchResultEntity extends Equatable {
@@ -93,11 +82,7 @@ class FlightSearchResultEntity extends Equatable {
   final List<ItineraryEntity>? departure;
   final List<ItineraryEntity>? returnItineraries;
 
-  const FlightSearchResultEntity({
-    this.tripType,
-    this.departure,
-    this.returnItineraries,
-  });
+  const FlightSearchResultEntity({this.tripType, this.departure, this.returnItineraries});
 
   @override
   List<Object?> get props => [tripType, departure, returnItineraries];

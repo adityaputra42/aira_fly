@@ -1,14 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:pss_app/app/routes/route_names.dart';
 import 'package:pss_app/features/home/presentation/screen/home_screen.dart';
 import 'package:pss_app/features/setting/ui/screen/setting_screen.dart';
 import 'package:pss_app/features/ticket/presentation/screen/ticket_screen.dart';
 import 'package:pss_app/features/wallet/presentation/screen/wallet_screen.dart';
+
+import '../../../../core/common/cubit/user_cubit.dart';
+import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../cubit/main_cubit.dart';
 import '../widget/custom_bottom_navbar.dart';
 
-class MainScreen extends StatelessWidget {
+class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
+
+  @override
+  State<MainScreen> createState() => _MainScreenState();
+}
+
+class _MainScreenState extends State<MainScreen> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<AuthBloc>().add(CheckAuthStatus());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,11 +54,22 @@ class MainScreen extends StatelessWidget {
               Align(
                 alignment: Alignment.bottomCenter,
                 child: SafeArea(
-                  child: CustomBottomNavbar(
-                    onTap: (index) {
-                      context.read<MainCubit>().setTab(index);
+                  child: BlocSelector<UserCubit, UserState, bool>(
+                    selector: (state) {
+                      return state is UserLoggedIn;
                     },
-                    selectedIndex: selectedIndex,
+                    builder: (ctx, isLoggedIn) {
+                      return CustomBottomNavbar(
+                        onTap: (index) {
+                          if (!isLoggedIn && index == 2) {
+                            ctx.goNamed(RouteNames.signin);
+                          } else {
+                            context.read<MainCubit>().setTab(index);
+                          }
+                        },
+                        selectedIndex: selectedIndex,
+                      );
+                    },
                   ),
                 ),
               ),

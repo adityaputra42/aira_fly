@@ -1,5 +1,6 @@
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:get_it/get_it.dart';
+import 'package:pss_app/core/common/cubit/user_cubit.dart';
 
 import '../core/common/cubit/theme_cubit.dart';
 import '../core/utils/connection_checker.dart';
@@ -77,6 +78,7 @@ Future<void> initDependencies() async {
 
   // core
   serviceLocator.registerLazySingleton(() => MainCubit());
+  serviceLocator.registerLazySingleton(() => UserCubit());
   serviceLocator.registerFactory<ConnectionChecker>(() => ConnectionCheckerImpl(serviceLocator()));
   serviceLocator.registerFactory<SplashCubit>(() => SplashCubit());
 
@@ -105,6 +107,7 @@ void _initAuth() {
     ..registerFactory(() => CurrentUser(serviceLocator()))
     ..registerLazySingleton(
       () => AuthBloc(
+        appUserCubit: serviceLocator(),
         signInUseCase: serviceLocator(),
         signOutUseCase: serviceLocator(),
         getCurrentUserUseCase: serviceLocator(),

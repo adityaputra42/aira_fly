@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import '../../domain/entities/user_entities.dart';
+import '../../../../core/common/entities/user.dart';
 
 LoginResponseModel loginResponseModelFromJson(dynamic str) => LoginResponseModel.fromJson((str));
 
@@ -49,7 +49,7 @@ String userModelToJson(UserModel data) {
   return json.encode(data.toJson());
 }
 
-class UserModel extends UserEntity {
+class UserModel extends User {
   const UserModel({
     super.id,
     super.email,

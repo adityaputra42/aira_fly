@@ -7,9 +7,10 @@ import 'package:pss_app/app/theme/theme.dart';
 import 'package:pss_app/core/common/widget/card_general.dart';
 import 'package:pss_app/core/utils/size_extension.dart';
 import 'package:pss_app/features/flight/presentation/bloc/flight/flight_bloc.dart';
+import 'package:pss_app/features/home/presentation/widget/header_home.dart';
+
 import '../../../../app/init_dependencies.dart';
 import '../widget/app_bar_home.dart';
-import '../widget/search_flight_form.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -17,23 +18,14 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
-      providers: [
-        // .value, not BlocProvider(create: ...) -- FlightBloc is a
-        // shared lazySingleton (init_dependencies.dart), and `create:`
-        // closes whatever it creates when this widget is disposed.
-        // Since search_airport_screen.dart and flight_selecting_screen.dart
-        // resolve this exact same instance, that close() would kill the
-        // bloc for the whole flow, not just Home. See the fuller
-        // explanation in search_airport_screen.dart.
-        BlocProvider.value(value: serviceLocator<FlightBloc>()),
-      ],
+      providers: [BlocProvider.value(value: serviceLocator<FlightBloc>())],
       child: Scaffold(
         body: SafeArea(
           top: false,
           child: CustomScrollView(
             slivers: [
               AppBarHome(),
-              SearchFlightForm(),
+              HeaderHome(),
               SliverToBoxAdapter(
                 child: Column(
                   children: [
@@ -76,10 +68,6 @@ class HomeScreen extends StatelessWidget {
                         scrollDirection: Axis.horizontal,
                         itemBuilder: (context, index) => StaggerItem(
                           index: index,
-                          // Tips list is 10 items on one screen -- no
-                          // horizontal scroll offscreen items need to
-                          // skip their delay for, unlike a long
-                          // vertical list.
                           child: CardGeneral(
                             padding: EdgeInsets.zero,
                             radius: 12,
@@ -97,8 +85,7 @@ class HomeScreen extends StatelessWidget {
                                 fit: BoxFit.cover,
                                 fadeInDuration: const Duration(milliseconds: 100),
                                 height: 68,
-                                imageUrl:
-                                    'https://news.atlasbeachfest.com/wp-content/uploads/2023/05/18-Gambar-Utama.webp',
+                                imageUrl: 'https://news.atlasbeachfest.com/wp-content/uploads/2023/05/18-Gambar-Utama.webp',
                                 imageBuilder: (context, imageProvider) => Container(
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(8),

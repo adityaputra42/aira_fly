@@ -76,14 +76,11 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
     ...(_search.departure.segments ?? const []),
     ...(_search.returnItinerary?.segments ?? const []),
   ];
-
   double get _estimatedTotal {
-    final departureFare = FareCalculator.cheapestFare(_search.departure.fares, _search.pax);
-    final returnFare = _search.returnItinerary != null
-        ? FareCalculator.cheapestFare(_search.returnItinerary!.fares, _search.pax)
-        : null;
+    final departureFare = _search.departureFare; // CHANGED
+    final returnFare = _search.returnFare; // CHANGED
     final fareTotal =
-        (departureFare != null ? FareCalculator.totalForFare(departureFare, _search.pax) : 0) +
+        FareCalculator.totalForFare(departureFare, _search.pax) +
         (returnFare != null ? FareCalculator.totalForFare(returnFare, _search.pax) : 0);
     return fareTotal +
         sumAncillaryPrices(widget.result.baggage) +
@@ -103,12 +100,10 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
       _errorMessage = null;
     });
 
-    final departureFare = FareCalculator.cheapestFare(_search.departure.fares, _search.pax);
-    final returnFare = _search.returnItinerary != null
-        ? FareCalculator.cheapestFare(_search.returnItinerary!.fares, _search.pax)
-        : null;
+    final departureFare = _search.departureFare; // CHANGED
+    final returnFare = _search.returnFare; // CHANGED
 
-    if (departureFare?.fareClassId == null ||
+    if (departureFare.fareClassId == null ||
         (_search.isRoundTrip && returnFare?.fareClassId == null)) {
       setState(() {
         _step = _Step.error;
@@ -120,7 +115,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
     final segments = <BookingSegmentInput>[
       for (final s in _search.departure.segments ?? const [])
         if (s.flightId != null)
-          BookingSegmentInput(flightId: s.flightId!, fareClassId: departureFare!.fareClassId!),
+          BookingSegmentInput(flightId: s.flightId!, fareClassId: departureFare.fareClassId!),
       if (_search.returnItinerary != null)
         for (final s in _search.returnItinerary!.segments ?? const [])
           if (s.flightId != null)

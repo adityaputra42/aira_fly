@@ -120,14 +120,11 @@ class _PaxBookingScreenState extends State<PaxBookingScreen> {
   Widget build(BuildContext context) {
     final args = widget.arguments;
 
-    final departureFare = FareCalculator.cheapestFare(args.departure.fares, args.pax);
-    final returnFare = args.returnItinerary != null
-        ? FareCalculator.cheapestFare(args.returnItinerary!.fares, args.pax)
-        : null;
+    final departureFare = args.departureFare; // CHANGED — pakai pilihan user, jangan hitung ulang
+    final returnFare = args.returnFare; // CHANGED
     final total =
-        (departureFare != null ? FareCalculator.totalForFare(departureFare, args.pax) : 0) +
+        FareCalculator.totalForFare(departureFare, args.pax) +
         (returnFare != null ? FareCalculator.totalForFare(returnFare, args.pax) : 0);
-
     return Scaffold(
       appBar: WidgetHelper.appBar(
         context: context,
