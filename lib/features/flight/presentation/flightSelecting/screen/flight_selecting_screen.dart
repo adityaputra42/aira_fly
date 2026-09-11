@@ -17,6 +17,7 @@ import 'package:pss_app/core/utils/dashed_divider.dart';
 import 'package:pss_app/core/utils/show_dialog_zoom.dart';
 import 'package:pss_app/features/flight/domain/entities/airport_entity.dart';
 import 'package:pss_app/features/flight/domain/entities/itinerary_entity.dart';
+import 'package:pss_app/features/flight/presentation/bloc/fareClass/fare_class_bloc.dart';
 import 'package:pss_app/features/flight/presentation/bloc/flight/flight_bloc.dart';
 import 'package:pss_app/features/flight/presentation/flightResult/screen/flight_result_screen.dart';
 import 'package:pss_app/features/flight/presentation/utils/flight_display_utils.dart';
@@ -112,6 +113,7 @@ class _FlightSelectingScreenState extends State<FlightSelectingScreen> {
   bool _firstLoading = true;
   FlightSearchLoaded? _lastLoaded;
   late final FlightBloc _flightBloc;
+  late final FareClassBloc _fareClassBloc;
 
   late DateTime _departureDate;
   DateTime? _returnDate;
@@ -120,6 +122,9 @@ class _FlightSelectingScreenState extends State<FlightSelectingScreen> {
   void initState() {
     super.initState();
     _flightBloc = serviceLocator<FlightBloc>();
+
+    _fareClassBloc = serviceLocator<FareClassBloc>();
+    _fareClassBloc.add(const LoadFareClassesRequested());
     _departureDate = widget.arguments.departureDate;
     _returnDate = widget.arguments.returnDate;
     scrollController.addListener(() => _onScroll());
@@ -197,8 +202,11 @@ class _FlightSelectingScreenState extends State<FlightSelectingScreen> {
         : (_returnDate ?? args.dateForLeg);
     final minSelectableDate = args.leg == FlightLeg.returnLeg ? _departureDate : DateTime.now();
 
-    return BlocProvider.value(
-      value: _flightBloc,
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider.value(value: _flightBloc),
+        BlocProvider.value(value: _fareClassBloc),
+      ],
       child: Scaffold(
         body: SafeArea(
           top: false,
@@ -262,6 +270,13 @@ class _FlightSelectingScreenState extends State<FlightSelectingScreen> {
                     builder: (context, state) {
                       final isRefetching = state is! FlightSearchLoaded && state is! FlightError;
 
+                      final fareClassState = context.watch<FareClassBloc>().state;
+                      final fareClassLabels = fareClassState is FareClassLoaded
+                          ? fareClassState.byId.map(
+                              (id, fc) => MapEntry(id, fc.name ?? 'Kelas #$id'),
+                            )
+                          : null;
+
                       if (state is FlightError && _lastLoaded == null) {
                         return SliverFillRemaining(
                           hasScrollBody: false,
@@ -306,11 +321,21 @@ class _FlightSelectingScreenState extends State<FlightSelectingScreen> {
                             return Column(
                               children: [
                                 const LinearProgressIndicator(minHeight: 2),
-                                _buildFlightCard(itineraries[0], 0, itineraries.length),
+                                _buildFlightCard(
+                                  itineraries[0],
+                                  0,
+                                  itineraries.length,
+                                  fareClassLabels,
+                                ),
                               ],
                             );
                           }
-                          return _buildFlightCard(itineraries[index], index, itineraries.length);
+                          return _buildFlightCard(
+                            itineraries[index],
+                            index,
+                            itineraries.length,
+                            fareClassLabels,
+                          );
                         }, childCount: itineraries.length),
                       );
                     },
@@ -372,7 +397,12 @@ class _FlightSelectingScreenState extends State<FlightSelectingScreen> {
     );
   }
 
-  Widget _buildFlightCard(ItineraryEntity itinerary, int index, int length) {
+  Widget _buildFlightCard(
+    ItineraryEntity itinerary,
+    int index,
+    int length,
+    Map<int, String>? fareClassLabels,
+  ) {
     return Padding(
       padding: EdgeInsets.fromLTRB(16, 12, 16, index == length - 1 ? 76 : 0),
       child: StaggerItem(
@@ -381,6 +411,7 @@ class _FlightSelectingScreenState extends State<FlightSelectingScreen> {
           itinerary: itinerary,
           pax: widget.arguments.pax,
           onFareSelected: (fare) => _onSelectItinerary(itinerary, fare),
+          fareClassLabels: fareClassLabels,
         ),
       ),
     );
