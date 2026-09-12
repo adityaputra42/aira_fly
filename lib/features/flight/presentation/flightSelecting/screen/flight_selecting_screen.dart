@@ -115,18 +115,20 @@ class _FlightSelectingScreenState extends State<FlightSelectingScreen> {
   late final FlightBloc _flightBloc;
   late final FareClassBloc _fareClassBloc;
 
+  late FlightSelectingArguments _arguments;
+
   late DateTime _departureDate;
   DateTime? _returnDate;
 
   @override
   void initState() {
     super.initState();
+    _arguments = widget.arguments;
     _flightBloc = serviceLocator<FlightBloc>();
-
     _fareClassBloc = serviceLocator<FareClassBloc>();
     _fareClassBloc.add(const LoadFareClassesRequested());
-    _departureDate = widget.arguments.departureDate;
-    _returnDate = widget.arguments.returnDate;
+    _departureDate = _arguments.departureDate;
+    _returnDate = _arguments.returnDate;
     scrollController.addListener(() => _onScroll());
     _retrySearch();
   }
@@ -139,8 +141,19 @@ class _FlightSelectingScreenState extends State<FlightSelectingScreen> {
     });
   }
 
+  void _onSearchChanged(FlightSelectingArguments newArguments) {
+    setState(() {
+      _arguments = newArguments;
+      _departureDate = newArguments.departureDate;
+      _returnDate = newArguments.returnDate;
+      _firstLoading = true;
+      _lastLoaded = null;
+    });
+    _retrySearch();
+  }
+
   void _retrySearch({DateTime? newDate}) {
-    final args = widget.arguments;
+    final args = _arguments;
 
     if (newDate != null) {
       setState(() {
@@ -167,7 +180,7 @@ class _FlightSelectingScreenState extends State<FlightSelectingScreen> {
   }
 
   void _onSelectItinerary(ItineraryEntity itinerary, ItineraryFareEntity fare) {
-    final args = widget.arguments;
+    final args = _arguments;
 
     if (args.isRoundTrip && args.leg == FlightLeg.departure) {
       context.pushNamed(
@@ -196,7 +209,7 @@ class _FlightSelectingScreenState extends State<FlightSelectingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final args = widget.arguments;
+    final args = _arguments;
     final currentLegDate = args.leg == FlightLeg.departure
         ? _departureDate
         : (_returnDate ?? args.dateForLeg);
@@ -245,6 +258,7 @@ class _FlightSelectingScreenState extends State<FlightSelectingScreen> {
                         currentDate: currentLegDate,
                         minDate: minSelectableDate,
                         onDateChanged: (date) => _retrySearch(newDate: date),
+                        onSearchChanged: _onSearchChanged,
                       ),
                     ),
                   ),
@@ -409,7 +423,7 @@ class _FlightSelectingScreenState extends State<FlightSelectingScreen> {
         index: index,
         child: CardFlightSelecting(
           itinerary: itinerary,
-          pax: widget.arguments.pax,
+          pax: _arguments.pax,
           onFareSelected: (fare) => _onSelectItinerary(itinerary, fare),
           fareClassLabels: fareClassLabels,
         ),

@@ -8,6 +8,7 @@ class FlexibleAppBarWidget extends StatefulWidget {
     required this.currentDate,
     required this.minDate,
     required this.onDateChanged,
+    required this.onSearchChanged,
   });
 
   final bool isCollapsed;
@@ -15,6 +16,8 @@ class FlexibleAppBarWidget extends StatefulWidget {
   final DateTime currentDate;
   final DateTime minDate;
   final ValueChanged<DateTime> onDateChanged;
+
+  final ValueChanged<FlightSelectingArguments> onSearchChanged;
 
   @override
   State<FlexibleAppBarWidget> createState() => _FlexibleAppBarWidgetState();
@@ -56,11 +59,10 @@ class _FlexibleAppBarWidgetState extends State<FlexibleAppBarWidget> {
             ),
             widget.width(8),
             InkWell(
-              onTap: () => showZoomDialog(
-                context: context,
-                barrierDismissible: false,
-                child: BlocProvider.value(
-                  value: context.read<FlightBloc>(),
+              onTap: () async {
+                final result = await showZoomDialog<FlightSelectingArguments>(
+                  context: context,
+                  barrierDismissible: false,
                   child: Dialog(
                     child: CardGeneral(
                       background: Theme.of(context).colorScheme.surface,
@@ -90,8 +92,11 @@ class _FlexibleAppBarWidgetState extends State<FlexibleAppBarWidget> {
                       ),
                     ),
                   ),
-                ),
-              ),
+                );
+
+                if (result == null || !context.mounted) return;
+                widget.onSearchChanged(result);
+              },
               child: Container(
                 padding: EdgeInsets.all(6),
                 decoration: BoxDecoration(

@@ -1,6 +1,5 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconify_flutter_plus/iconify_flutter_plus.dart';
 import 'package:iconify_flutter_plus/icons/mdi.dart';
@@ -9,7 +8,6 @@ import 'package:pss_app/core/utils/show_dialog_zoom.dart';
 import 'package:pss_app/core/utils/show_snackbar.dart';
 import 'package:pss_app/core/utils/size_extension.dart';
 import 'package:pss_app/features/flight/domain/entities/airport_entity.dart';
-import 'package:pss_app/features/flight/presentation/bloc/flight/flight_bloc.dart';
 import 'package:pss_app/features/flight/presentation/flightSelecting/screen/flight_selecting_screen.dart';
 import 'package:pss_app/features/flight/presentation/searchAirport/screen/search_airport_screen.dart';
 import 'package:pss_app/features/home/presentation/widget/pax_selection.dart';
@@ -190,18 +188,6 @@ class _SearchFlightFormState extends State<SearchFlightForm> {
     );
 
     if (widget.fromSelectingFlight) {
-      context.read<FlightBloc>().add(
-        SearchFlightsRequested(
-          departureAirportId: args.departureAirport.id!,
-          arrivalAirportId: args.arrivalAirport.id!,
-          date: args.departureDate.toFormattedString(flightFormatDateReversed),
-          tripType: args.tripType,
-          returnDate: args.isRoundTrip
-              ? args.returnDate?.toFormattedString(flightFormatDateReversed)
-              : null,
-          totalPax: args.pax.total,
-        ),
-      );
       context.pop(args);
     } else {
       context.pushNamed(RouteNames.flightSelecting, extra: args);

@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -32,6 +33,8 @@ class DateSlider extends StatefulWidget {
 class _DateSliderState extends State<DateSlider> {
   int _currentIndex = 0;
   int _initialIndex = 0;
+
+  bool _isProgrammaticJump = false;
 
   CarouselSliderController carouselController = CarouselSliderController();
   List<DateTime> dateList = [];
@@ -70,9 +73,18 @@ class _DateSliderState extends State<DateSlider> {
     super.didUpdateWidget(oldWidget);
 
     if (widget.departureDate != oldWidget.departureDate) {
-      _currentIndex = dateList.indexWhere((element) => element.isSameDay(widget.departureDate));
       dateList = generateDateList();
-      carouselController.jumpToPage(_currentIndex);
+      final newIndex = dateList.indexWhere((element) => element.isSameDay(widget.departureDate));
+      _currentIndex = newIndex;
+
+      if (newIndex >= 0) {
+        _isProgrammaticJump = true;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          carouselController.jumpToPage(newIndex);
+        });
+      }
+
       setState(() {});
     }
   }
@@ -109,6 +121,12 @@ class _DateSliderState extends State<DateSlider> {
                   if (widget.canUpdate) {
                     _currentIndex = index;
                     setState(() {});
+
+                    if (_isProgrammaticJump) {
+                      _isProgrammaticJump = false;
+                      return;
+                    }
+
                     widget.onPageChange(index, dateList[index]);
                   } else {}
                 },
