@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 import 'package:pss_app/app/theme/theme.dart';
 import 'package:pss_app/core/common/widget/card_general.dart';
 import 'package:pss_app/core/common/widget/input_text.dart';
@@ -74,11 +75,34 @@ class _ContactInformationDialogState extends State<ContactInformationDialog> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("Contact Information", style: AppFont.medium16),
-              widget.height(4),
-              Text(
-                "Who should we contact about this booking? Doesn't have to be a passenger.",
-                style: AppFont.reguler12.copyWith(color: Theme.of(context).hintColor),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text("Contact Information", style: AppFont.medium16),
+                        widget.height(4),
+                        Text(
+                          "Who should we contact about this booking? Doesn't have to be a passenger.",
+                          style: AppFont.reguler12.copyWith(color: Theme.of(context).hintColor),
+                        ),
+                      ],
+                    ),
+                  ),
+                  InkWell(
+                    onTap: () {
+                      context.pop();
+                    },
+                    child: Icon(
+                      Icons.close,
+                      size: 24,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
+                ],
               ),
               widget.height(16),
               InputText(

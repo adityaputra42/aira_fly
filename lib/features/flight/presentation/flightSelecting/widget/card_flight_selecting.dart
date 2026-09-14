@@ -173,6 +173,40 @@ class _CardFlightSelectingState extends State<CardFlightSelecting> {
                             '${firstSegment?.departureAirportCode ?? '-'} - ${lastSegment?.arrivalAirportCode ?? '-'}',
                             style: AppFont.reguler12.copyWith(color: Theme.of(context).hintColor),
                           ),
+                        ],
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Row(
+                            children: [
+                              Text(
+                                displayTotal != null
+                                    ? formatIDR(displayTotal)
+                                    : 'Price unavailable',
+                                style: AppFont.semibold16.copyWith(color: AppColor.greenColor),
+                              ),
+                              if (displayTotal != null)
+                                Text(
+                                  hasMultipleFares && _selectedFare == null ? " mulai" : " total",
+                                  style: AppFont.reguler12.copyWith(
+                                    color: Theme.of(context).hintColor,
+                                  ),
+                                ),
+                              if (hasMultipleFares) ...[
+                                widget.width(4),
+                                AnimatedRotation(
+                                  turns: _expanded ? 0.5 : 0,
+                                  duration: const Duration(milliseconds: 200),
+                                  child: Icon(
+                                    Icons.keyboard_arrow_down_rounded,
+                                    size: 20,
+                                    color: Theme.of(context).hintColor,
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
                           if (_selectedFare != null) ...[
                             widget.width(6),
                             Container(
@@ -184,31 +218,6 @@ class _CardFlightSelectingState extends State<CardFlightSelecting> {
                               child: Text(
                                 _fareClassLabel(_selectedFare!.fareClassId),
                                 style: AppFont.reguler12.copyWith(color: AppColor.secondaryColor),
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          Text(
-                            displayTotal != null ? formatIDR(displayTotal) : 'Price unavailable',
-                            style: AppFont.semibold16.copyWith(color: AppColor.greenColor),
-                          ),
-                          if (displayTotal != null)
-                            Text(
-                              hasMultipleFares && _selectedFare == null ? " mulai" : " total",
-                              style: AppFont.reguler12.copyWith(color: Theme.of(context).hintColor),
-                            ),
-                          if (hasMultipleFares) ...[
-                            widget.width(4),
-                            AnimatedRotation(
-                              turns: _expanded ? 0.5 : 0,
-                              duration: const Duration(milliseconds: 200),
-                              child: Icon(
-                                Icons.keyboard_arrow_down_rounded,
-                                size: 20,
-                                color: Theme.of(context).hintColor,
                               ),
                             ),
                           ],
@@ -275,8 +284,9 @@ class _FareOptionTile extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
         decoration: BoxDecoration(
-          color: isSelected ? AppColor.secondaryColor.withValues(alpha: 0.08) : null,
+          color: isSelected ? AppColor.secondaryColor.withValues(alpha: 0.05) : null,
           borderRadius: BorderRadius.circular(8),
+          border: isSelected ? Border.all(width: 1, color: AppColor.secondaryColor) : null,
         ),
         child: Row(
           children: [

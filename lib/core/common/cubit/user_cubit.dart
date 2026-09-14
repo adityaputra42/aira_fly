@@ -15,4 +15,8 @@ class UserCubit extends Cubit<UserState> {
       emit(UserLoggedIn(user));
     }
   }
+
+  void reset() {
+    emit(UserInitial());
+  }
 }

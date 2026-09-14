@@ -92,18 +92,9 @@ abstract interface class BookingRepository {
     int holdTtlSeconds,
   });
 
-  /// Admin-only on the backend (`booking:pnr:view`).
   Future<Either<Failure, PnrDetailEntity>> getPnr(int id);
 
-  /// Admin-only on the backend (`booking:pnr:view`).
-  Future<Either<Failure, List<PnrSummaryEntity>>> listPnrs({
-    int page,
-    int limit,
-    String? status,
-  });
+  Future<Either<Failure, List<PnrSummaryEntity>>> listPnrs({int page, int limit, String? status});
 
-  /// Admin-only on the backend (`booking:pnr:cancel`). Only works while the
-  /// PNR is still HOLD (unpaid); a BOOKED (paid) PNR cannot be cancelled
-  /// this way.
   Future<Either<Failure, void>> cancelPnr(int id);
 }

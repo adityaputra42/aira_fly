@@ -161,10 +161,7 @@ class PaxSelectionDialogState extends State<PaxSelectionDialog> {
             PrimaryButton(
               title: "Save",
               onPressed: () {
-                // Was previously `Navigator.of(context).pop()` with no
-                // value -- the caller in search_flight_form.dart awaits
-                // a result to update pax counts, so a bare pop() meant
-                // every edit made in this dialog was silently discarded.
+               
                 Navigator.of(context).pop([amountAdult, amountChild, amountInfant]);
               },
             ),

@@ -1,3 +1,4 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -32,18 +33,21 @@ class SplashScreen extends StatelessWidget {
             }
           },
           child: Scaffold(
-            body: Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Image.asset(AppImages.logo, width: context.w(0.4)),
-                  height(12),
-                  Text(
-                    "Aira Fly",
-                    style: AppFont.semibold18.copyWith(color: AppColor.primaryColor),
-                  ),
-                ],
-              ),
+            backgroundColor: AppColor.primaryColor,
+            body: Stack(
+              children: [
+                Image.asset(
+                  AppImages.bg,
+                  width: context.w(1),
+                  height: context.h(1),
+                  fit: BoxFit.cover,
+                ),
+                ZoomIn(
+                  delay: const Duration(milliseconds: 500),
+                  duration: const Duration(seconds: 2),
+                  child: Center(child: Image.asset(AppImages.whiteLogo, width: context.w(0.35))),
+                ),
+              ],
             ),
           ),
         );

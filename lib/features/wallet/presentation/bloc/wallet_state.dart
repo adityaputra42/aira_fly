@@ -1,57 +1,81 @@
 part of 'wallet_bloc.dart';
 
-sealed class WalletState extends Equatable {
-  const WalletState();
+enum WalletStatus { initial, loading, success, failure }
 
-  @override
-  List<Object?> get props => [];
-}
+class WalletState extends Equatable {
+  final WalletStatus balanceStatus;
+  final WalletStatus transactionsStatus;
+  final WalletStatus createTopupStatus;
+  final WalletStatus getTopupStatusStatus;
 
-final class WalletInitial extends WalletState {}
-
-class WalletLoading extends WalletState {}
-
-class BalanceLoaded extends WalletState {
-  final BalanceEntity balance;
-
-  const BalanceLoaded(this.balance);
-
-  @override
-  List<Object?> get props => [balance];
-}
-
-class WalletTransactionsLoaded extends WalletState {
+  final BalanceEntity? balance;
   final List<WalletTransactionEntity> transactions;
+  final TopupEntity? topup;
+  final TopupStatusEntity? topupStatus;
 
-  const WalletTransactionsLoaded(this.transactions);
+  final String? balanceError;
+  final String? transactionsError;
+  final String? createTopupError;
+  final String? getTopupStatusError;
+
+  const WalletState({
+    this.balanceStatus = WalletStatus.initial,
+    this.transactionsStatus = WalletStatus.initial,
+    this.createTopupStatus = WalletStatus.initial,
+    this.getTopupStatusStatus = WalletStatus.initial,
+    this.balance,
+    this.transactions = const [],
+    this.topup,
+    this.topupStatus,
+    this.balanceError,
+    this.transactionsError,
+    this.createTopupError,
+    this.getTopupStatusError,
+  });
+
+  WalletState copyWith({
+    WalletStatus? balanceStatus,
+    WalletStatus? transactionsStatus,
+    WalletStatus? createTopupStatus,
+    WalletStatus? getTopupStatusStatus,
+    BalanceEntity? balance,
+    List<WalletTransactionEntity>? transactions,
+    TopupEntity? topup,
+    TopupStatusEntity? topupStatus,
+    String? balanceError,
+    String? transactionsError,
+    String? createTopupError,
+    String? getTopupStatusError,
+  }) {
+    return WalletState(
+      balanceStatus: balanceStatus ?? this.balanceStatus,
+      transactionsStatus: transactionsStatus ?? this.transactionsStatus,
+      createTopupStatus: createTopupStatus ?? this.createTopupStatus,
+      getTopupStatusStatus: getTopupStatusStatus ?? this.getTopupStatusStatus,
+      balance: balance ?? this.balance,
+      transactions: transactions ?? this.transactions,
+      topup: topup ?? this.topup,
+      topupStatus: topupStatus ?? this.topupStatus,
+      balanceError: balanceError ?? this.balanceError,
+      transactionsError: transactionsError ?? this.transactionsError,
+      createTopupError: createTopupError ?? this.createTopupError,
+      getTopupStatusError: getTopupStatusError ?? this.getTopupStatusError,
+    );
+  }
 
   @override
-  List<Object?> get props => [transactions];
-}
-
-class TopupCreated extends WalletState {
-  final TopupEntity topup;
-
-  const TopupCreated(this.topup);
-
-  @override
-  List<Object?> get props => [topup];
-}
-
-class TopupStatusLoaded extends WalletState {
-  final TopupStatusEntity status;
-
-  const TopupStatusLoaded(this.status);
-
-  @override
-  List<Object?> get props => [status];
-}
-
-class WalletError extends WalletState {
-  final String message;
-
-  const WalletError(this.message);
-
-  @override
-  List<Object?> get props => [message];
+  List<Object?> get props => [
+    balanceStatus,
+    transactionsStatus,
+    createTopupStatus,
+    getTopupStatusStatus,
+    balance,
+    transactions,
+    topup,
+    topupStatus,
+    balanceError,
+    transactionsError,
+    createTopupError,
+    getTopupStatusError,
+  ];
 }

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import 'app_animation_config.dart';
 
-/// *inside* an already-visible surface.
 class ScaleIn extends StatefulWidget {
   const ScaleIn({
     super.key,

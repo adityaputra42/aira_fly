@@ -75,9 +75,7 @@ class DropDownCustom extends StatelessWidget {
             decoration: InputDecoration(
               enabled: enable,
               isDense: true,
-
-              contentPadding:
-                  contentPadding ?? const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              contentPadding: contentPadding ?? const EdgeInsets.symmetric(vertical: 8),
               suffixIcon: icon,
               suffix: suffix,
               prefixIcon: prefixIcon,
@@ -98,7 +96,11 @@ class DropDownCustom extends StatelessWidget {
               filled: filled,
               fillColor: filledColor ?? Theme.of(context).colorScheme.surface,
               hintStyle:
-                  hintStyle ?? AppFont.reguler12.copyWith(color: Theme.of(context).hintColor),
+                  hintStyle ??
+                  AppFont.reguler12.copyWith(
+                    color: Theme.of(context).hintColor,
+                    overflow: TextOverflow.ellipsis,
+                  ),
               border: OutlineInputBorder(
                 borderRadius: borderRadius ?? BorderRadius.circular(8),
                 borderSide: BorderSide(
@@ -142,7 +144,7 @@ class DropDownCustom extends StatelessWidget {
             dropdownStyleData: DropdownStyleData(
               decoration: BoxDecoration(
                 color: color ?? Theme.of(context).cardColor,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(8),
               ),
             ),
           ),

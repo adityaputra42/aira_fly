@@ -1,8 +1,10 @@
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:get_it/get_it.dart';
+import 'package:pss_app/app/routes/app_routes.dart';
 import 'package:pss_app/core/common/cubit/user_cubit.dart';
 
 import '../core/common/cubit/theme_cubit.dart';
+import '../core/network/dio_client.dart';
 import '../core/utils/connection_checker.dart';
 import '../features/auth/data/datasources/auth_local_datasource.dart';
 import '../features/auth/data/datasources/auth_remote_data_source.dart';
@@ -75,6 +77,7 @@ import '../features/wallet/domain/usecases/list_wallet_transactions.dart'
     show ListWalletTransactions;
 import '../features/wallet/domain/usecases/topup_wallet.dart';
 import '../features/wallet/presentation/bloc/wallet_bloc.dart';
+import 'routes/route_names.dart';
 
 final serviceLocator = GetIt.instance;
 
@@ -85,7 +88,7 @@ Future<void> initDependencies() async {
   serviceLocator.registerLazySingleton(() => MainCubit());
   serviceLocator.registerLazySingleton(() => UserCubit());
   serviceLocator.registerFactory<ConnectionChecker>(() => ConnectionCheckerImpl(serviceLocator()));
-  serviceLocator.registerFactory<SplashCubit>(() => SplashCubit());
+  serviceLocator.registerFactory<SplashCubit>(() => SplashCubit(authBloc: serviceLocator()));
 
   serviceLocator.registerFactory<ThemeCubit>(() => ThemeCubit());
   serviceLocator.registerFactory<OnboardingCubit>(() => OnboardingCubit());
@@ -98,6 +101,14 @@ Future<void> initDependencies() async {
   _initWallet();
   _initTicket();
   _initProfile();
+
+  DioClient().configure(
+    authLocalDataSource: serviceLocator(),
+    onForceLogout: () {
+      serviceLocator<UserCubit>().reset();
+      AppRouter.router.goNamed(RouteNames.signin);
+    },
+  );
 }
 
 void _initAuth() {
@@ -114,8 +125,9 @@ void _initAuth() {
       () => AuthBloc(
         appUserCubit: serviceLocator(),
         signInUseCase: serviceLocator(),
-        signOutUseCase: serviceLocator(),
+        signUpUseCase: serviceLocator(),
         getCurrentUserUseCase: serviceLocator(),
+        authLocalDataSource: serviceLocator(),
       ),
     );
 }

@@ -3,12 +3,14 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:dio/dio.dart';
+import 'package:pss_app/core/constants/enpoint.dart';
 
+import '../../features/auth/data/datasources/auth_local_datasource.dart';
 import '../constants/environment.dart';
 import 'logging_interceptor.dart';
 
 class DioClient {
-  DioClient._() : onForceLogout = null {
+  DioClient._() {
     _dio = _createDio();
     _authDio = _createDio();
 
@@ -23,11 +25,22 @@ class DioClient {
   late final Dio _dio;
   late final Dio _authDio;
 
-  final void Function()? onForceLogout;
+  AuthLocalDataSource? _authLocalDataSource;
+  void Function()? _onForceLogout;
+  bool _configured = false;
+
+  void configure({
+    required AuthLocalDataSource authLocalDataSource,
+    required void Function() onForceLogout,
+  }) {
+    _authLocalDataSource = authLocalDataSource;
+    _onForceLogout = onForceLogout;
+    _configured = true;
+  }
 
   Future<String>? _refreshFuture;
 
-  static const String _refreshPath = '';
+  static const String _refreshPath = Endpoint.refreshToken;
 
   static const String _bypassInterceptor = 'X-Bypass-Interceptor';
   static const String _retryHeader = 'X-Retry';
@@ -48,19 +61,23 @@ class DioClient {
     return InterceptorsWrapper(onRequest: _onRequest, onResponse: _onResponse, onError: _onError);
   }
 
-  void _onRequest(RequestOptions options, RequestInterceptorHandler handler) {
+  Future<void> _onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
     if (options.data is! FormData) {
       options.headers['Content-Type'] = 'application/json; charset=UTF-8';
     }
 
-    // Jika nanti token disimpan di local storage/preferences,
-    // inject Authorization di sini.
-    //
-    // final token = Preferences.getString(Preferences.accessToken);
-    //
-    // if (token != null && token.isNotEmpty) {
-    //   options.headers['Authorization'] = 'Bearer $token';
-    // }
+    if (!_configured) {
+      log(
+        'WARNING: DioClient.configure() belum dipanggil -- request ini jalan TANPA access token.',
+      );
+    }
+
+    if (!_isBypassInterceptor(options)) {
+      final token = await _authLocalDataSource?.getAccessToken();
+      if (token != null && token.isNotEmpty) {
+        options.headers['Authorization'] = 'Bearer $token';
+      }
+    }
 
     handler.next(options);
   }
@@ -105,6 +122,12 @@ class DioClient {
       return handler.reject(error);
     }
 
+    final refreshToken = await _authLocalDataSource?.getRefreshToken();
+    if (refreshToken == null || refreshToken.isEmpty) {
+      log('401 tanpa refresh token tersimpan -- treated as guest, skip refresh & logout.');
+      return handler.next(error);
+    }
+
     try {
       log('401 detected. Refreshing token...');
 
@@ -121,7 +144,6 @@ class DioClient {
       return handler.reject(error);
     }
   }
-
   // ---------------------------------------------------------------------------
   // Token Refresh
   // ---------------------------------------------------------------------------
@@ -149,29 +171,39 @@ class DioClient {
   Future<String> _handleTokenRefresh() async {
     log('Token refresh started');
 
+    final refreshToken = await _authLocalDataSource?.getRefreshToken();
+
+    if (refreshToken == null || refreshToken.isEmpty) {
+      throw StateError('No refresh token stored; cannot refresh.');
+    }
+
     try {
       final response = await _authDio.post(
         _refreshPath,
-        data: const {},
+
+        data: {'refresh_token': refreshToken},
         options: Options(
-          headers: {
-            'Authorization': '',
-            _retryHeader: true,
-            'Content-Type': 'application/json; charset=UTF-8',
-          },
+          headers: {_retryHeader: true, 'Content-Type': 'application/json; charset=UTF-8'},
         ),
       );
 
       final data = _extractData(response.data);
-      final token = data['token']?.toString();
+      final newAccessToken = data['token']?.toString() ?? data['access_token']?.toString();
+      final newRefreshToken = data['refresh_token']?.toString();
 
-      if (token == null || token.isEmpty) {
+      if (newAccessToken == null || newAccessToken.isEmpty) {
         throw const FormatException('Refresh response did not contain a valid token');
+      }
+
+      await _authLocalDataSource?.saveAccessToken(newAccessToken);
+
+      if (newRefreshToken != null && newRefreshToken.isNotEmpty) {
+        await _authLocalDataSource?.saveRefreshToken(newRefreshToken);
       }
 
       log('Token refreshed successfully');
 
-      return token;
+      return newAccessToken;
     } catch (e, stackTrace) {
       log('Token refresh failed', error: e, stackTrace: stackTrace);
 
@@ -189,7 +221,6 @@ class DioClient {
     headers['Authorization'] = 'Bearer $newToken';
     headers[_retryHeader] = true;
 
-    // Jangan override Content-Type untuk FormData.
     if (requestOptions.data is! FormData) {
       headers['Content-Type'] = 'application/json; charset=UTF-8';
     }
@@ -281,7 +312,11 @@ class DioClient {
   void _forceLogout() {
     log('Force logout triggered');
 
-    onForceLogout?.call();
+    // Fire-and-forget: dipanggil dari _onResponse yang sync, gak perlu
+    // ditunggu supaya interceptor gak nge-block response lain.
+    unawaited(_authLocalDataSource?.clearTokens() ?? Future.value());
+
+    _onForceLogout?.call();
   }
 
   // ---------------------------------------------------------------------------
@@ -300,26 +335,6 @@ class DioClient {
       queryParameters: queryParameters,
       options: options,
       cancelToken: cancelToken,
-      onReceiveProgress: onReceiveProgress,
-    );
-  }
-
-  Future<Response<T>> query<T>(
-    String uri, {
-    dynamic data,
-    Map<String, dynamic>? queryParameters,
-    Options? options,
-    CancelToken? cancelToken,
-    ProgressCallback? onSendProgress,
-    ProgressCallback? onReceiveProgress,
-  }) {
-    return _dio.query<T>(
-      uri,
-      data: data,
-      queryParameters: queryParameters,
-      options: options,
-      cancelToken: cancelToken,
-      onSendProgress: onSendProgress,
       onReceiveProgress: onReceiveProgress,
     );
   }

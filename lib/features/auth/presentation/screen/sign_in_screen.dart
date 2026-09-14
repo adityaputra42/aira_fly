@@ -1,8 +1,10 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconify_flutter_plus/iconify_flutter_plus.dart';
 import 'package:iconify_flutter_plus/icons/mdi.dart';
+import 'package:loader_overlay/loader_overlay.dart';
 import 'package:pss_app/app/routes/route_names.dart';
 import 'package:pss_app/app/theme/theme.dart';
 import 'package:pss_app/core/common/widget/card_general.dart';
@@ -13,6 +15,7 @@ import 'package:pss_app/core/utils/size_extension.dart';
 import 'package:pss_app/features/auth/presentation/bloc/auth_bloc.dart';
 
 import '../../../../core/utils/show_snackbar.dart';
+import '../../../../core/utils/widget_helper.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -22,6 +25,7 @@ class SignInScreen extends StatefulWidget {
 }
 
 class _SignInScreenState extends State<SignInScreen> {
+  bool disable = true;
   bool obscureText = true;
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
@@ -35,9 +39,28 @@ class _SignInScreenState extends State<SignInScreen> {
     passwordController.dispose();
   }
 
+  void validateDisable() {
+    setState(() {
+      if (emailController.text != "" && passwordController.text != "") {
+        disable = false;
+      } else {
+        disable = true;
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: WidgetHelper.appBar(
+        context: context,
+        title: "Sign In",
+        onTap: () {
+          context.pop();
+        },
+        color: AppColor.primaryColor,
+        titleColor: AppColor.darkText1,
+      ),
       body: Stack(
         children: [
           Container(
@@ -64,24 +87,7 @@ class _SignInScreenState extends State<SignInScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Center(
-                    child: Column(
-                      children: [
-                        widget.height(32),
-                        Image.asset(
-                          AppImages.logo,
-                          width: context.w(0.2),
-                          color: AppColor.cardLight,
-                        ),
-                        widget.height(8),
-
-                        Text(
-                          "Aira Fly",
-                          style: AppFont.semibold16.copyWith(color: AppColor.cardLight),
-                        ),
-                      ],
-                    ),
-                  ),
+                  Center(child: Image.asset(AppImages.whiteLogo, width: context.w(0.2))),
 
                   widget.height(24),
                   Text("Welcome Back", style: AppFont.medium18.copyWith(color: AppColor.darkText1)),
@@ -94,6 +100,11 @@ class _SignInScreenState extends State<SignInScreen> {
                   Expanded(
                     child: BlocConsumer<AuthBloc, AuthState>(
                       listener: (context, state) {
+                        if (state is AuthLoading) {
+                          context.loaderOverlay.show();
+                        } else {
+                          context.loaderOverlay.hide();
+                        }
                         if (state is AuthError) {
                           showSnackBar(context, state.message);
                         } else if (state is Authenticated) {
@@ -117,6 +128,9 @@ class _SignInScreenState extends State<SignInScreen> {
                                         hintText: "Input your email address!",
                                         title: "Email",
                                         controller: emailController,
+                                        onChange: (p0) {
+                                          validateDisable();
+                                        },
                                       ),
                                       widget.height(12),
                                       InputText(
@@ -124,6 +138,9 @@ class _SignInScreenState extends State<SignInScreen> {
                                         title: "Password",
                                         controller: passwordController,
                                         obscureText: obscureText,
+                                        onChange: (p0) {
+                                          validateDisable();
+                                        },
                                         icon: InkWell(
                                           onTap: () {
                                             setState(() {
@@ -151,6 +168,7 @@ class _SignInScreenState extends State<SignInScreen> {
                                       ),
                                       widget.height(24),
                                       PrimaryButton(
+                                        disable: disable,
                                         title: "Sign In",
                                         onPressed: () {
                                           if (formKey.currentState!.validate()) {
@@ -161,7 +179,6 @@ class _SignInScreenState extends State<SignInScreen> {
                                               ),
                                             );
                                           }
-                                          context.pushReplacementNamed(RouteNames.main);
                                         },
                                       ),
                                       widget.height(16),
@@ -258,6 +275,10 @@ class _SignInScreenState extends State<SignInScreen> {
                                               style: AppFont.medium10.copyWith(
                                                 color: AppColor.secondaryColor,
                                               ),
+                                              recognizer: TapGestureRecognizer()
+                                                ..onTap = () {
+                                                  context.goNamed(RouteNames.signup);
+                                                },
                                             ),
                                           ],
                                         ),

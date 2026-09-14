@@ -32,7 +32,6 @@ class _SelectingSeatScreenState extends State<SelectingSeatScreen> {
 
   int _selectedPassengerIndex = 0;
 
-  /// passengerIndex -> picked seat for this leg only.
   late Map<int, FlightSeatEntity> _selectionByPassenger;
 
   @override

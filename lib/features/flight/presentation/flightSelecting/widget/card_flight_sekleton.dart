@@ -34,7 +34,7 @@ class FlightSearchSkeleton extends StatelessWidget {
                           child: Iconify(Bx.bxs_plane, color: AppColor.secondaryColor, size: 20),
                         ),
                       ),
-                      height(8),
+                      width(8),
                       Expanded(
                         child: Column(
                           mainAxisSize: MainAxisSize.min,

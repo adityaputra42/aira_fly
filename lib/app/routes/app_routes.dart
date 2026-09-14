@@ -55,6 +55,26 @@ class AppRouter {
         ),
         routes: [
           GoRoute(
+            path: RouteNames.signin,
+            name: RouteNames.signin,
+            pageBuilder: (context, state) => buildPageWithTransition(
+              key: state.pageKey,
+              child: const SignInScreen(),
+              transition: PageTransitionType.sharedAxisVertical,
+            ),
+            routes: [
+              GoRoute(
+                path: RouteNames.signup,
+                name: RouteNames.signup,
+                pageBuilder: (context, state) => buildPageWithTransition(
+                  key: state.pageKey,
+                  child: const SignUpScreen(),
+                  transition: PageTransitionType.fadeScale,
+                ),
+              ),
+            ],
+          ),
+          GoRoute(
             path: RouteNames.ticketDetail,
             name: RouteNames.ticketDetail,
             pageBuilder: (context, state) => buildPageWithTransition(
@@ -208,26 +228,6 @@ class AppRouter {
                 ],
               ),
             ],
-          ),
-        ],
-      ),
-      GoRoute(
-        path: '/${RouteNames.signin}',
-        name: RouteNames.signin,
-        pageBuilder: (context, state) => buildPageWithTransition(
-          key: state.pageKey,
-          child: const SignInScreen(),
-          transition: PageTransitionType.sharedAxisVertical,
-        ),
-        routes: [
-          GoRoute(
-            path: RouteNames.signup,
-            name: RouteNames.signup,
-            pageBuilder: (context, state) => buildPageWithTransition(
-              key: state.pageKey,
-              child: const SignUpScreen(),
-              transition: PageTransitionType.fadeScale,
-            ),
           ),
         ],
       ),

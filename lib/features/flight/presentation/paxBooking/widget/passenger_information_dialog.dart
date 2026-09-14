@@ -1,5 +1,6 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:pss_app/app/theme/theme.dart';
 import 'package:pss_app/core/common/widget/card_general.dart';
@@ -28,7 +29,9 @@ class PassengerInformationDialog extends StatefulWidget {
 
 class _PassengerInformationDialogState extends State<PassengerInformationDialog> {
   static const _dateFormat = 'yyyy-MM-dd';
-  static const _titleOptions = ['Mr.', 'Mrs.', 'Ms.', 'Mstr.', 'Miss'];
+  static const _adultTitleOptions = ['Mr.', 'Mrs.', 'Ms.'];
+
+  static const _childTitleOptions = ['Mstr.', 'Miss'];
   static const _documentTypeOptions = ['KTP', 'Passport', 'KIA'];
 
   final _formKey = GlobalKey<FormState>();
@@ -163,25 +166,141 @@ class _PassengerInformationDialogState extends State<PassengerInformationDialog>
           padding: EdgeInsets.all(16),
           child: Form(
             key: _formKey,
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(widget.label, style: AppFont.medium16),
-                  widget.height(4),
-                  Text(
-                    "As it appears on their ID or passport.",
-                    style: AppFont.reguler12.copyWith(color: Theme.of(context).hintColor),
-                  ),
-                  widget.height(16),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(
-                        width: 96,
-                        child: DropDownCustom(
-                          listData: _titleOptions
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(widget.label, style: AppFont.medium16),
+                          widget.height(4),
+                          Text(
+                            "As it appears on their ID or passport.",
+                            style: AppFont.reguler12.copyWith(color: Theme.of(context).hintColor),
+                          ),
+                        ],
+                      ),
+                    ),
+                    InkWell(
+                      onTap: () {
+                        context.pop();
+                      },
+                      child: Icon(
+                        Icons.close,
+                        size: 24,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                    ),
+                  ],
+                ),
+
+                widget.height(16),
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          spacing: 8,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Visibility(
+                              visible: widget.passengerType != "INF",
+                              child: SizedBox(
+                                width: context.w(0.25),
+                                child: DropDownCustom(
+                                  listData:
+                                      (widget.passengerType == "ADT"
+                                              ? _adultTitleOptions
+                                              : _childTitleOptions)
+                                          .map(
+                                            (item) => DropdownItem<String>(
+                                              value: item,
+                                              child: Text(
+                                                item,
+                                                style: AppFont.reguler12.copyWith(
+                                                  color: Theme.of(context).colorScheme.onSurface,
+                                                ),
+                                              ),
+                                            ),
+                                          )
+                                          .toList(),
+                                  hint: "Select title",
+                                  title: "Title ",
+                                  value: _title == "" ? null : _title,
+
+                                  onChange: (v) => setState(() => _title = v),
+                                ),
+                              ),
+                            ),
+
+                            Expanded(
+                              child: InputText(
+                                title: "First Name",
+                                hintText: "e.g. Aditya",
+                                controller: _firstNameController,
+                                textInputAction: TextInputAction.next,
+                                validator: (v) => (v == null || v.trim().isEmpty)
+                                    ? "First name is required"
+                                    : null,
+                              ),
+                            ),
+                          ],
+                        ),
+                        widget.height(12),
+                        InputText(
+                          title: "Last Name (optional)",
+                          hintText: "e.g. Pratama",
+                          controller: _lastNameController,
+                          textInputAction: TextInputAction.next,
+                        ),
+                        widget.height(12),
+                        DropDownCustom(
+                          listData: ['M', 'F']
+                              .map(
+                                (item) => DropdownItem<String>(
+                                  value: item,
+                                  child: Text(
+                                    item == 'M' ? 'Male' : 'Female',
+                                    style: AppFont.reguler12.copyWith(
+                                      color: Theme.of(context).colorScheme.onSurface,
+                                    ),
+                                  ),
+                                ),
+                              )
+                              .toList(),
+                          hint: "Select gender",
+                          title: "Gender (optional)",
+                          value: (_gender == "" || _gender == null) ? null : _gender,
+
+                          onChange: (v) => setState(() => _gender = v),
+                        ),
+
+                        widget.height(12),
+                        _dateField(
+                          label: _birthDateRequired ? "Birth Date" : "Birth Date (optional)",
+                          hintText: "Select birth date",
+                          value: _birthDate,
+                          onTap: _pickBirthDate,
+                        ),
+                        widget.height(12),
+                        InputText(
+                          title: "Nationality (optional)",
+                          hintText: "e.g. Indonesia",
+                          controller: _nationalityController,
+                          textInputAction: TextInputAction.next,
+                        ),
+                        widget.height(12),
+
+                        DropDownCustom(
+                          listData: _documentTypeOptions
                               .map(
                                 (item) => DropdownItem<String>(
                                   value: item,
@@ -194,110 +313,34 @@ class _PassengerInformationDialogState extends State<PassengerInformationDialog>
                                 ),
                               )
                               .toList(),
-                          hint: "Select title",
-                          title: "Title ",
-                          value: _title == "" ? null : _title,
+                          hint: "Select document type",
+                          title: "Document Type (optional)",
+                          value: _documentType == "" ? null : _documentType,
 
-                          onChange: (v) => setState(() => _title = v),
+                          onChange: (v) => setState(() => _documentType = v),
                         ),
-                      ),
-                      widget.width(12),
-                      Expanded(
-                        child: InputText(
-                          title: "First Name",
-                          hintText: "e.g. Aditya",
-                          controller: _firstNameController,
+
+                        widget.height(12),
+                        InputText(
+                          title: "Document Number (optional)",
+                          hintText: "e.g. 3171234567890001",
+                          controller: _documentNumberController,
                           textInputAction: TextInputAction.next,
-                          validator: (v) =>
-                              (v == null || v.trim().isEmpty) ? "First name is required" : null,
                         ),
-                      ),
-                    ],
+                        widget.height(12),
+                        _dateField(
+                          label: "Document Expiry (optional)",
+                          hintText: "Select expiry date",
+                          value: _documentExpiredAt,
+                          onTap: _pickDocumentExpiry,
+                        ),
+                        widget.height(24),
+                        PrimaryButton(title: "Save", onPressed: _onSave),
+                      ],
+                    ),
                   ),
-                  widget.height(12),
-                  InputText(
-                    title: "Last Name (optional)",
-                    hintText: "e.g. Pratama",
-                    controller: _lastNameController,
-                    textInputAction: TextInputAction.next,
-                  ),
-                  widget.height(12),
-                  DropDownCustom(
-                    listData: ['M', 'F']
-                        .map(
-                          (item) => DropdownItem<String>(
-                            value: item,
-                            child: Text(
-                              item == 'M' ? 'Male' : 'Female',
-                              style: AppFont.reguler12.copyWith(
-                                color: Theme.of(context).colorScheme.onSurface,
-                              ),
-                            ),
-                          ),
-                        )
-                        .toList(),
-                    hint: "Select gender",
-                    title: "Gender (optional)",
-                    value: _gender == "" ? null : _gender,
-
-                    onChange: (v) => setState(() => _gender = v),
-                  ),
-
-                  widget.height(12),
-                  _dateField(
-                    label: _birthDateRequired ? "Birth Date" : "Birth Date (optional)",
-                    hintText: "Select birth date",
-                    value: _birthDate,
-                    onTap: _pickBirthDate,
-                  ),
-                  widget.height(12),
-                  InputText(
-                    title: "Nationality (optional)",
-                    hintText: "e.g. Indonesia",
-                    controller: _nationalityController,
-                    textInputAction: TextInputAction.next,
-                  ),
-                  widget.height(12),
-
-                  DropDownCustom(
-                    listData: _documentTypeOptions
-                        .map(
-                          (item) => DropdownItem<String>(
-                            value: item,
-                            child: Text(
-                              item,
-                              style: AppFont.reguler12.copyWith(
-                                color: Theme.of(context).colorScheme.onSurface,
-                              ),
-                            ),
-                          ),
-                        )
-                        .toList(),
-                    hint: "Select document type",
-                    title: "Document Type (optional)",
-                    value: _documentType == "" ? null : _documentType,
-
-                    onChange: (v) => setState(() => _documentType = v),
-                  ),
-
-                  widget.height(12),
-                  InputText(
-                    title: "Document Number (optional)",
-                    hintText: "e.g. 3171234567890001",
-                    controller: _documentNumberController,
-                    textInputAction: TextInputAction.next,
-                  ),
-                  widget.height(12),
-                  _dateField(
-                    label: "Document Expiry (optional)",
-                    hintText: "Select expiry date",
-                    value: _documentExpiredAt,
-                    onTap: _pickDocumentExpiry,
-                  ),
-                  widget.height(24),
-                  PrimaryButton(title: "Save", onPressed: _onSave),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),

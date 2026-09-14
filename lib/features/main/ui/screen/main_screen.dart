@@ -8,23 +8,11 @@ import 'package:pss_app/features/ticket/presentation/screen/ticket_screen.dart';
 import 'package:pss_app/features/wallet/presentation/screen/wallet_screen.dart';
 
 import '../../../../core/common/cubit/user_cubit.dart';
-import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../cubit/main_cubit.dart';
 import '../widget/custom_bottom_navbar.dart';
 
-class MainScreen extends StatefulWidget {
+class MainScreen extends StatelessWidget {
   const MainScreen({super.key});
-
-  @override
-  State<MainScreen> createState() => _MainScreenState();
-}
-
-class _MainScreenState extends State<MainScreen> {
-  @override
-  void initState() {
-    super.initState();
-    context.read<AuthBloc>().add(CheckAuthStatus());
-  }
 
   @override
   Widget build(BuildContext context) {

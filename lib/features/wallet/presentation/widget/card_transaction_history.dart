@@ -1,8 +1,8 @@
 part of '../screen/wallet_screen.dart';
 
 class CardTransactionHistory extends StatelessWidget {
-  const CardTransactionHistory({super.key});
-
+  const CardTransactionHistory({super.key, required this.data});
+  final WalletTransactionEntity data;
   @override
   Widget build(BuildContext context) {
     return CardGeneral(
@@ -26,17 +26,21 @@ class CardTransactionHistory extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("Top Up Balance", style: AppFont.medium14),
+                Text(data.type ?? "", style: AppFont.medium14),
                 height(2),
                 Text(
-                  DateFormat("dd MMM yyyy, HH:mm:ss").format(DateTime.now()),
+                  DateFormat("dd MMM yyyy, HH:mm:ss").format(data.createdAt ?? DateTime.now()),
                   style: AppFont.reguler12.copyWith(color: Theme.of(context).hintColor),
                 ),
               ],
             ),
           ),
           Text(
-            NumberFormat.currency(locale: "id_ID", symbol: "Rp ", decimalDigits: 0).format(120000),
+            NumberFormat.currency(
+              locale: "id_ID",
+              symbol: "Rp ",
+              decimalDigits: 0,
+            ).format(data.amount ?? 0),
             style: AppFont.medium14.copyWith(color: AppColor.greenColor),
           ),
         ],

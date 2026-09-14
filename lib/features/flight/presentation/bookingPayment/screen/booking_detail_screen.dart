@@ -9,6 +9,7 @@ import 'package:iconify_flutter_plus/iconify_flutter_plus.dart';
 import 'package:iconify_flutter_plus/icons/bx.dart';
 import 'package:intl/intl.dart';
 import 'package:pss_app/app/theme/theme.dart';
+import 'package:pss_app/core/common/cubit/user_cubit.dart';
 import 'package:pss_app/core/common/widget/card_general.dart';
 import 'package:pss_app/core/common/widget/primary_button.dart';
 import 'package:pss_app/core/common/widget/secondary_button.dart';
@@ -266,6 +267,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                 Text("Contact", style: AppFont.medium14),
                 widget.height(8),
                 CardGeneral(
+                  width: double.infinity,
                   margin: EdgeInsets.zero,
                   padding: const EdgeInsets.all(12),
                   child: Column(
@@ -316,6 +318,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                 Text("Addons", style: AppFont.medium14),
                 widget.height(8),
                 CardGeneral(
+                  width: double.infinity,
                   margin: EdgeInsets.zero,
                   padding: const EdgeInsets.all(12),
                   child: Column(
@@ -377,76 +380,82 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
   }
 
   Widget _buildPaymentMethod(BuildContext context) {
-    const isLoggedIn = false;
-
-    return Column(
-      children: [
-        if (_ancillaryFailures.isNotEmpty)
-          Container(
-            width: double.infinity,
-            margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.orange.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.orange, width: 0.5),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Booking created (${_pnr?.bookingCode ?? '-'}), but some addons could not be attached:",
-                  style: AppFont.medium12.copyWith(color: Colors.orange.shade800),
+    return BlocBuilder<UserCubit, UserState>(
+      builder: (context, state) {
+        var isLoggedIn = false;
+        if (state is UserLoggedIn) {
+          isLoggedIn = true;
+        }
+        return Column(
+          children: [
+            if (_ancillaryFailures.isNotEmpty)
+              Container(
+                width: double.infinity,
+                margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.orange.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.orange, width: 0.5),
                 ),
-                widget.height(4),
-                for (final failure in _ancillaryFailures)
-                  Text(
-                    "\u2022 $failure",
-                    style: AppFont.reguler12.copyWith(color: Colors.orange.shade800),
-                  ),
-              ],
-            ),
-          ),
-        if (_errorMessage != null)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-            child: Text(_errorMessage!, style: AppFont.reguler12.copyWith(color: Colors.red)),
-          ),
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text("Booking Code", style: AppFont.reguler12),
-                Text(_pnr?.bookingCode ?? '-', style: AppFont.semibold20),
-                widget.height(24),
-                Text("Payment Method", style: AppFont.medium14),
-                widget.height(8),
-                _paymentMethodTile(
-                  value: 'DOKU_VA',
-                  title: "Virtual Account (DOKU)",
-                  subtitle: "Pay via bank transfer -- works without signing in.",
-                  enabled: true,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Booking created (${_pnr?.bookingCode ?? '-'}), but some addons could not be attached:",
+                      style: AppFont.medium12.copyWith(color: Colors.orange.shade800),
+                    ),
+                    widget.height(4),
+                    for (final failure in _ancillaryFailures)
+                      Text(
+                        "\u2022 $failure",
+                        style: AppFont.reguler12.copyWith(color: Colors.orange.shade800),
+                      ),
+                  ],
                 ),
-                widget.height(8),
-                _paymentMethodTile(
-                  value: 'BALANCE',
-                  title: "Wallet Balance",
-                  subtitle: "Sign in to pay with your wallet balance.",
-                  enabled: isLoggedIn,
+              ),
+            if (_errorMessage != null)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                child: Text(_errorMessage!, style: AppFont.reguler12.copyWith(color: Colors.red)),
+              ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("Booking Code", style: AppFont.reguler12),
+                    Text(_pnr?.bookingCode ?? '-', style: AppFont.semibold20),
+                    widget.height(24),
+                    Text("Payment Method", style: AppFont.medium14),
+                    widget.height(8),
+                    _paymentMethodTile(
+                      value: 'DOKU_VA',
+                      title: "Virtual Account (DOKU)",
+                      subtitle: "Pay via bank transfer -- works without signing in.",
+                      enabled: true,
+                    ),
+                    widget.height(8),
+                    _paymentMethodTile(
+                      value: 'BALANCE',
+                      title: "Wallet Balance",
+                      subtitle: "Sign in to pay with your wallet balance.",
+                      enabled: isLoggedIn,
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
-          ),
-        ),
-        _bottomBar(
-          label: "Total",
-          amount: _pnr?.totalAmount ?? _estimatedTotal,
-          buttonLabel: "Pay Now",
-          onPressed: _pay,
-        ),
-      ],
+            _bottomBar(
+              label: "Total",
+              amount: _pnr?.totalAmount ?? _estimatedTotal,
+              buttonLabel: "Pay Now",
+              onPressed: _pay,
+            ),
+          ],
+        );
+      },
     );
   }
 
