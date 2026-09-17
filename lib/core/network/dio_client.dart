@@ -48,7 +48,7 @@ class DioClient {
   static Dio _createDio() {
     return Dio(
       BaseOptions(
-        baseUrl: Environment.getApiBaseUrl(),
+        baseUrl: Env.getApiBaseUrl(),
         connectTimeout: const Duration(seconds: 30),
         receiveTimeout: const Duration(seconds: 30),
         responseType: ResponseType.json,

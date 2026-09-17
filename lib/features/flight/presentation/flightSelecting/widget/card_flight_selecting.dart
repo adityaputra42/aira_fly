@@ -26,7 +26,8 @@ class _CardFlightSelectingState extends State<CardFlightSelecting> {
   late bool _expanded = widget.initiallyExpanded;
   ItineraryFareEntity? _selectedFare;
 
-  String _formatTime(DateTime? dt) => dt == null ? '--:--' : DateFormat('HH:mm').format(dt);
+  String _formatTime(DateTime? dt) =>
+      dt == null ? '--:--' : DateFormat('HH:mm').format(dt.toLocal());
   String _formatDate(DateTime? dt) => dt == null ? '-' : DateFormat('EEE, dd MMM yyyy').format(dt);
 
   String _fareClassLabel(int? id) {

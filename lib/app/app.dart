@@ -17,9 +17,9 @@ class App extends StatelessWidget {
       builder: (context, isDarkMode) {
         return MaterialApp.router(
           routerConfig: AppRouter.router,
-          debugShowCheckedModeBanner: Environment.getAppEnv() == "dev",
+          debugShowCheckedModeBanner: Env.appEnv == "dev",
           title: "Aira Fly",
-          theme: Styles.themeData(!isDarkMode, context),
+          theme: Styles.themeData(isDarkMode, context),
           builder: (context, child) {
             return GlobalLoaderOverlay(
               overlayColor: AppColor.primaryColor.withValues(alpha: 0.25),

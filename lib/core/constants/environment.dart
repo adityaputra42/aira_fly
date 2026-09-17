@@ -1,29 +1,40 @@
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:envied/envied.dart';
 
-class Environment {
+part 'environment.g.dart';
+
+@Envied(path: '.env')
+abstract class Env {
+  @EnviedField(varName: 'APP_ENV')
+  static const String appEnv = _Env.appEnv;
+
+  @EnviedField(varName: 'DEV_URL')
+  static const String devUrl = _Env.devUrl;
+
+  @EnviedField(varName: 'STAGING_URL')
+  static const String stagingUrl = _Env.stagingUrl;
+
+  @EnviedField(varName: 'PRODUCTION_URL')
+  static const String productionUrl = _Env.productionUrl;
+
+  @EnviedField(varName: 'APP_USERNAME_LOGIN')
+  static const String appUsernameLogin = _Env.appUsernameLogin;
+
+  @EnviedField(varName: 'APP_PASSWORD_LOGIN')
+  static const String appPasswordLogin = _Env.appPasswordLogin;
+
   static String getApiBaseUrl() {
-    String? url = dotenv.env['PRODUCTION_URL'];
-    if (dotenv.env['APP_ENV'] == 'dev') {
-      url = dotenv.env['DEV_URL'];
-    }
-    if (dotenv.env['APP_ENV'] == 'staging') {
-      url = dotenv.env['STAGING_URL'];
-    }
-    if (dotenv.env['APP_ENV'] == 'prod') {
-      url = dotenv.env['PRODUCTION_URL'];
-    }
-    return url!;
-  }
+    switch (appEnv) {
+      case 'dev':
+        return devUrl;
 
-  static String? getAppEnv() {
-    return dotenv.env['APP_ENV'];
-  }
+      case 'staging':
+        return stagingUrl;
 
-  static String? getAppUsernameLogin() {
-    return dotenv.env['APP_USERNAME_LOGIN'];
-  }
+      case 'prod':
+        return productionUrl;
 
-  static String? getAppPasswordLogin() {
-    return dotenv.env['APP_PASSWORD_LOGIN'];
+      default:
+        throw StateError('Invalid APP_ENV: $appEnv');
+    }
   }
 }

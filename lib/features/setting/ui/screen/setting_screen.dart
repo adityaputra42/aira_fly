@@ -4,6 +4,7 @@ import 'package:flutter_switch/flutter_switch.dart';
 import 'package:iconify_flutter_plus/iconify_flutter_plus.dart';
 import 'package:iconify_flutter_plus/icons/material_symbols.dart';
 import 'package:iconify_flutter_plus/icons/mdi.dart';
+import 'package:pss_app/core/common/cubit/theme_cubit.dart';
 import 'package:pss_app/core/common/cubit/user_cubit.dart';
 import 'package:pss_app/core/common/entities/user.dart';
 import 'package:pss_app/core/common/widget/card_general.dart';
@@ -80,22 +81,28 @@ class SettingScreen extends StatelessWidget {
                   ),
                 ),
                 CardMenu(icon: Mdi.language, title: "Language"),
-                CardMenu(
-                  icon: MaterialSymbols.dark_mode_rounded,
-                  title: "Dark Mode",
-                  rightIcon: FlutterSwitch(
-                    width: 36.0,
-                    height: 20.0,
-                    toggleSize: 16.0,
-                    value: false,
-                    activeColor: AppColor.primaryColor,
-                    inactiveColor: Theme.of(context).highlightColor,
-                    padding: 2.0,
-                    onToggle: (val) {},
-                  ),
+                BlocBuilder<ThemeCubit, bool>(
+                  builder: (context, isDark) {
+                    return CardMenu(
+                      icon: MaterialSymbols.dark_mode_rounded,
+                      title: "Dark Mode",
+                      rightIcon: FlutterSwitch(
+                        width: 42.0,
+                        height: 24.0,
+                        toggleSize: 20.0,
+                        value: isDark,
+                        activeColor: AppColor.secondaryColor,
+                        inactiveColor: Theme.of(context).highlightColor,
+                        padding: 2.0,
+                        onToggle: (val) {
+                          context.read<ThemeCubit>().toggleTheme(val);
+                        },
+                      ),
+                    );
+                  },
                 ),
                 isLogin
-                    ? CardMenu(icon: Mdi.logout, title: "Log Out",)
+                    ? CardMenu(icon: Mdi.logout, title: "Log Out")
                     : CardMenu(icon: Mdi.login, title: "Log In"),
               ],
             ),
@@ -114,22 +121,30 @@ class CardMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CardGeneral(
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Row(
-        children: [
-          Iconify(icon, size: 24, color: AppColor.primaryColor),
-          width(8),
-          Expanded(child: Text(title, style: AppFont.medium14)),
-          rightIcon ??
-              Icon(
-                Icons.arrow_forward_ios_rounded,
-                size: 20,
-                color: Theme.of(context).colorScheme.onSurface,
+    return BlocBuilder<ThemeCubit, bool>(
+      builder: (context, isDark) {
+        return CardGeneral(
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Row(
+            children: [
+              Iconify(
+                icon,
+                size: 24,
+                color: isDark ? AppColor.secondaryColor : AppColor.primaryColor,
               ),
-        ],
-      ),
+              width(8),
+              Expanded(child: Text(title, style: AppFont.medium14)),
+              rightIcon ??
+                  Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    size: 20,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

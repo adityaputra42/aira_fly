@@ -1,4 +1,4 @@
-package com.example.pss_app
+package com.airafly.dev
 
 import io.flutter.embedding.android.FlutterActivity
 

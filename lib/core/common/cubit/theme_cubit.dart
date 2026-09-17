@@ -12,9 +12,8 @@ class ThemeCubit extends Cubit<bool> {
   }
 
   /// Toggle theme
-  Future<void> toggleTheme() async {
-    final newTheme = !state;
-    PrefHelper.instance.setDarkTheme(newTheme);
-    emit(newTheme);
+  Future<void> toggleTheme(bool value) async {
+    PrefHelper.instance.setDarkTheme(value);
+    emit(value);
   }
 }
