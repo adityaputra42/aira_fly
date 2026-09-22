@@ -1,6 +1,7 @@
 import '../../domain/entities/payment_entity.dart';
 import 'pnr_model.dart';
 
+/// Maps the `payment` object nested inside createPaymentResponse.
 class PaymentModel extends PaymentEntity {
   const PaymentModel({
     super.paymentId,
@@ -29,6 +30,12 @@ class PaymentModel extends PaymentEntity {
   }
 }
 
+/// Maps the full POST /payments response -- `{ payment: {...}, pnr: {...}? }`.
+/// Previously (before the backend's nesting change) [PaymentModel] parsed
+/// this top-level object directly; that silently produced an all-null
+/// payment because payment_id etc. now live one level deeper, under
+/// `payment`. This wrapper is what repository/bloc code should parse
+/// the raw response with instead.
 class CreatePaymentResponseModel extends CreatePaymentResponseEntity {
   const CreatePaymentResponseModel({required super.payment, super.pnr});
 
@@ -42,6 +49,10 @@ class CreatePaymentResponseModel extends CreatePaymentResponseEntity {
   }
 }
 
+/// Maps `appquery.PaymentView` -- this Go struct has NO json tags, so it
+/// serializes using the raw (capitalized) field names. Used by
+/// GET /payments/{id}, GET /payments/pnr/{pnr_id}, and each item inside
+/// GET /payments (admin list).
 class PaymentViewModel extends PaymentViewEntity {
   const PaymentViewModel({
     super.id,

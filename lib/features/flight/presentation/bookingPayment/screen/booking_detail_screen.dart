@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -11,9 +11,8 @@ import 'package:intl/intl.dart';
 import 'package:pss_app/app/theme/theme.dart';
 import 'package:pss_app/core/common/cubit/user_cubit.dart';
 import 'package:pss_app/core/common/widget/card_general.dart';
+import 'package:pss_app/core/common/widget/dropdown_custom.dart';
 import 'package:pss_app/core/common/widget/primary_button.dart';
-import 'package:pss_app/core/common/widget/secondary_button.dart';
-import 'package:pss_app/core/common/widget/shimmer_loading.dart';
 import 'package:pss_app/core/utils/clipper.dart';
 import 'package:pss_app/core/utils/dashed_divider.dart';
 import 'package:pss_app/core/utils/size_extension.dart';
@@ -45,7 +44,7 @@ class BookingDetailScreen extends StatefulWidget {
   State<BookingDetailScreen> createState() => _BookingDetailScreenState();
 }
 
-enum _Step { review, processing, paymentMethod, done, error }
+enum _Step { review, processing, done, error }
 
 class _BookingDetailScreenState extends State<BookingDetailScreen> {
   late final BookingBloc _bookingBloc;
@@ -94,79 +93,108 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
     return parts.whereType<String>().join(' ');
   }
 
-  Future<void> _confirmBooking() async {
+  Future<void> _confirmAndPay() async {
     setState(() {
       _step = _Step.processing;
-      _processingMessage = "Creating your booking...";
       _errorMessage = null;
     });
 
-    final departureFare = _search.departureFare; // CHANGED
-    final returnFare = _search.returnFare; // CHANGED
+    var pnr = _pnr;
 
-    if (departureFare.fareClassId == null ||
-        (_search.isRoundTrip && returnFare?.fareClassId == null)) {
-      setState(() {
-        _step = _Step.error;
-        _errorMessage = "This itinerary has no available fare class to book. Please search again.";
-      });
-      return;
-    }
+    if (pnr == null) {
+      setState(() => _processingMessage = "Creating your booking...");
 
-    final segments = <BookingSegmentInput>[
-      for (final s in _search.departure.segments ?? const [])
-        if (s.flightId != null)
-          BookingSegmentInput(flightId: s.flightId!, fareClassId: departureFare.fareClassId!),
-      if (_search.returnItinerary != null)
-        for (final s in _search.returnItinerary!.segments ?? const [])
+      final departureFare = _search.departureFare;
+      final returnFare = _search.returnFare;
+
+      if (departureFare.fareClassId == null ||
+          (_search.isRoundTrip && returnFare?.fareClassId == null)) {
+        setState(() {
+          _step = _Step.error;
+          _errorMessage =
+              "This itinerary has no available fare class to book. Please search again.";
+        });
+        return;
+      }
+
+      final segments = <BookingSegmentInput>[
+        for (final s in _search.departure.segments ?? const [])
           if (s.flightId != null)
-            BookingSegmentInput(flightId: s.flightId!, fareClassId: returnFare!.fareClassId!),
-    ];
+            BookingSegmentInput(flightId: s.flightId!, fareClassId: departureFare.fareClassId!),
+        if (_search.returnItinerary != null)
+          for (final s in _search.returnItinerary!.segments ?? const [])
+            if (s.flightId != null)
+              BookingSegmentInput(flightId: s.flightId!, fareClassId: returnFare!.fareClassId!),
+      ];
 
-    final allSegments = _allSegments;
-    final seatSelections = <SeatSelectionInput>[
-      for (final selected in widget.result.seats)
-        if (() {
-          final idx = allSegments.indexWhere((s) => s.flightId == selected.flightId);
-          return idx != -1;
-        }())
-          SeatSelectionInput(
-            passengerIndex: selected.passengerIndex,
-            segmentIndex: allSegments.indexWhere((s) => s.flightId == selected.flightId),
-            flightSeatId: selected.seat.id!,
-          ),
-    ];
+      final allSegments = _allSegments;
+      final seatSelections = <SeatSelectionInput>[
+        for (final selected in widget.result.seats)
+          if (() {
+            final idx = allSegments.indexWhere((s) => s.flightId == selected.flightId);
+            return idx != -1;
+          }())
+            SeatSelectionInput(
+              passengerIndex: selected.passengerIndex,
+              segmentIndex: allSegments.indexWhere((s) => s.flightId == selected.flightId),
+              flightSeatId: selected.seat.id!,
+            ),
+      ];
 
-    _bookingBloc.add(
-      CreatePnrRequested(
-        contact: _contact,
-        passengers: _passengers,
-        segments: segments,
-        seatSelections: seatSelections,
-      ),
-    );
+      _bookingBloc.add(
+        CreatePnrRequested(
+          contact: _contact,
+          passengers: _passengers,
+          segments: segments,
+          seatSelections: seatSelections,
+        ),
+      );
 
-    final bookingResult = await _bookingBloc.stream.firstWhere(
-      (s) => s is PnrCreated || s is BookingError,
+      final bookingResult = await _bookingBloc.stream.firstWhere(
+        (s) => s is PnrCreated || s is BookingError,
+      );
+
+      if (!mounted) return;
+
+      if (bookingResult is BookingError) {
+        setState(() {
+          _step = _Step.review;
+          _errorMessage = bookingResult.message;
+        });
+        return;
+      }
+
+      pnr = (bookingResult as PnrCreated).pnr;
+      setState(() => _pnr = pnr);
+
+      await _purchaseAncillaries(pnr);
+      if (!mounted) return;
+    }
+
+    setState(() => _processingMessage = "Processing payment...");
+
+    _paymentBloc.add(CreatePaymentRequested(pnrId: pnr.id!, paymentMethod: _paymentMethod));
+
+    final result = await _paymentBloc.stream.firstWhere(
+      (s) => s is PaymentCreated || s is PaymentError,
     );
 
     if (!mounted) return;
 
-    if (bookingResult is BookingError) {
+    if (result is PaymentError) {
       setState(() {
-        _step = _Step.error;
-        _errorMessage = bookingResult.message;
+        _step = _Step.review;
+        _errorMessage = result.message;
       });
       return;
     }
 
-    final pnr = (bookingResult as PnrCreated).pnr;
-    setState(() => _pnr = pnr);
+    setState(() {
+      _payment = (result as PaymentCreated).payment;
 
-    await _purchaseAncillaries(pnr);
-    if (!mounted) return;
-
-    setState(() => _step = _Step.paymentMethod);
+      if (_payment?.pnr != null) _pnr = _payment!.pnr;
+      _step = _Step.done;
+    });
   }
 
   Future<void> _purchaseAncillaries(PnrDetailEntity pnr) async {
@@ -208,39 +236,6 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
     }
   }
 
-  Future<void> _pay() async {
-    final pnr = _pnr;
-    if (pnr?.id == null) return;
-
-    setState(() {
-      _step = _Step.processing;
-      _processingMessage = "Processing payment...";
-      _errorMessage = null;
-    });
-
-    _paymentBloc.add(CreatePaymentRequested(pnrId: pnr!.id!, paymentMethod: _paymentMethod));
-
-    final result = await _paymentBloc.stream.firstWhere(
-      (s) => s is PaymentCreated || s is PaymentError,
-    );
-
-    if (!mounted) return;
-
-    if (result is PaymentError) {
-      setState(() {
-        _step = _Step.paymentMethod;
-        _errorMessage = result.message;
-      });
-      return;
-    }
-
-    setState(() {
-      _payment = (result as PaymentCreated).payment;
-      if (_payment?.pnr != null) _pnr = _payment!.pnr;
-      _step = _Step.done;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
@@ -260,7 +255,6 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
           child: switch (_step) {
             _Step.review => _buildReview(context),
             _Step.processing => _buildProcessing(context),
-            _Step.paymentMethod => _buildPaymentMethod(context),
             _Step.done => _buildDone(context),
             _Step.error => _buildError(context),
           },
@@ -269,111 +263,296 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
     );
   }
 
+  List<TicketLeg> _buildLegs() {
+    String paxLabel() {
+      final parts = <String>[];
+      if (_search.amountAdult > 0) parts.add("${_search.amountAdult} Adult");
+      if (_search.amountChild > 0) parts.add("${_search.amountChild} Child");
+      if (_search.amountInfant > 0) parts.add("${_search.amountInfant} Infant");
+      return parts.isEmpty ? '-' : parts.join(', ');
+    }
+
+    String? labelForLeg(Set<int> flightIds) {
+      final seats = widget.result.seats.where((s) => flightIds.contains(s.flightId)).toList();
+      return seats.isEmpty ? null : seats.map((s) => s.seat.seatNumber ?? '-').join(', ');
+    }
+
+    String? baggageForLeg(Set<int> flightIds) {
+      final items = widget.result.baggage.where((s) => flightIds.contains(s.flightId)).toList();
+      return items.isEmpty ? null : items.map((s) => s.item.name ?? '-').join(', ');
+    }
+
+    String? mealsForLeg(Set<int> flightIds) {
+      final items = widget.result.meals.where((s) => flightIds.contains(s.flightId)).toList();
+      return items.isEmpty ? null : items.map((s) => s.item.name ?? '-').join(', ');
+    }
+
+    final legs = <TicketLeg>[];
+
+    final departureFlightIds = (_search.departure.segments ?? const [])
+        .map((s) => s.flightId)
+        .whereType<int>()
+        .toSet();
+    legs.add(
+      TicketLeg(
+        label: _search.isRoundTrip ? "Departure Flight" : "Flight Detail",
+        itinerary: _search.departure,
+        bookingCode: _pnr?.bookingCode,
+        paxLabel: paxLabel(),
+        seatsLabel: labelForLeg(departureFlightIds),
+        baggageLabel: baggageForLeg(departureFlightIds),
+        mealsLabel: mealsForLeg(departureFlightIds),
+      ),
+    );
+
+    if (_search.returnItinerary != null) {
+      final returnFlightIds = (_search.returnItinerary!.segments ?? const [])
+          .map((s) => s.flightId)
+          .whereType<int>()
+          .toSet();
+      legs.add(
+        TicketLeg(
+          label: "Return Flight",
+          itinerary: _search.returnItinerary!,
+          bookingCode: _pnr?.bookingCode,
+          paxLabel: paxLabel(),
+          seatsLabel: labelForLeg(returnFlightIds),
+          baggageLabel: baggageForLeg(returnFlightIds),
+          mealsLabel: mealsForLeg(returnFlightIds),
+        ),
+      );
+    }
+
+    return legs;
+  }
+
+  List<FareSegmentBreakdown> _buildFareBreakdown() {
+    FareSegmentBreakdown breakdown(String routeLabel, ItineraryFareEntity fare) {
+      final lines = <FareLineItem>[];
+      double subtotal = 0;
+      for (final entry in [
+        ('ADT', 'Adult', _search.amountAdult),
+        ('CHD', 'Child', _search.amountChild),
+        ('INF', 'Infant', _search.amountInfant),
+      ]) {
+        final (code, label, count) = entry;
+        if (count <= 0) continue;
+        final price = FareCalculator.priceForType(fare, code);
+        if (price <= 0) continue;
+        lines.add(FareLineItem(label: "Fare $label ${count}x", amount: price * count));
+        subtotal += price * count;
+      }
+      return FareSegmentBreakdown(routeLabel: routeLabel, lines: lines, subtotal: subtotal);
+    }
+
+    String routeLabel(bool isReturn) {
+      final origin = isReturn ? _search.arrivalAirport : _search.departureAirport;
+      final dest = isReturn ? _search.departureAirport : _search.arrivalAirport;
+      return "${origin.city ?? origin.code ?? '-'} (${origin.code ?? '-'}) \u2192 "
+          "${dest.city ?? dest.code ?? '-'} (${dest.code ?? '-'})";
+    }
+
+    final segments = <FareSegmentBreakdown>[breakdown(routeLabel(false), _search.departureFare)];
+    final returnFare = _search.returnFare;
+    if (returnFare != null) {
+      segments.add(breakdown(routeLabel(true), returnFare));
+    }
+    return segments;
+  }
+
   Widget _buildReview(BuildContext context) {
-    return Column(
-      children: [
-        Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text("Contact", style: AppFont.medium14),
-                widget.height(8),
-                CardGeneral(
-                  width: double.infinity,
-                  margin: EdgeInsets.zero,
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(_contact.fullName, style: AppFont.medium14),
-                      widget.height(4),
-                      if (_contact.email != null)
-                        Text(
-                          _contact.email!,
-                          style: AppFont.reguler12.copyWith(color: Theme.of(context).hintColor),
+    final fareSegments = _buildFareBreakdown();
+    final isRetryingPayment = _pnr != null;
+
+    return BlocBuilder<UserCubit, UserState>(
+      builder: (context, userState) {
+        final isLoggedIn = userState is UserLoggedIn;
+
+        if (!isLoggedIn && _paymentMethod == 'BALANCE') {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) setState(() => _paymentMethod = 'DOKU_VA');
+          });
+        }
+
+        return Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.only(top: 12, bottom: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (_errorMessage != null)
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                        child: Text(
+                          _errorMessage!,
+                          style: AppFont.reguler12.copyWith(color: Colors.red),
                         ),
-                      Text(
-                        _contact.phone,
-                        style: AppFont.reguler12.copyWith(color: Theme.of(context).hintColor),
                       ),
-                    ],
-                  ),
-                ),
-                widget.height(16),
-                Text("Passengers", style: AppFont.medium14),
-                widget.height(8),
-                CardGeneral(
-                  margin: EdgeInsets.zero,
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    children: [
-                      for (var i = 0; i < _passengers.length; i++)
-                        Padding(
-                          padding: EdgeInsets.only(bottom: i == _passengers.length - 1 ? 0 : 8),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(_passengerLabel(i), style: AppFont.reguler14),
+                    if (_ancillaryFailures.isNotEmpty)
+                      Container(
+                        width: double.infinity,
+                        margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.orange.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.orange, width: 0.5),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Some addons could not be attached:",
+                              style: AppFont.medium12.copyWith(color: Colors.orange.shade800),
+                            ),
+                            widget.height(4),
+                            for (final failure in _ancillaryFailures)
                               Text(
-                                _passengers[i].passengerType,
+                                "\u2022 $failure",
+                                style: AppFont.reguler12.copyWith(color: Colors.orange.shade800),
+                              ),
+                          ],
+                        ),
+                      ),
+                    // Booking Detail -- real flight/segment data per leg.
+                    CarouselTicket(legs: _buildLegs()),
+                    widget.height(4),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Text("Contact", style: AppFont.medium14),
+                    ),
+                    widget.height(8),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: CardGeneral(
+                        width: double.infinity,
+                        margin: EdgeInsets.zero,
+                        padding: const EdgeInsets.all(12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(_contact.fullName, style: AppFont.medium14),
+                            widget.height(4),
+                            if (_contact.email != null)
+                              Text(
+                                _contact.email!,
                                 style: AppFont.reguler12.copyWith(
                                   color: Theme.of(context).hintColor,
                                 ),
                               ),
-                            ],
-                          ),
+                            Text(
+                              _contact.phone,
+                              style: AppFont.reguler12.copyWith(color: Theme.of(context).hintColor),
+                            ),
+                          ],
                         ),
+                      ),
+                    ),
+                    widget.height(16),
+                    // Passenger detail.
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Text("Passengers", style: AppFont.medium14),
+                    ),
+                    widget.height(8),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: CardGeneral(
+                        margin: EdgeInsets.zero,
+                        padding: const EdgeInsets.all(12),
+                        child: Column(
+                          children: [
+                            for (var i = 0; i < _passengers.length; i++)
+                              Padding(
+                                padding: EdgeInsets.only(
+                                  bottom: i == _passengers.length - 1 ? 0 : 8,
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(_passengerLabel(i), style: AppFont.reguler14),
+                                    Text(
+                                      _passengers[i].passengerType,
+                                      style: AppFont.reguler12.copyWith(
+                                        color: Theme.of(context).hintColor,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    // Price Detail -- real fare breakdown + ancillary totals.
+                    PriceDetail(
+                      segments: fareSegments,
+                      baggageTotal: sumAncillaryPrices(widget.result.baggage),
+                      mealTotal: sumAncillaryPrices(widget.result.meals),
+                      total: _pnr?.totalAmount ?? _estimatedTotal,
+                    ),
+                    // Payment method.
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Text("Payment Method", style: AppFont.medium14),
+                    ),
+                    widget.height(8),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: DropDownCustom(
+                        hint: "Select payment method",
+                        value: _paymentMethod,
+                        onChange: (value) => setState(() => _paymentMethod = value as String),
+                        listData: [
+                          DropdownItem<String>(
+                            value: 'DOKU_VA',
+                            child: Text("Virtual Account (DOKU)", style: AppFont.reguler12),
+                          ),
+
+                          if (isLoggedIn)
+                            DropdownItem<String>(
+                              value: 'BALANCE',
+                              child: Text("Wallet Balance", style: AppFont.reguler12),
+                            ),
+                        ],
+                      ),
+                    ),
+                    if (!isLoggedIn) ...[
+                      widget.height(4),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Text(
+                          "Sign in to also pay with your wallet balance.",
+                          style: AppFont.reguler12.copyWith(color: Theme.of(context).hintColor),
+                        ),
+                      ),
                     ],
-                  ),
+                  ],
                 ),
-                widget.height(16),
-                Text("Addons", style: AppFont.medium14),
-                widget.height(8),
-                CardGeneral(
-                  width: double.infinity,
-                  margin: EdgeInsets.zero,
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.result.baggage.isEmpty
-                            ? "No baggage added"
-                            : "${widget.result.baggage.length} baggage item(s) -- "
-                                  "${formatIDR(sumAncillaryPrices(widget.result.baggage))}",
-                        style: AppFont.reguler14,
-                      ),
-                      widget.height(6),
-                      Text(
-                        widget.result.meals.isEmpty
-                            ? "No meals added"
-                            : "${widget.result.meals.length} meal(s) -- "
-                                  "${formatIDR(sumAncillaryPrices(widget.result.meals))}",
-                        style: AppFont.reguler14,
-                      ),
-                      widget.height(6),
-                      Text(
-                        widget.result.seats.isEmpty
-                            ? "No seats selected"
-                            : "${widget.result.seats.length} seat(s) selected",
-                        style: AppFont.reguler14,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
-        ),
-        _bottomBar(
-          label: "Estimated Total",
-          amount: _estimatedTotal,
-          buttonLabel: "Confirm Booking",
-          onPressed: _confirmBooking,
-        ),
-      ],
+            _bottomBar(
+              label: isRetryingPayment ? "Total" : "Estimated Total",
+              amount: _pnr?.totalAmount ?? _estimatedTotal,
+              buttonLabel: isRetryingPayment ? "Retry Payment" : "Confirm & Pay",
+              onPressed: () {
+                // BALANCE is only enabled for logged-in users on the
+                // dropdown above, but the dropdown package doesn't stop
+                // a disabled item from staying selected if auth state
+                // changes underneath it -- re-check here rather than
+                // trust `_paymentMethod` blindly.
+                if (_paymentMethod == 'BALANCE' && !isLoggedIn) {
+                  setState(() => _errorMessage = "Sign in to pay with your wallet balance.");
+                  return;
+                }
+                _confirmAndPay();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -389,130 +568,6 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
             style: AppFont.reguler14.copyWith(color: Theme.of(context).hintColor),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildPaymentMethod(BuildContext context) {
-    return BlocBuilder<UserCubit, UserState>(
-      builder: (context, state) {
-        var isLoggedIn = false;
-        if (state is UserLoggedIn) {
-          isLoggedIn = true;
-        }
-        return Column(
-          children: [
-            if (_ancillaryFailures.isNotEmpty)
-              Container(
-                width: double.infinity,
-                margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.orange.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.orange, width: 0.5),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Booking created (${_pnr?.bookingCode ?? '-'}), but some addons could not be attached:",
-                      style: AppFont.medium12.copyWith(color: Colors.orange.shade800),
-                    ),
-                    widget.height(4),
-                    for (final failure in _ancillaryFailures)
-                      Text(
-                        "\u2022 $failure",
-                        style: AppFont.reguler12.copyWith(color: Colors.orange.shade800),
-                      ),
-                  ],
-                ),
-              ),
-            if (_errorMessage != null)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                child: Text(_errorMessage!, style: AppFont.reguler12.copyWith(color: Colors.red)),
-              ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text("Booking Code", style: AppFont.reguler12),
-                    Text(_pnr?.bookingCode ?? '-', style: AppFont.semibold20),
-                    widget.height(24),
-                    Text("Payment Method", style: AppFont.medium14),
-                    widget.height(8),
-                    _paymentMethodTile(
-                      value: 'DOKU_VA',
-                      title: "Virtual Account (DOKU)",
-                      subtitle: "Pay via bank transfer -- works without signing in.",
-                      enabled: true,
-                    ),
-                    widget.height(8),
-                    _paymentMethodTile(
-                      value: 'BALANCE',
-                      title: "Wallet Balance",
-                      subtitle: "Sign in to pay with your wallet balance.",
-                      enabled: isLoggedIn,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            _bottomBar(
-              label: "Total",
-              amount: _pnr?.totalAmount ?? _estimatedTotal,
-              buttonLabel: "Pay Now",
-              onPressed: _pay,
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _paymentMethodTile({
-    required String value,
-    required String title,
-    required String subtitle,
-    required bool enabled,
-  }) {
-    final isSelected = _paymentMethod == value;
-    return Opacity(
-      opacity: enabled ? 1 : 0.5,
-      child: InkWell(
-        onTap: enabled ? () => setState(() => _paymentMethod = value) : null,
-        child: CardGeneral(
-          margin: EdgeInsets.zero,
-          padding: const EdgeInsets.all(12),
-          border: Border.all(
-            color: isSelected ? AppColor.primaryColor : Colors.transparent,
-            width: 1.5,
-          ),
-          child: Row(
-            children: [
-              Icon(
-                isSelected ? Icons.radio_button_checked : Icons.radio_button_off,
-                color: isSelected ? AppColor.primaryColor : Theme.of(context).hintColor,
-              ),
-              widget.width(12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(title, style: AppFont.medium14),
-                    Text(
-                      subtitle,
-                      style: AppFont.reguler12.copyWith(color: Theme.of(context).hintColor),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }

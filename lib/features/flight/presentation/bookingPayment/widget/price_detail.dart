@@ -1,7 +1,37 @@
 part of '../screen/booking_detail_screen.dart';
 
+class FareLineItem {
+  final String label;
+  final double amount;
+
+  const FareLineItem({required this.label, required this.amount});
+}
+
+class FareSegmentBreakdown {
+  final String routeLabel;
+  final List<FareLineItem> lines;
+  final double subtotal;
+
+  const FareSegmentBreakdown({required this.routeLabel, required this.lines, required this.subtotal});
+}
+
 class PriceDetail extends StatelessWidget {
-  const PriceDetail({super.key});
+  const PriceDetail({
+    super.key,
+    required this.segments,
+    this.baggageTotal = 0,
+    this.mealTotal = 0,
+    required this.total,
+    this.currency = 'IDR',
+  });
+
+  final List<FareSegmentBreakdown> segments;
+  final double baggageTotal;
+  final double mealTotal;
+  final double total;
+  final String currency;
+
+  String _format(double value) => currency == 'IDR' ? formatIDR(value) : '$currency ${value.toStringAsFixed(2)}';
 
   @override
   Widget build(BuildContext context) {
@@ -13,10 +43,30 @@ class PriceDetail extends StatelessWidget {
         children: [
           Text("Price Detail", style: AppFont.semibold16),
           height(8),
-          CardPricePerSegment(),
-          height(8),
-          CardPricePerSegment(isReturn: true),
-
+          for (var i = 0; i < segments.length; i++) ...[
+            if (i > 0) height(8),
+            CardPricePerSegment(segment: segments[i]),
+          ],
+          if (baggageTotal > 0) ...[
+            height(8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text("Baggage", style: AppFont.reguler14),
+                Text(_format(baggageTotal), style: AppFont.medium14),
+              ],
+            ),
+          ],
+          if (mealTotal > 0) ...[
+            height(8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text("Meal", style: AppFont.reguler14),
+                Text(_format(mealTotal), style: AppFont.medium14),
+              ],
+            ),
+          ],
           height(8),
           SizedBox(height: 1, child: Divider(thickness: 1, color: Theme.of(context).hintColor)),
           height(8),
@@ -24,14 +74,7 @@ class PriceDetail extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text("Total", style: AppFont.reguler14),
-              Text(
-                NumberFormat.currency(
-                  locale: "id_ID",
-                  symbol: "Rp ",
-                  decimalDigits: 0,
-                ).format(8400000),
-                style: AppFont.medium14.copyWith(color: AppColor.greenColor),
-              ),
+              Text(_format(total), style: AppFont.medium14.copyWith(color: AppColor.greenColor)),
             ],
           ),
         ],
@@ -41,8 +84,10 @@ class PriceDetail extends StatelessWidget {
 }
 
 class CardPricePerSegment extends StatelessWidget {
-  const CardPricePerSegment({super.key, this.isReturn = false});
-  final bool isReturn;
+  const CardPricePerSegment({super.key, required this.segment});
+
+  final FareSegmentBreakdown segment;
+
   @override
   Widget build(BuildContext context) {
     return CardGeneral(
@@ -55,115 +100,24 @@ class CardPricePerSegment extends StatelessWidget {
         children: [
           Row(
             children: [
-              Text(isReturn ? "Denpasar (DPS)" : "Jakarta (CGK)", style: AppFont.medium14),
-              width(8),
-              Transform.rotate(
-                angle: -math.pi / 0.66,
-                child: Iconify(Bx.bxs_plane, color: AppColor.secondaryColor, size: 20),
-              ),
-              width(8),
-              Text(isReturn ? "Jakarta (CGK)" : "Denpasar (DPS)", style: AppFont.medium14),
+              Expanded(child: Text(segment.routeLabel, style: AppFont.medium14)),
             ],
           ),
           height(12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "Fare Adult 2x",
-                style: AppFont.reguler12.copyWith(color: Theme.of(context).hintColor),
+          for (final line in segment.lines)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    line.label,
+                    style: AppFont.reguler12.copyWith(color: Theme.of(context).hintColor),
+                  ),
+                  Text(formatIDR(line.amount), style: AppFont.medium12),
+                ],
               ),
-              Text(
-                NumberFormat.currency(
-                  locale: "id_ID",
-                  symbol: "Rp ",
-                  decimalDigits: 0,
-                ).format(2000000),
-                style: AppFont.medium12,
-              ),
-            ],
-          ),
-          height(8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "Fare Child 1x",
-                style: AppFont.reguler12.copyWith(color: Theme.of(context).hintColor),
-              ),
-              Text(
-                NumberFormat.currency(
-                  locale: "id_ID",
-                  symbol: "Rp ",
-                  decimalDigits: 0,
-                ).format(1000000),
-                style: AppFont.medium12,
-              ),
-            ],
-          ),
-          height(8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text("Tax", style: AppFont.reguler12.copyWith(color: Theme.of(context).hintColor)),
-              Text(
-                NumberFormat.currency(
-                  locale: "id_ID",
-                  symbol: "Rp ",
-                  decimalDigits: 0,
-                ).format(150000),
-                style: AppFont.medium12,
-              ),
-            ],
-          ),
-          height(8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "Baggage",
-                style: AppFont.reguler12.copyWith(color: Theme.of(context).hintColor),
-              ),
-              Text(
-                NumberFormat.currency(
-                  locale: "id_ID",
-                  symbol: "Rp ",
-                  decimalDigits: 0,
-                ).format(180000),
-                style: AppFont.medium12,
-              ),
-            ],
-          ),
-          height(8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text("Meal", style: AppFont.reguler12.copyWith(color: Theme.of(context).hintColor)),
-              Text(
-                NumberFormat.currency(
-                  locale: "id_ID",
-                  symbol: "Rp ",
-                  decimalDigits: 0,
-                ).format(120000),
-                style: AppFont.medium12,
-              ),
-            ],
-          ),
-          height(8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text("Seat", style: AppFont.reguler12.copyWith(color: Theme.of(context).hintColor)),
-              Text(
-                NumberFormat.currency(
-                  locale: "id_ID",
-                  symbol: "Rp ",
-                  decimalDigits: 0,
-                ).format(750000),
-                style: AppFont.medium12,
-              ),
-            ],
-          ),
+            ),
         ],
       ),
     );

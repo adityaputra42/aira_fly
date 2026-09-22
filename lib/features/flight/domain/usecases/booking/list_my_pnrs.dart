@@ -5,6 +5,9 @@ import '../../../../../core/usecase/usecase.dart';
 import '../../entities/pnr_entity.dart';
 import '../../repository/booking_repository.dart';
 
+/// Self-service booking history -- login required. Use for the "Ticket
+/// History" tab when the user is signed in; use [GetPnrByBookingCode] for
+/// the guest (signed-out) flow instead.
 class ListMyPnrs implements UseCase<List<PnrSummaryEntity>, ListMyPnrsParams> {
   final BookingRepository bookingRepository;
 
@@ -12,11 +15,7 @@ class ListMyPnrs implements UseCase<List<PnrSummaryEntity>, ListMyPnrsParams> {
 
   @override
   Future<Either<Failure, List<PnrSummaryEntity>>> call(ListMyPnrsParams params) {
-    return bookingRepository.listMyPnrs(
-      page: params.page,
-      limit: params.limit,
-      status: params.status,
-    );
+    return bookingRepository.listMyPnrs(page: params.page, limit: params.limit, status: params.status);
   }
 }
 

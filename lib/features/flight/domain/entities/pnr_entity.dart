@@ -44,6 +44,7 @@ class PassengerDetailEntity extends Equatable {
   ];
 }
 
+/// One flight segment inside a PNRDetail.
 class SegmentDetailEntity extends Equatable {
   final int? id;
   final int? flightId;
@@ -91,6 +92,10 @@ class SeatDetailEntity extends Equatable {
   List<Object?> get props => [passengerId, segmentId, flightSeatId, seatNumber];
 }
 
+/// One purchased ancillary as nested inside a PNRDetail. NOT the same shape
+/// as [BookingAncillaryEntity] (the standalone ancillary-purchase endpoints
+/// in ancillary_entity.dart) -- same underlying data, different endpoint,
+/// keep them separate rather than forcing one shared model.
 class PnrAncillaryDetailEntity extends Equatable {
   final int? id;
   final int? passengerId; // null if the add-on applies to the whole PNR
@@ -131,6 +136,23 @@ class PnrAncillaryDetailEntity extends Equatable {
   ];
 }
 
+/// Full PNR detail. As of the backend's "update response booking" +
+/// json-tag fix (2026-09-18), this is what comes back from THREE
+/// different endpoints, not just admin Get:
+///   - POST /bookings/pnrs (createPnr) -- the full detail immediately,
+///     no second round trip needed.
+///   - GET /bookings/pnrs/{id} (admin only, `booking:pnr:view`).
+///   - GET /bookings/pnrs/mine/{code} (self-service lookup by booking
+///     code -- see BookingRepository.getPnrByBookingCode. Route-level
+///     this endpoint currently has NO auth check at all despite its
+///     swagger doc claiming otherwise -- see the doc comment there
+///     before treating "not logged in" as a safe boundary for what it
+///     returns).
+/// Previously this was two separate shapes ([PnrEntity] with only
+/// pnrId/bookingCode/status/expiresAt/totalAmount/currency, and this
+/// richer [PnrDetailEntity] for admin Get only) because createBooking
+/// used to return the lightweight one. Merged now that all three
+/// endpoints return the same shape.
 class PnrDetailEntity extends Equatable {
   final int? id;
   final String? bookingCode;
@@ -186,6 +208,10 @@ class PnrDetailEntity extends Equatable {
   ];
 }
 
+/// Row shape for GET /bookings/pnrs (admin list, `booking:pnr:view`) AND
+/// GET /bookings/pnrs/mine (self-service, login required, always scoped
+/// to the caller's own bookings -- see BookingRepository.listMyPnrs).
+/// Both endpoints return the same `query.PNRSummary` shape.
 class PnrSummaryEntity extends Equatable {
   final int? id;
   final String? bookingCode;
