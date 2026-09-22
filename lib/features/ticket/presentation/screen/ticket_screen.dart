@@ -14,6 +14,7 @@ import '../../../../core/utils/clipper.dart';
 import '../../../../core/utils/dashed_divider.dart';
 import '../../../../core/utils/size_extension.dart';
 import '../../../../core/utils/widget_helper.dart';
+import '../widget/booking_history_tab.dart';
 part '../widget/card_tikcet_list.dart';
 
 class TicketScreen extends StatelessWidget {
@@ -83,19 +84,7 @@ class TicketScreen extends StatelessWidget {
                     },
                     itemCount: 1,
                   ),
-                  ListView.builder(
-                    padding: EdgeInsets.symmetric(horizontal: 16),
-                    itemBuilder: (context, index) {
-                      return Padding(
-                        padding: EdgeInsets.only(
-                          top: index == 0 ? 0 : 12,
-                          bottom: index == 4 ? 126 : 0,
-                        ),
-                        child: CardTikcetList(),
-                      );
-                    },
-                    itemCount: 5,
-                  ),
+                  const BookingHistoryTab(),
                 ],
               ),
             ),

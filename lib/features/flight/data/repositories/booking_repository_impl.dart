@@ -15,7 +15,7 @@ class BookingRepositoryImpl implements BookingRepository {
   const BookingRepositoryImpl(this.remoteDataSource, this.connectionChecker);
 
   @override
-  Future<Either<Failure, PnrEntity>> createPnr({
+  Future<Either<Failure, PnrDetailEntity>> createPnr({
     required ContactInput contact,
     required List<PassengerInput> passengers,
     required List<BookingSegmentInput> segments,
@@ -40,7 +40,7 @@ class BookingRepositoryImpl implements BookingRepository {
         return left(Failure('Failed to create booking'));
       }
 
-      return right(PnrModel.fromJson(response.data as Map<String, dynamic>));
+      return right(PnrDetailModel.fromJson(response.data as Map<String, dynamic>));
     } on ServerException catch (e) {
       return left(Failure(e.message));
     } catch (e) {
@@ -86,6 +86,51 @@ class BookingRepositoryImpl implements BookingRepository {
 
       final list = PnrListModel.fromJson(response.data as Map<String, dynamic>);
       return right(list.items);
+    } on ServerException catch (e) {
+      return left(Failure(e.message));
+    } catch (e) {
+      return left(Failure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<PnrSummaryEntity>>> listMyPnrs({
+    int page = 1,
+    int limit = 10,
+    String? status,
+  }) async {
+    try {
+      if (!await connectionChecker.isConnected) {
+        return left(Failure('No internet connection'));
+      }
+
+      final response = await remoteDataSource.listMyPnrs(page: page, limit: limit, status: status);
+      if (response == null) {
+        return left(Failure('Failed to load your bookings'));
+      }
+
+      final list = PnrListModel.fromJson(response.data as Map<String, dynamic>);
+      return right(list.items);
+    } on ServerException catch (e) {
+      return left(Failure(e.message));
+    } catch (e) {
+      return left(Failure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, PnrDetailEntity>> getPnrByBookingCode(String bookingCode) async {
+    try {
+      if (!await connectionChecker.isConnected) {
+        return left(Failure('No internet connection'));
+      }
+
+      final response = await remoteDataSource.getPnrByBookingCode(bookingCode);
+      if (response == null) {
+        return left(Failure('Booking not found'));
+      }
+
+      return right(PnrDetailModel.fromJson(response.data as Map<String, dynamic>));
     } on ServerException catch (e) {
       return left(Failure(e.message));
     } catch (e) {

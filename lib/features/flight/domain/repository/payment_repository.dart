@@ -4,7 +4,7 @@ import '../../../../core/error/failures.dart';
 import '../entities/payment_entity.dart';
 
 abstract interface class PaymentRepository {
-  Future<Either<Failure, PaymentEntity>> createPayment({
+  Future<Either<Failure, CreatePaymentResponseEntity>> createPayment({
     required int pnrId,
     String? channel,
     String? paymentMethod,

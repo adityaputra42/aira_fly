@@ -12,7 +12,7 @@ final class PaymentInitial extends PaymentState {}
 class PaymentLoading extends PaymentState {}
 
 class PaymentCreated extends PaymentState {
-  final PaymentEntity payment;
+  final CreatePaymentResponseEntity payment;
 
   const PaymentCreated(this.payment);
 
@@ -28,7 +28,6 @@ class PaymentDetailLoaded extends PaymentState {
   @override
   List<Object?> get props => [payment];
 }
-
 
 class PaymentError extends PaymentState {
   final String message;

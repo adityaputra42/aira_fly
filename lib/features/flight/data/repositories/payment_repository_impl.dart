@@ -15,7 +15,7 @@ class PaymentRepositoryImpl implements PaymentRepository {
   const PaymentRepositoryImpl(this.remoteDataSource, this.connectionChecker);
 
   @override
-  Future<Either<Failure, PaymentEntity>> createPayment({
+  Future<Either<Failure, CreatePaymentResponseEntity>> createPayment({
     required int pnrId,
     String? channel,
     String? paymentMethod,
@@ -34,7 +34,7 @@ class PaymentRepositoryImpl implements PaymentRepository {
         return left(Failure('Failed to create payment'));
       }
 
-      return right(PaymentModel.fromJson(response.data as Map<String, dynamic>));
+      return right(CreatePaymentResponseModel.fromJson(response.data as Map<String, dynamic>));
     } on ServerException catch (e) {
       return left(Failure(e.message));
     } catch (e) {

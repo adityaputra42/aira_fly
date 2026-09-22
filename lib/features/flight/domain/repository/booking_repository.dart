@@ -84,7 +84,7 @@ class SeatSelectionInput {
 }
 
 abstract interface class BookingRepository {
-  Future<Either<Failure, PnrEntity>> createPnr({
+  Future<Either<Failure, PnrDetailEntity>> createPnr({
     required ContactInput contact,
     required List<PassengerInput> passengers,
     required List<BookingSegmentInput> segments,
@@ -95,6 +95,10 @@ abstract interface class BookingRepository {
   Future<Either<Failure, PnrDetailEntity>> getPnr(int id);
 
   Future<Either<Failure, List<PnrSummaryEntity>>> listPnrs({int page, int limit, String? status});
+
+  Future<Either<Failure, List<PnrSummaryEntity>>> listMyPnrs({int page, int limit, String? status});
+
+  Future<Either<Failure, PnrDetailEntity>> getPnrByBookingCode(String bookingCode);
 
   Future<Either<Failure, void>> cancelPnr(int id);
 }

@@ -39,6 +39,8 @@ import '../features/flight/domain/usecases/ancillary/purchase_ancillary.dart';
 import '../features/flight/domain/usecases/booking/cancel_pnr.dart';
 import '../features/flight/domain/usecases/booking/create_pnr.dart';
 import '../features/flight/domain/usecases/booking/get_pnr.dart';
+import '../features/flight/domain/usecases/booking/get_pnr_by_booking_code.dart';
+import '../features/flight/domain/usecases/booking/list_my_pnrs.dart';
 import '../features/flight/domain/usecases/booking/list_pnrs.dart';
 import '../features/flight/domain/usecases/flight/get_airports.dart';
 import '../features/flight/domain/usecases/flight/get_fare_classes.dart';
@@ -167,12 +169,16 @@ void _initBooking() {
     ..registerFactory(() => CreatePnr(serviceLocator()))
     ..registerFactory(() => GetPnr(serviceLocator()))
     ..registerFactory(() => ListPnrs(serviceLocator()))
+    ..registerFactory(() => ListMyPnrs(serviceLocator()))
+    ..registerFactory(() => GetPnrByBookingCode(serviceLocator()))
     ..registerFactory(() => CancelPnr(serviceLocator()))
     ..registerLazySingleton(
       () => BookingBloc(
         createPnrUseCase: serviceLocator(),
         getPnrUseCase: serviceLocator(),
         listPnrsUseCase: serviceLocator(),
+        listMyPnrsUseCase: serviceLocator(),
+        getPnrByBookingCodeUseCase: serviceLocator(),
         cancelPnrUseCase: serviceLocator(),
       ),
     );

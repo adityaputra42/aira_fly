@@ -5,13 +5,13 @@ import '../../../../../core/usecase/usecase.dart';
 import '../../entities/pnr_entity.dart';
 import '../../repository/booking_repository.dart';
 
-class CreatePnr implements UseCase<PnrEntity, CreatePnrParams> {
+class CreatePnr implements UseCase<PnrDetailEntity, CreatePnrParams> {
   final BookingRepository bookingRepository;
 
   const CreatePnr(this.bookingRepository);
 
   @override
-  Future<Either<Failure, PnrEntity>> call(CreatePnrParams params) {
+  Future<Either<Failure, PnrDetailEntity>> call(CreatePnrParams params) {
     return bookingRepository.createPnr(
       contact: params.contact,
       passengers: params.passengers,

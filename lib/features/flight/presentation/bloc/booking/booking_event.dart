@@ -46,6 +46,26 @@ class LoadPnrListRequested extends BookingEvent {
   List<Object?> get props => [page, limit, status];
 }
 
+class LoadMyPnrListRequested extends BookingEvent {
+  final int page;
+  final int limit;
+  final String? status;
+
+  const LoadMyPnrListRequested({this.page = 1, this.limit = 10, this.status});
+
+  @override
+  List<Object?> get props => [page, limit, status];
+}
+
+class LoadPnrByBookingCodeRequested extends BookingEvent {
+  final String bookingCode;
+
+  const LoadPnrByBookingCodeRequested({required this.bookingCode});
+
+  @override
+  List<Object?> get props => [bookingCode];
+}
+
 class CancelPnrRequested extends BookingEvent {
   final int id;
 

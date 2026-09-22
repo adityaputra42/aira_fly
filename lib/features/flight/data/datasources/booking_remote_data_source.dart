@@ -9,6 +9,10 @@ abstract interface class BookingRemoteDataSource {
 
   Future<ApiResponse?> listPnrs({int page, int limit, String? status});
 
+  Future<ApiResponse?> listMyPnrs({int page, int limit, String? status});
+
+  Future<ApiResponse?> getPnrByBookingCode(String bookingCode);
+
   Future<ApiResponse?> cancelPnr(int id);
 }
 
@@ -31,7 +35,7 @@ class BookingRemoteDataSourceImpl implements BookingRemoteDataSource {
   @override
   Future<ApiResponse?> getPnr(int id) async {
     try {
-      var response = await dio.get('${Endpoint.pnr}$id');
+      var response = await dio.get('${Endpoint.pnr}/$id');
       if (response.data == null) {
         return ApiResponse.withError(response, response.statusMessage, null);
       }
@@ -57,9 +61,37 @@ class BookingRemoteDataSourceImpl implements BookingRemoteDataSource {
   }
 
   @override
+  Future<ApiResponse?> listMyPnrs({int page = 1, int limit = 10, String? status}) async {
+    try {
+      var query = <String, dynamic>{'page': page, 'limit': limit};
+      if (status != null && status.isNotEmpty) query['status'] = status;
+      var response = await dio.get('${Endpoint.pnr}/mine', queryParameters: query);
+      if (response.data == null) {
+        return ApiResponse.withError(response, response.statusMessage, null);
+      }
+      return ApiResponse.withSuccess(response, response.data);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  @override
+  Future<ApiResponse?> getPnrByBookingCode(String bookingCode) async {
+    try {
+      var response = await dio.get('${Endpoint.pnr}/mine/$bookingCode');
+      if (response.data == null) {
+        return ApiResponse.withError(response, response.statusMessage, null);
+      }
+      return ApiResponse.withSuccess(response, response.data);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  @override
   Future<ApiResponse?> cancelPnr(int id) async {
     try {
-      var response = await dio.post('${Endpoint.pnr}$id/cancel');
+      var response = await dio.post('${Endpoint.pnr}/$id/cancel');
       if (response.data == null) {
         return ApiResponse.withError(response, response.statusMessage, null);
       }

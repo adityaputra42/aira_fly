@@ -1,6 +1,6 @@
 import '../../domain/entities/payment_entity.dart';
+import 'pnr_model.dart';
 
-/// Maps `createPaymentResponse` from POST /payments (snake_case json tags).
 class PaymentModel extends PaymentEntity {
   const PaymentModel({
     super.paymentId,
@@ -29,10 +29,19 @@ class PaymentModel extends PaymentEntity {
   }
 }
 
-/// Maps `appquery.PaymentView` -- this Go struct has NO json tags, so it
-/// serializes using the raw (capitalized) field names. Used by
-/// GET /payments/{id}, GET /payments/pnr/{pnr_id}, and each item inside
-/// GET /payments (admin list).
+class CreatePaymentResponseModel extends CreatePaymentResponseEntity {
+  const CreatePaymentResponseModel({required super.payment, super.pnr});
+
+  factory CreatePaymentResponseModel.fromJson(Map<String, dynamic> json) {
+    return CreatePaymentResponseModel(
+      payment: PaymentModel.fromJson(json['payment'] as Map<String, dynamic>),
+      pnr: json['pnr'] == null
+          ? null
+          : PnrDetailModel.fromJson(json['pnr'] as Map<String, dynamic>),
+    );
+  }
+}
+
 class PaymentViewModel extends PaymentViewEntity {
   const PaymentViewModel({
     super.id,

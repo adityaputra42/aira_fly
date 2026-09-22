@@ -5,13 +5,13 @@ import '../../../../../core/usecase/usecase.dart';
 import '../../entities/payment_entity.dart';
 import '../../repository/payment_repository.dart';
 
-class CreatePayment implements UseCase<PaymentEntity, CreatePaymentParams> {
+class CreatePayment implements UseCase<CreatePaymentResponseEntity, CreatePaymentParams> {
   final PaymentRepository paymentRepository;
 
   const CreatePayment(this.paymentRepository);
 
   @override
-  Future<Either<Failure, PaymentEntity>> call(CreatePaymentParams params) {
+  Future<Either<Failure, CreatePaymentResponseEntity>> call(CreatePaymentParams params) {
     return paymentRepository.createPayment(
       pnrId: params.pnrId,
       channel: params.channel,

@@ -56,10 +56,10 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
   String? _processingMessage;
   String? _errorMessage;
 
-  PnrEntity? _pnr;
+  PnrDetailEntity? _pnr;
   final List<String> _ancillaryFailures = [];
   String _paymentMethod = 'DOKU_VA';
-  PaymentEntity? _payment;
+  CreatePaymentResponseEntity? _payment;
 
   @override
   void initState() {
@@ -163,22 +163,35 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
     final pnr = (bookingResult as PnrCreated).pnr;
     setState(() => _pnr = pnr);
 
-    await _purchaseAncillaries(pnr.pnrId!);
+    await _purchaseAncillaries(pnr);
     if (!mounted) return;
 
     setState(() => _step = _Step.paymentMethod);
   }
 
-  Future<void> _purchaseAncillaries(int pnrId) async {
+  Future<void> _purchaseAncillaries(PnrDetailEntity pnr) async {
     final allSelections = [...widget.result.baggage, ...widget.result.meals];
     if (allSelections.isEmpty) return;
 
     setState(() => _processingMessage = "Adding your baggage and meal selections...");
 
     for (final selection in allSelections) {
+      int? matchedSegmentId;
+      for (final seg in pnr.segments) {
+        if (seg.flightId == selection.flightId) {
+          matchedSegmentId = seg.id;
+          break;
+        }
+      }
+      final matchedPassengerId = selection.passengerIndex < pnr.passengers.length
+          ? pnr.passengers[selection.passengerIndex].id
+          : null;
+
       _ancillaryBloc.add(
         PurchaseAncillaryRequested(
-          pnrId: pnrId,
+          pnrId: pnr.id!,
+          passengerId: matchedPassengerId,
+          segmentId: matchedSegmentId,
           ancillaryId: selection.item.id!,
           flightId: selection.flightId,
           quantity: 1,
@@ -197,7 +210,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
 
   Future<void> _pay() async {
     final pnr = _pnr;
-    if (pnr?.pnrId == null) return;
+    if (pnr?.id == null) return;
 
     setState(() {
       _step = _Step.processing;
@@ -205,7 +218,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
       _errorMessage = null;
     });
 
-    _paymentBloc.add(CreatePaymentRequested(pnrId: pnr!.pnrId!, paymentMethod: _paymentMethod));
+    _paymentBloc.add(CreatePaymentRequested(pnrId: pnr!.id!, paymentMethod: _paymentMethod));
 
     final result = await _paymentBloc.stream.firstWhere(
       (s) => s is PaymentCreated || s is PaymentError,
@@ -223,6 +236,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
 
     setState(() {
       _payment = (result as PaymentCreated).payment;
+      if (_payment?.pnr != null) _pnr = _payment!.pnr;
       _step = _Step.done;
     });
   }
@@ -504,7 +518,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
   }
 
   Widget _buildDone(BuildContext context) {
-    final payment = _payment;
+    final payment = _payment?.payment;
     final isInstantlyPaid = payment?.virtualAccountNo == null || payment!.virtualAccountNo!.isEmpty;
 
     return Center(

@@ -12,7 +12,7 @@ final class BookingInitial extends BookingState {}
 class BookingLoading extends BookingState {}
 
 class PnrCreated extends BookingState {
-  final PnrEntity pnr;
+  final PnrDetailEntity pnr;
 
   const PnrCreated(this.pnr);
 
@@ -36,6 +36,24 @@ class PnrListLoaded extends BookingState {
 
   @override
   List<Object?> get props => [pnrs];
+}
+
+class MyPnrListLoaded extends BookingState {
+  final List<PnrSummaryEntity> pnrs;
+
+  const MyPnrListLoaded(this.pnrs);
+
+  @override
+  List<Object?> get props => [pnrs];
+}
+
+class PnrByBookingCodeLoaded extends BookingState {
+  final PnrDetailEntity pnr;
+
+  const PnrByBookingCodeLoaded(this.pnr);
+
+  @override
+  List<Object?> get props => [pnr];
 }
 
 class PnrCancelled extends BookingState {}
