@@ -55,7 +55,7 @@ class _CarouselTicketState extends State<CarouselTicket> {
           options: CarouselOptions(
             autoPlay: false,
             disableCenter: true,
-            aspectRatio: 31 / 32,
+            aspectRatio: 35 / 36,
             height: null,
             enableInfiniteScroll: false,
             viewportFraction: 1,

@@ -29,6 +29,7 @@ class PaymentDetailLoaded extends PaymentState {
   List<Object?> get props => [payment];
 }
 
+
 class PaymentError extends PaymentState {
   final String message;
 

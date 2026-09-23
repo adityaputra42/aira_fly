@@ -29,6 +29,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<SignInRequested>(_onSignInRequested);
     on<CheckAuthStatus>(_onCheckAuthStatus);
     on<SignUpRequested>(_onSignUpRequested);
+    on<SignOutRequested>(_onSignOutRequested);
   }
 
   Future _onSignInRequested(SignInRequested event, Emitter<AuthState> emit) async {
@@ -60,6 +61,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       (failure) => emit(AuthError(failure.message)),
       (user) => _emitAuthSuccess(user, emit),
     );
+  }
+
+  Future _onSignOutRequested(SignOutRequested event, Emitter<AuthState> emit) async {
+    emit(AuthLoading());
+
+    authLocalDataSource.clearTokens();
+    emit(AuthInitial());
+    appUserCubit.reset();
   }
 
   Future _onCheckAuthStatus(CheckAuthStatus event, Emitter<AuthState> emit) async {

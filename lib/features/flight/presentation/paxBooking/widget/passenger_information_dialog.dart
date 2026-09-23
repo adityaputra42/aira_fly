@@ -2,6 +2,7 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:pss_app/app/init_dependencies.dart';
 import 'package:pss_app/app/theme/theme.dart';
 import 'package:pss_app/core/common/widget/card_general.dart';
 import 'package:pss_app/core/common/widget/dropdown_custom.dart';
@@ -10,6 +11,9 @@ import 'package:pss_app/core/common/widget/primary_button.dart';
 import 'package:pss_app/core/utils/show_snackbar.dart';
 import 'package:pss_app/core/utils/size_extension.dart';
 import 'package:pss_app/features/flight/domain/repository/booking_repository.dart';
+import 'package:pss_app/features/master/domain/entities/country_code_entity.dart';
+import 'package:pss_app/features/master/domain/usecases/list_country_codes.dart';
+import 'package:pss_app/features/master/presentation/widget/country_search_dialog.dart';
 
 class PassengerInformationDialog extends StatefulWidget {
   const PassengerInformationDialog({
@@ -37,15 +41,21 @@ class _PassengerInformationDialogState extends State<PassengerInformationDialog>
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _firstNameController;
   late final TextEditingController _lastNameController;
-  late final TextEditingController _nationalityController;
   late final TextEditingController _documentNumberController;
 
   String? _title;
   String? _gender; // M | F
   DateTime? _birthDate;
+  // Stores the ISO 3166-1 alpha-3 code (e.g. "IDN"), not the display
+  // name -- see CountryCodeEntity.alpha3. Was free text before this was
+  // wired to GET /master/country-codes.
+  String? _nationality;
   String? _documentType;
   DateTime? _documentExpiredAt;
   bool get _birthDateRequired => widget.passengerType != 'ADT';
+
+  List<CountryCodeEntity>? _countries;
+  String? _countriesError;
 
   @override
   void initState() {
@@ -53,13 +63,35 @@ class _PassengerInformationDialogState extends State<PassengerInformationDialog>
     final initial = widget.initial;
     _firstNameController = TextEditingController(text: initial?.firstName ?? '');
     _lastNameController = TextEditingController(text: initial?.lastName ?? '');
-    _nationalityController = TextEditingController(text: initial?.nationality ?? '');
     _documentNumberController = TextEditingController(text: initial?.documentNumber ?? '');
     _title = initial?.title;
     _gender = initial?.gender;
     _birthDate = _tryParseDate(initial?.birthDate);
+    _nationality = initial?.nationality;
     _documentType = initial?.documentType;
     _documentExpiredAt = _tryParseDate(initial?.documentExpiredAt);
+    _loadCountries();
+  }
+
+  Future<void> _loadCountries() async {
+    final result = await serviceLocator<ListCountryCodes>()(const ListCountryCodesParams());
+    if (!mounted) return;
+    result.fold((failure) => setState(() => _countriesError = failure.message), (countries) {
+      setState(() {
+        _countries = countries;
+        // A previously-saved nationality that isn't one of the codes we
+        // just got back (e.g. old free-text data like "Indonesia" from
+        // before this was wired to the country list, or a country
+        // dropped from the reference table) would silently render as a
+        // blank field with no way to tell "unset" apart from "set to
+        // something we can no longer display". Clear it so the person
+        // re-picks explicitly rather than unknowingly resubmitting a
+        // stale, unverifiable value.
+        if (_nationality != null && !countries.any((c) => c.alpha3 == _nationality)) {
+          _nationality = null;
+        }
+      });
+    });
   }
 
   DateTime? _tryParseDate(String? value) {
@@ -71,7 +103,6 @@ class _PassengerInformationDialogState extends State<PassengerInformationDialog>
   void dispose() {
     _firstNameController.dispose();
     _lastNameController.dispose();
-    _nationalityController.dispose();
     _documentNumberController.dispose();
     super.dispose();
   }
@@ -122,9 +153,7 @@ class _PassengerInformationDialogState extends State<PassengerInformationDialog>
         lastName: _lastNameController.text.trim().isEmpty ? null : _lastNameController.text.trim(),
         gender: _gender,
         birthDate: _birthDate != null ? DateFormat(_dateFormat).format(_birthDate!) : null,
-        nationality: _nationalityController.text.trim().isEmpty
-            ? null
-            : _nationalityController.text.trim(),
+        nationality: _nationality,
         documentType: _documentType,
         documentNumber: _documentNumberController.text.trim().isEmpty
             ? null
@@ -152,6 +181,69 @@ class _PassengerInformationDialogState extends State<PassengerInformationDialog>
         text: value != null ? DateFormat('dd MMM yyyy').format(value) : '',
       ),
       icon: const Icon(Icons.calendar_today_rounded, size: 16),
+    );
+  }
+
+  Widget _nationalityField() {
+    if (_countriesError != null) {
+      return Row(
+        children: [
+          Expanded(
+            child: Text(
+              "Couldn't load the country list: $_countriesError",
+              style: AppFont.reguler12.copyWith(color: Colors.red),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              setState(() => _countriesError = null);
+              _loadCountries();
+            },
+            child: const Text("Retry"),
+          ),
+        ],
+      );
+    }
+
+    final countries = _countries;
+    if (countries == null) {
+      return Row(
+        children: [
+          const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2)),
+          widget.width(8),
+          Text(
+            "Loading country list...",
+            style: AppFont.reguler12.copyWith(color: Theme.of(context).hintColor),
+          ),
+        ],
+      );
+    }
+
+    CountryCodeEntity? selected;
+    for (final c in countries) {
+      if (c.alpha2 == _nationality) {
+        selected = c;
+        break;
+      }
+    }
+
+    return InputText(
+      title: "Nationality (optional)",
+      hintText: "Tap to search",
+      readOnly: true,
+      cursor: false,
+      ontaped: () async {
+        final picked = await showCountrySearchDialog(
+          context,
+          countries: countries,
+          initialAlpha3: _nationality,
+        );
+        if (picked != null) setState(() => _nationality = picked.alpha2);
+      },
+      controller: TextEditingController(
+        text: selected == null ? '' : "${selected.name ?? '-'} (${selected.alpha2})",
+      ),
+      icon: const Icon(Icons.expand_more, size: 16),
     );
   }
 
@@ -291,12 +383,7 @@ class _PassengerInformationDialogState extends State<PassengerInformationDialog>
                           onTap: _pickBirthDate,
                         ),
                         widget.height(12),
-                        InputText(
-                          title: "Nationality (optional)",
-                          hintText: "e.g. Indonesia",
-                          controller: _nationalityController,
-                          textInputAction: TextInputAction.next,
-                        ),
+                        _nationalityField(),
                         widget.height(12),
 
                         DropDownCustom(

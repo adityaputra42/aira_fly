@@ -76,7 +76,7 @@ class CardTicketBookingDetail extends StatelessWidget {
                                 ),
                               ),
                               height(2),
-                              Text(bookingCode ?? "-", style: AppFont.medium14),
+                              Text(bookingCode ?? "Pending", style: AppFont.medium14),
                             ],
                           ),
                         ],

@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_switch/flutter_switch.dart';
+import 'package:go_router/go_router.dart';
 import 'package:iconify_flutter_plus/iconify_flutter_plus.dart';
 import 'package:iconify_flutter_plus/icons/material_symbols.dart';
 import 'package:iconify_flutter_plus/icons/mdi.dart';
+import 'package:pss_app/app/init_dependencies.dart';
+import 'package:pss_app/app/routes/route_names.dart';
 import 'package:pss_app/core/common/cubit/theme_cubit.dart';
 import 'package:pss_app/core/common/cubit/user_cubit.dart';
 import 'package:pss_app/core/common/entities/user.dart';
 import 'package:pss_app/core/common/widget/card_general.dart';
 import 'package:pss_app/app/theme/theme.dart';
+import 'package:pss_app/features/auth/presentation/bloc/auth_bloc.dart';
 
 import '../../../../core/utils/size_extension.dart';
 
@@ -102,8 +106,20 @@ class SettingScreen extends StatelessWidget {
                   },
                 ),
                 isLogin
-                    ? CardMenu(icon: Mdi.logout, title: "Log Out")
-                    : CardMenu(icon: Mdi.login, title: "Log In"),
+                    ? CardMenu(
+                        icon: Mdi.logout,
+                        title: "Log Out",
+                        ontap: () {
+                          serviceLocator<AuthBloc>().add(SignOutRequested());
+                        },
+                      )
+                    : CardMenu(
+                        icon: Mdi.login,
+                        title: "Log In",
+                        ontap: () {
+                          context.goNamed(RouteNames.signin);
+                        },
+                      ),
               ],
             ),
           );
@@ -114,10 +130,11 @@ class SettingScreen extends StatelessWidget {
 }
 
 class CardMenu extends StatelessWidget {
-  const CardMenu({super.key, required this.icon, required this.title, this.rightIcon});
+  const CardMenu({super.key, required this.icon, required this.title, this.rightIcon, this.ontap});
   final String title;
   final String icon;
   final Widget? rightIcon;
+  final Function()? ontap;
 
   @override
   Widget build(BuildContext context) {
@@ -126,22 +143,25 @@ class CardMenu extends StatelessWidget {
         return CardGeneral(
           padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Row(
-            children: [
-              Iconify(
-                icon,
-                size: 24,
-                color: isDark ? AppColor.secondaryColor : AppColor.primaryColor,
-              ),
-              width(8),
-              Expanded(child: Text(title, style: AppFont.medium14)),
-              rightIcon ??
-                  Icon(
-                    Icons.arrow_forward_ios_rounded,
-                    size: 20,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-            ],
+          child: InkWell(
+            onTap: ontap,
+            child: Row(
+              children: [
+                Iconify(
+                  icon,
+                  size: 24,
+                  color: isDark ? AppColor.secondaryColor : AppColor.primaryColor,
+                ),
+                width(8),
+                Expanded(child: Text(title, style: AppFont.medium14)),
+                rightIcon ??
+                    Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      size: 20,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+              ],
+            ),
           ),
         );
       },

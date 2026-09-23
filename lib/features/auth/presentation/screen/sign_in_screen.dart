@@ -14,6 +14,7 @@ import 'package:pss_app/core/constants/images.dart';
 import 'package:pss_app/core/utils/size_extension.dart';
 import 'package:pss_app/features/auth/presentation/bloc/auth_bloc.dart';
 
+import '../../../../core/constants/environment.dart';
 import '../../../../core/utils/show_snackbar.dart';
 import '../../../../core/utils/widget_helper.dart';
 
@@ -31,6 +32,17 @@ class _SignInScreenState extends State<SignInScreen> {
   TextEditingController passwordController = TextEditingController();
 
   final formKey = GlobalKey<FormState>();
+
+  @override
+  void initState() {
+    super.initState();
+    if (Env.appEnv != "prod") {
+      emailController.text = Env.appUsernameLogin;
+      passwordController.text = Env.appPasswordLogin;
+      disable = false;
+    }
+  }
+
   @override
   void dispose() {
     super.dispose();

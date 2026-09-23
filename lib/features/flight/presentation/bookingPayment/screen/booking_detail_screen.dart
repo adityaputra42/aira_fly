@@ -191,7 +191,6 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
 
     setState(() {
       _payment = (result as PaymentCreated).payment;
-
       if (_payment?.pnr != null) _pnr = _payment!.pnr;
       _step = _Step.done;
     });
@@ -502,6 +501,8 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: DropDownCustom(
+                        filled: true,
+                        filledColor: Theme.of(context).colorScheme.surface,
                         hint: "Select payment method",
                         value: _paymentMethod,
                         onChange: (value) => setState(() => _paymentMethod = value as String),
@@ -510,7 +511,6 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                             value: 'DOKU_VA',
                             child: Text("Virtual Account (DOKU)", style: AppFont.reguler12),
                           ),
-
                           if (isLoggedIn)
                             DropdownItem<String>(
                               value: 'BALANCE',
@@ -538,11 +538,6 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
               amount: _pnr?.totalAmount ?? _estimatedTotal,
               buttonLabel: isRetryingPayment ? "Retry Payment" : "Confirm & Pay",
               onPressed: () {
-                // BALANCE is only enabled for logged-in users on the
-                // dropdown above, but the dropdown package doesn't stop
-                // a disabled item from staying selected if auth state
-                // changes underneath it -- re-check here rather than
-                // trust `_paymentMethod` blindly.
                 if (_paymentMethod == 'BALANCE' && !isLoggedIn) {
                   setState(() => _errorMessage = "Sign in to pay with your wallet balance.");
                   return;

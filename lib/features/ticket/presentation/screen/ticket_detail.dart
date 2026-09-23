@@ -21,6 +21,7 @@ class TicketDetailScreen extends StatelessWidget {
       body: ListView(
         children: [
           height(12),
+         
           CarouselTicket(legs: const []),
           PriceDetail(segments: const [], total: 0),
           PrimaryButton(

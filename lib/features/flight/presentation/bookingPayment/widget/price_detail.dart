@@ -12,7 +12,11 @@ class FareSegmentBreakdown {
   final List<FareLineItem> lines;
   final double subtotal;
 
-  const FareSegmentBreakdown({required this.routeLabel, required this.lines, required this.subtotal});
+  const FareSegmentBreakdown({
+    required this.routeLabel,
+    required this.lines,
+    required this.subtotal,
+  });
 }
 
 class PriceDetail extends StatelessWidget {
@@ -31,7 +35,8 @@ class PriceDetail extends StatelessWidget {
   final double total;
   final String currency;
 
-  String _format(double value) => currency == 'IDR' ? formatIDR(value) : '$currency ${value.toStringAsFixed(2)}';
+  String _format(double value) =>
+      currency == 'IDR' ? formatIDR(value) : '$currency ${value.toStringAsFixed(2)}';
 
   @override
   Widget build(BuildContext context) {
@@ -99,9 +104,7 @@ class CardPricePerSegment extends StatelessWidget {
       child: Column(
         children: [
           Row(
-            children: [
-              Expanded(child: Text(segment.routeLabel, style: AppFont.medium14)),
-            ],
+            children: [Expanded(child: Text(segment.routeLabel, style: AppFont.medium14))],
           ),
           height(12),
           for (final line in segment.lines)

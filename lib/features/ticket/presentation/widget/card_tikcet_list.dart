@@ -1,10 +1,43 @@
-part of '../screen/ticket_screen.dart';
+import 'dart:math' as math;
+
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:iconify_flutter_plus/iconify_flutter_plus.dart';
+import 'package:iconify_flutter_plus/icons/bx.dart';
+import 'package:intl/intl.dart';
+
+import '../../../../app/routes/route_names.dart';
+import '../../../../app/theme/theme.dart';
+import '../../../../core/common/widget/card_general.dart';
+import '../../../../core/utils/clipper.dart';
+import '../../../../core/utils/dashed_divider.dart';
+import '../../../../core/utils/size_extension.dart';
+import '../../../flight/domain/entities/pnr_entity.dart';
 
 class CardTikcetList extends StatelessWidget {
-  const CardTikcetList({super.key});
+  const CardTikcetList({super.key, required this.pnr, required this.onTap});
+
+  final PnrDetailEntity pnr;
+  final VoidCallback onTap;
+  Color _statusColor(String? status) {
+    switch (status) {
+      case 'BOOKED':
+        return AppColor.greenColor;
+      case 'HOLD':
+        return Colors.orange;
+      case 'CANCELLED':
+      case 'EXPIRED':
+        return Colors.red;
+      default:
+        return AppColor.greenColor;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final segments = pnr.segments;
+    final first = segments.isNotEmpty ? segments.first : null;
+
     return InkWell(
       onTap: () {
         context.goNamed(RouteNames.ticketDetail);
@@ -22,8 +55,8 @@ class CardTikcetList extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text("Garuda Indonesia", style: AppFont.medium14),
-                      Text("BF47S8", style: AppFont.reguler14),
+                      Text("Aira Fly", style: AppFont.medium14),
+                      Text(pnr.bookingCode ?? '', style: AppFont.reguler14),
                     ],
                   ),
                   height(4),
@@ -31,10 +64,19 @@ class CardTikcetList extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        "GA-245",
+                        first?.flightNumber ?? "",
                         style: AppFont.reguler12.copyWith(color: Theme.of(context).hintColor),
                       ),
-                      Text("Confirm", style: AppFont.medium12.copyWith(color: AppColor.greenColor)),
+                      CardGeneral(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        background: _statusColor(pnr.status).withValues(alpha: 0.12),
+                        radius: 6,
+
+                        child: Text(
+                          pnr.status ?? '-',
+                          style: AppFont.medium12.copyWith(color: _statusColor(pnr.status)),
+                        ),
+                      ),
                     ],
                   ),
                   height(16),
@@ -122,9 +164,8 @@ class CardTikcetList extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        DateFormat(
-                          "HH:mm",
-                        ).format(DateTime.now().add(Duration(hours: 2, minutes: 45))),
+                        DateFormat("HH:mm")
+                            .format(DateTime.now().add(Duration(hours: 2, minutes: 45))),
                         style: AppFont.reguler12.copyWith(color: Theme.of(context).hintColor),
                       ),
                     ],

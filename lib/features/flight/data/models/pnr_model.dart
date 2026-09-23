@@ -105,11 +105,6 @@ class PnrAncillaryDetailModel extends PnrAncillaryDetailEntity {
   }
 }
 
-/// Maps the PNRDetail response shared by POST /bookings/pnrs (create),
-/// GET /bookings/pnrs/{id} (admin), and GET /bookings/pnrs/mine/{code}
-/// (self-service by booking code). Consistently snake_case as of the
-/// backend's 2026-09-18 json-tag fix -- see PnrDetailEntity's doc
-/// comment for what changed and why this used to be two shapes.
 class PnrDetailModel extends PnrDetailEntity {
   const PnrDetailModel({
     super.id,
@@ -137,9 +132,6 @@ class PnrDetailModel extends PnrDetailEntity {
       paymentStatus: json['payment_status'] as String?,
       totalAmount: double.tryParse('${json['total_amount']}'),
       currency: json['currency'] as String?,
-      // Absent from the response entirely when null (Go `,omitempty` on a
-      // nil pointer) -- not sent as an explicit `null`, but json['x'] on a
-      // missing key already returns null in Dart, so this check covers both.
       holdExpiresAt: json['hold_expires_at'] == null
           ? null
           : DateTime.tryParse(json['hold_expires_at']),
@@ -163,8 +155,6 @@ class PnrDetailModel extends PnrDetailEntity {
   }
 }
 
-/// Maps one item of GET /bookings/pnrs (admin list, `booking:pnr:view`).
-/// Backend struct `query.PNRSummary` DOES have snake_case json tags.
 class PnrSummaryModel extends PnrSummaryEntity {
   const PnrSummaryModel({
     super.id,
@@ -191,9 +181,6 @@ class PnrSummaryModel extends PnrSummaryEntity {
   }
 }
 
-/// Maps the `ListPNRsResult` wrapper `{ items, total, page, limit }`
-/// (this outer wrapper DOES have snake_case json tags, unlike the two
-/// models above).
 class PnrListModel {
   final List<PnrSummaryModel> items;
   final int total;

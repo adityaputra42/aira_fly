@@ -38,6 +38,10 @@ class PnrListLoaded extends BookingState {
   List<Object?> get props => [pnrs];
 }
 
+/// Result of [LoadMyPnrListRequested] -- kept distinct from
+/// [PnrListLoaded] (the admin listPnrs result) even though the row shape
+/// is the same, so a BlocListener/Builder can't accidentally treat "my
+/// history loaded" and "admin's global list loaded" as the same event.
 class MyPnrListLoaded extends BookingState {
   final List<PnrSummaryEntity> pnrs;
 
@@ -47,6 +51,8 @@ class MyPnrListLoaded extends BookingState {
   List<Object?> get props => [pnrs];
 }
 
+/// Result of [LoadPnrByBookingCodeRequested] -- kept distinct from
+/// [PnrDetailLoaded] (the admin getPnr-by-id result) for the same reason.
 class PnrByBookingCodeLoaded extends BookingState {
   final PnrDetailEntity pnr;
 

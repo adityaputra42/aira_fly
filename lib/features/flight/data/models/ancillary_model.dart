@@ -14,9 +14,6 @@ class AncillaryCategoryModel extends AncillaryCategoryEntity {
   }
 }
 
-/// Maps `appquery.CatalogItem` -- this Go struct has NO json tags, so it
-/// serializes using the raw (capitalized) field names. Used by
-/// GET /ancillaries, GET /ancillaries/{id}, and GET /ancillaries/flight/{flight_id}.
 class AncillaryItemModel extends AncillaryItemEntity {
   const AncillaryItemModel({
     super.id,
@@ -45,9 +42,6 @@ class AncillaryItemModel extends AncillaryItemEntity {
   }
 }
 
-/// Maps `commanddb.BookingAncillary` / `querydb.BookingAncillary`
-/// (snake_case json tags) -- the result of a purchase, a cancel, and each
-/// row of ListByPNR.
 class BookingAncillaryModel extends BookingAncillaryEntity {
   const BookingAncillaryModel({
     super.id,
@@ -76,12 +70,8 @@ class BookingAncillaryModel extends BookingAncillaryEntity {
       unitPrice: (json['unit_price'] as num?)?.toDouble(),
       totalPrice: (json['total_price'] as num?)?.toDouble(),
       status: json['status'] as String?,
-      purchasedAt: json['purchased_at'] == null
-          ? null
-          : DateTime.tryParse(json['purchased_at']),
-      createdAt: json['created_at'] == null
-          ? null
-          : DateTime.tryParse(json['created_at']),
+      purchasedAt: json['purchased_at'] == null ? null : DateTime.tryParse(json['purchased_at']),
+      createdAt: json['created_at'] == null ? null : DateTime.tryParse(json['created_at']),
       paymentStatus: json['payment_status'] as String?,
       paymentId: json['payment_id'] as int?,
     );

@@ -63,6 +63,10 @@ import '../features/profile/domain/repository/profile_repository.dart';
 import '../features/profile/domain/usecases/get_profile.dart';
 import '../features/profile/domain/usecases/update_profile.dart';
 import '../features/profile/presentation/bloc/profile_bloc.dart';
+import '../features/master/data/datasources/country_code_remote_data_source.dart';
+import '../features/master/data/repositories/country_code_repository_impl.dart';
+import '../features/master/domain/repository/country_code_repository.dart';
+import '../features/master/domain/usecases/list_country_codes.dart';
 import '../features/splash/cubit/splash_cubit.dart';
 import '../features/ticket/data/datasources/ticket_remote_data_source.dart';
 import '../features/ticket/data/repositories/ticket_repository_impl.dart';
@@ -103,6 +107,7 @@ Future<void> initDependencies() async {
   _initWallet();
   _initTicket();
   _initProfile();
+  _initMaster();
 
   DioClient().configure(
     authLocalDataSource: serviceLocator(),
@@ -273,4 +278,13 @@ void _initProfile() {
       () =>
           ProfileBloc(getProfileUseCase: serviceLocator(), updateProfileUseCase: serviceLocator()),
     );
+}
+
+void _initMaster() {
+  serviceLocator
+    ..registerFactory<CountryCodeRemoteDataSource>(() => CountryCodeRemoteDataSourceImpl())
+    ..registerFactory<CountryCodeRepository>(
+      () => CountryCodeRepositoryImpl(serviceLocator(), serviceLocator()),
+    )
+    ..registerFactory(() => ListCountryCodes(serviceLocator()));
 }

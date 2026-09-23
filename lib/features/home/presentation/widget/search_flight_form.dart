@@ -395,7 +395,7 @@ class _SearchFlightFormState extends State<SearchFlightForm> {
               margin: EdgeInsets.zero,
               width: double.infinity,
               height: 42,
-              padding: EdgeInsets.all(2),
+              padding: EdgeInsets.all(3),
               child: TabBar(
                 physics: const NeverScrollableScrollPhysics(),
                 automaticIndicatorColorAdjustment: false,
@@ -408,9 +408,9 @@ class _SearchFlightFormState extends State<SearchFlightForm> {
                 indicatorColor: Theme.of(context).colorScheme.surface,
                 labelColor: AppColor.darkText1,
                 labelPadding: EdgeInsets.zero,
-                labelStyle: AppFont.medium14,
+                labelStyle: AppFont.medium12,
                 unselectedLabelColor: Theme.of(context).hintColor,
-                unselectedLabelStyle: AppFont.reguler14,
+                unselectedLabelStyle: AppFont.reguler12,
                 indicatorSize: TabBarIndicatorSize.tab,
                 onTap: (index) {
                   changeTab(index);

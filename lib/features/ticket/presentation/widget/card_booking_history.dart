@@ -10,7 +10,7 @@ import 'package:pss_app/features/flight/presentation/utils/flight_display_utils.
 class CardBookingHistory extends StatelessWidget {
   const CardBookingHistory({super.key, required this.pnr, required this.onTap});
 
-  final PnrSummaryEntity pnr;
+  final PnrDetailEntity pnr;
   final VoidCallback onTap;
 
   Color _statusColor(String? status) {
@@ -29,6 +29,9 @@ class CardBookingHistory extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final segments = pnr.segments;
+    final first = segments.isNotEmpty ? segments.first : null;
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(8),
@@ -56,34 +59,43 @@ class CardBookingHistory extends StatelessWidget {
                 ),
               ],
             ),
+            if (first != null) ...[
+              height(6),
+              Text(
+                segments.length > 1
+                    ? "${first.flightNumber ?? '-'} +${segments.length - 1} more"
+                    : (first.flightNumber ?? '-'),
+                style: AppFont.medium14,
+              ),
+              height(4),
+              Text(
+                first.departureTime == null
+                    ? '-'
+                    : DateFormat('dd MMM yyyy, HH:mm').format(first.departureTime!),
+                style: AppFont.reguler12.copyWith(color: Theme.of(context).hintColor),
+              ),
+            ],
             height(6),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  pnr.createdAt == null
-                      ? '-'
-                      : DateFormat('dd MMM yyyy, HH:mm').format(pnr.createdAt!),
+                  "${pnr.passengers.length} passenger(s)",
                   style: AppFont.reguler12.copyWith(color: Theme.of(context).hintColor),
                 ),
                 Text(
                   formatIDR(pnr.totalAmount ?? 0),
-                  style: AppFont.medium14.copyWith(color: AppColor.primaryColor),
+                  style: AppFont.medium14.copyWith(color: AppColor.secondaryColor),
                 ),
               ],
             ),
-            if (pnr.status == 'HOLD' && pnr.expiresAt != null) ...[
+            if (pnr.status == 'HOLD' && pnr.holdExpiresAt != null) ...[
               height(4),
               Text(
-                'Pay before ${DateFormat('dd MMM yyyy, HH:mm').format(pnr.expiresAt!)}',
+                'Pay before ${DateFormat('dd MMM yyyy, HH:mm').format(pnr.holdExpiresAt!)}',
                 style: AppFont.reguler12.copyWith(color: Colors.orange.shade800),
               ),
             ],
-            height(4),
-            Text(
-              'Payment: ${pnr.paymentStatus ?? '-'}',
-              style: AppFont.reguler12.copyWith(color: Theme.of(context).hintColor),
-            ),
           ],
         ),
       ),

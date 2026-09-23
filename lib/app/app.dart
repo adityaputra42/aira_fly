@@ -3,7 +3,6 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:loader_overlay/loader_overlay.dart';
-import 'package:pss_app/core/constants/environment.dart';
 
 import '../core/common/cubit/theme_cubit.dart';
 import 'routes/app_routes.dart';
@@ -17,7 +16,7 @@ class App extends StatelessWidget {
       builder: (context, isDarkMode) {
         return MaterialApp.router(
           routerConfig: AppRouter.router,
-          debugShowCheckedModeBanner: Env.appEnv == "dev",
+          debugShowCheckedModeBanner: false,
           title: "Aira Fly",
           theme: Styles.themeData(isDarkMode, context),
           builder: (context, child) {

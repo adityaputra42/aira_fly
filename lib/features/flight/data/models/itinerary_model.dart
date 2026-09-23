@@ -1,6 +1,5 @@
 import '../../domain/entities/itinerary_entity.dart';
 
-/// Maps `segmentResponse` from GET /flights/search (snake_case json tags).
 class SegmentModel extends SegmentEntity {
   const SegmentModel({
     super.flightId,

@@ -1,7 +1,5 @@
 import '../../domain/entities/flight_seat_entity.dart';
 
-/// Maps GET /flights/instances/{id}/seats item shape
-/// (`ListFlightSeatsWithLayoutByFlightIDRow`, snake_case json tags).
 class FlightSeatModel extends FlightSeatEntity {
   const FlightSeatModel({
     super.id,

@@ -204,11 +204,11 @@ class _SelectingSeatScreenState extends State<SelectingSeatScreen> {
         }
 
         return Padding(
-          padding: EdgeInsets.symmetric(horizontal: maxColumns < 8 ? 2 : 2),
+          padding: EdgeInsets.symmetric(horizontal: maxColumns < 8 ? 3 : 2),
           child: SelectableBox(
             text: seat.seatNumber ?? seat.seatLetter ?? '?',
-            width: maxColumns < 8 ? 40 : 32,
-            height: maxColumns < 8 ? 36 : 30,
+            width: maxColumns < 8 ? 38 : 30,
+            height: maxColumns < 8 ? 38 : 30,
             fontsize: maxColumns < 8 ? 10 : 8,
             isEnable: seat.isAvailable,
             isSelected: currentSeat?.id != null && currentSeat!.id == seat.id,
@@ -220,27 +220,27 @@ class _SelectingSeatScreenState extends State<SelectingSeatScreen> {
   }
 
   Widget _buildAisle(int maxColumns) {
-    return SizedBox(width: maxColumns < 8 ? 20 : 16, height: maxColumns < 8 ? 40 : 36);
+    return SizedBox(width: maxColumns < 8 ? 20 : 10, height: maxColumns < 8 ? 38 : 30);
   }
 
   Widget _buildEmptySeat(int maxColumns) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: maxColumns < 8 ? 4 : 2),
-      child: SizedBox(width: maxColumns < 8 ? 44 : 36, height: maxColumns < 8 ? 40 : 36),
+      padding: EdgeInsets.symmetric(horizontal: maxColumns < 8 ? 3 : 2),
+      child: SizedBox(width: maxColumns < 8 ? 38 : 30, height: maxColumns < 8 ? 38 : 30),
     );
   }
 
   Widget _buildSeatHeader({required List<String> clusteredColumns, required int maxColumns}) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: clusteredColumns.map((column) {
         // Aisle
         if (column == '|') {
-          return SizedBox(width: maxColumns < 8 ? 20 : 16);
+          return SizedBox(width: maxColumns < 8 ? 20 : 10);
         }
 
         return SizedBox(
-          width: maxColumns < 8 ? 44 : 36,
+          width: maxColumns < 8 ? 38 : 30,
           child: Center(child: Text(column, style: AppFont.medium14)),
         );
       }).toList(),

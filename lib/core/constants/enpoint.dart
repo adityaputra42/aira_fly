@@ -45,4 +45,7 @@ class Endpoint {
   static const walletBalance = "wallet/balance";
   static const walletTransaction = "wallet/transactions";
   static const walletTopup = "wallet/topup";
+
+  // ===== Master / Reference Data ===== //
+  static const countryCodes = "master/country-codes";
 }

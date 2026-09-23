@@ -46,6 +46,8 @@ class LoadPnrListRequested extends BookingEvent {
   List<Object?> get props => [page, limit, status];
 }
 
+/// Self-service history -- login required, always the caller's own
+/// bookings. Use for the "Ticket History" tab when signed in.
 class LoadMyPnrListRequested extends BookingEvent {
   final int page;
   final int limit;
@@ -57,6 +59,9 @@ class LoadMyPnrListRequested extends BookingEvent {
   List<Object?> get props => [page, limit, status];
 }
 
+/// Guest (signed-out) lookup by booking code. See the warning on
+/// BookingRepository.getPnrByBookingCode before assuming this is
+/// ownership-checked -- today it isn't, backend-side.
 class LoadPnrByBookingCodeRequested extends BookingEvent {
   final String bookingCode;
 
