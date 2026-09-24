@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:pss_app/app/theme/theme.dart';
 import 'package:pss_app/core/common/widget/card_general.dart';
 import 'package:pss_app/core/common/widget/primary_button.dart';
@@ -101,11 +102,26 @@ class PaxSelectionDialogState extends State<PaxSelectionDialog> {
           mainAxisAlignment: MainAxisAlignment.end,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              "Passanger",
-              style: AppFont.medium16,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Passanger",
+                  style: AppFont.medium16,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                InkWell(
+                  onTap: () {
+                    context.pop();
+                  },
+                  child: Icon(
+                    Icons.close_rounded,
+                    size: 24,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
+              ],
             ),
 
             PaxQuantitySelector(
@@ -161,7 +177,6 @@ class PaxSelectionDialogState extends State<PaxSelectionDialog> {
             PrimaryButton(
               title: "Save",
               onPressed: () {
-               
                 Navigator.of(context).pop([amountAdult, amountChild, amountInfant]);
               },
             ),
@@ -294,7 +309,7 @@ class _PaxQuantitySelectorState extends State<PaxQuantitySelector> {
               timer!.cancel();
             }
           },
-          child: Icon(_buildRemoveIcon(), color: AppColor.primaryColor),
+          child: Icon(_buildRemoveIcon(), color: AppColor.secondaryColor),
         ),
         SizedBox(width: _getButtonSpaceWidth()),
         SizedBox(
@@ -320,7 +335,7 @@ class _PaxQuantitySelectorState extends State<PaxQuantitySelector> {
               timer!.cancel();
             }
           },
-          child: Icon(_buildAddIcon(), color: AppColor.primaryColor),
+          child: Icon(_buildAddIcon(), color: AppColor.secondaryColor),
         ),
       ],
     );

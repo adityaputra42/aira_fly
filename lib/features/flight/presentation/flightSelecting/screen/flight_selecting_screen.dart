@@ -17,6 +17,7 @@ import 'package:pss_app/core/utils/dashed_divider.dart';
 import 'package:pss_app/core/utils/show_dialog_zoom.dart';
 import 'package:pss_app/features/flight/domain/entities/airport_entity.dart';
 import 'package:pss_app/features/flight/domain/entities/itinerary_entity.dart';
+import 'package:pss_app/features/flight/domain/entities/seat_class_entity.dart';
 import 'package:pss_app/features/flight/presentation/bloc/fareClass/fare_class_bloc.dart';
 import 'package:pss_app/features/flight/presentation/bloc/flight/flight_bloc.dart';
 import 'package:pss_app/features/flight/presentation/flightResult/screen/flight_result_screen.dart';
@@ -48,6 +49,7 @@ class FlightSelectingArguments {
   final FlightLeg leg;
   final ItineraryEntity? selectedDeparture;
   final ItineraryFareEntity? selectedDepartureFare; // NEW
+  final SeatClassEntity? seatClass;
 
   const FlightSelectingArguments({
     required this.departureAirport,
@@ -61,6 +63,7 @@ class FlightSelectingArguments {
     this.leg = FlightLeg.departure,
     this.selectedDeparture,
     this.selectedDepartureFare, // NEW
+    this.seatClass,
   });
 
   bool get isRoundTrip => tripType == 'round_trip';
@@ -175,6 +178,7 @@ class _FlightSelectingScreenState extends State<FlightSelectingScreen> {
             ? _returnDate?.toFormattedString(flightFormatDateReversed)
             : null,
         totalPax: args.pax.total,
+        seatClassId: args.seatClass?.id,
       ),
     );
   }
@@ -201,6 +205,7 @@ class _FlightSelectingScreenState extends State<FlightSelectingScreen> {
         amountAdult: args.amountAdult,
         amountChild: args.amountChild,
         amountInfant: args.amountInfant,
+
         departureFare: args.leg == FlightLeg.returnLeg ? args.selectedDepartureFare! : fare,
         returnFare: args.leg == FlightLeg.returnLeg ? fare : null,
       ),

@@ -42,7 +42,7 @@ class _SearchAirportScreenState extends State<SearchAirportScreen> {
   @override
   void initState() {
     super.initState();
-    _flightBloc = serviceLocator<FlightBloc>()..add(const LoadAirportsRequested(limit: 100));
+    _flightBloc = serviceLocator<FlightBloc>()..add(const LoadAirportsRequested(limit: 10));
   }
 
   @override

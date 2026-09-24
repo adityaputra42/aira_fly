@@ -29,6 +29,9 @@ class Endpoint {
   // ===== Fare classes ===== //
   static const getFareClasses = "flights/fare-classes";
 
+  // ===== Seat classes ===== //
+  static const getSearClasses = "flights/seat-classes";
+
   // ===== Flight ===== //
   static const flightSearch = "flights/search";
   static const flightInstances = "flights/instances";

@@ -19,16 +19,19 @@ import '../features/flight/data/datasources/booking_remote_data_source.dart';
 import '../features/flight/data/datasources/fare_class_remote_data_source.dart';
 import '../features/flight/data/datasources/flight_remote_data_source.dart';
 import '../features/flight/data/datasources/payment_remote_data_source.dart';
+import '../features/flight/data/datasources/seat_class_remote_data_source.dart';
 import '../features/flight/data/repositories/ancillary_repository_impl.dart';
 import '../features/flight/data/repositories/booking_repository_impl.dart';
 import '../features/flight/data/repositories/fare_class_repository_impl.dart';
 import '../features/flight/data/repositories/flight_repository_impl.dart';
 import '../features/flight/data/repositories/payment_repository_impl.dart';
+import '../features/flight/data/repositories/seat_class_repository_impl.dart';
 import '../features/flight/domain/repository/ancillary_repository.dart';
 import '../features/flight/domain/repository/booking_repository.dart';
 import '../features/flight/domain/repository/fare_class_repository.dart';
 import '../features/flight/domain/repository/flight_repository.dart';
 import '../features/flight/domain/repository/payment_repository.dart';
+import '../features/flight/domain/repository/seat_class_repository.dart';
 import '../features/flight/domain/usecases/ancillary/cancel_ancillary_purchase.dart';
 import '../features/flight/domain/usecases/ancillary/get_ancillary.dart';
 import '../features/flight/domain/usecases/ancillary/list_ancillaries_by_flight.dart';
@@ -45,11 +48,13 @@ import '../features/flight/domain/usecases/booking/list_pnrs.dart';
 import '../features/flight/domain/usecases/flight/get_airports.dart';
 import '../features/flight/domain/usecases/flight/get_fare_classes.dart';
 import '../features/flight/domain/usecases/flight/get_flight_seats.dart';
+import '../features/flight/domain/usecases/flight/get_seat_classes.dart';
 import '../features/flight/domain/usecases/flight/search_flights.dart';
 import '../features/flight/domain/usecases/payment/create_payment.dart';
 import '../features/flight/domain/usecases/payment/get_payment.dart';
 import '../features/flight/domain/usecases/payment/get_payment_by_pnr.dart';
 import '../features/flight/presentation/bloc/ancillary/ancillary_bloc.dart';
+import '../features/flight/presentation/bloc/bloc/seat_class_bloc.dart';
 import '../features/flight/presentation/bloc/booking/booking_bloc.dart';
 import '../features/flight/presentation/bloc/fareClass/fare_class_bloc.dart';
 import '../features/flight/presentation/bloc/flight/flight_bloc.dart';
@@ -163,6 +168,14 @@ void _initFlight() {
     )
     ..registerFactory(() => GetFareClasses(serviceLocator()))
     ..registerLazySingleton(() => FareClassBloc(getFareClassesUseCase: serviceLocator()));
+
+  serviceLocator
+    ..registerFactory<SeatClassRemoteDataSource>(() => SeatClassRemoteDataSourceImpl())
+    ..registerFactory<SeatClassRepository>(
+      () => SeatClassRepositoryImpl(serviceLocator(), serviceLocator()),
+    )
+    ..registerFactory(() => GetSeatClasses(serviceLocator()))
+    ..registerLazySingleton(() => SeatClassBloc(getSeatClassesUseCase: serviceLocator()));
 }
 
 void _initBooking() {

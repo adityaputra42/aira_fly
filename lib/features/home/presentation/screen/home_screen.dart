@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pss_app/app/theme/theme.dart';
 import 'package:pss_app/core/common/widget/card_general.dart';
 import 'package:pss_app/core/utils/size_extension.dart';
+import 'package:pss_app/features/flight/presentation/bloc/bloc/seat_class_bloc.dart';
 import 'package:pss_app/features/flight/presentation/bloc/flight/flight_bloc.dart';
 import 'package:pss_app/features/home/presentation/widget/header_home.dart';
 
@@ -15,7 +16,12 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
-      providers: [BlocProvider.value(value: serviceLocator<FlightBloc>())],
+      providers: [
+        BlocProvider.value(value: serviceLocator<FlightBloc>()),
+        BlocProvider.value(
+          value: serviceLocator<SeatClassBloc>()..add(LoadSeatClassesRequested(limit: 10)),
+        ),
+      ],
       child: Scaffold(
         body: SafeArea(
           top: false,

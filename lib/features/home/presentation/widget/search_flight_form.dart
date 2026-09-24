@@ -8,8 +8,10 @@ import 'package:pss_app/core/utils/show_dialog_zoom.dart';
 import 'package:pss_app/core/utils/show_snackbar.dart';
 import 'package:pss_app/core/utils/size_extension.dart';
 import 'package:pss_app/features/flight/domain/entities/airport_entity.dart';
+import 'package:pss_app/features/flight/domain/entities/seat_class_entity.dart';
 import 'package:pss_app/features/flight/presentation/flightSelecting/screen/flight_selecting_screen.dart';
 import 'package:pss_app/features/flight/presentation/searchAirport/screen/search_airport_screen.dart';
+import 'package:pss_app/features/home/presentation/widget/class_selection.dart';
 import 'package:pss_app/features/home/presentation/widget/pax_selection.dart';
 
 import '../../../../app/theme/app_color.dart';
@@ -42,6 +44,7 @@ class _SearchFlightFormState extends State<SearchFlightForm> {
 
   AirportEntity? departureAirport;
   AirportEntity? arrivalAirport;
+  SeatClassEntity? seatClass;
 
   CancelToken cancelToken = CancelToken();
 
@@ -121,9 +124,16 @@ class _SearchFlightFormState extends State<SearchFlightForm> {
     }
   }
 
+  void onChangeSeatClass(SeatClassEntity? value) {
+    if (value == null) return;
+    seatClass = value;
+    classTextController.text = value.name ?? '';
+  }
+
   Future<void> onSelectPax() async {
     final result = await showZoomDialog<List<int>>(
       context: context,
+      barrierDismissible: false,
       child: PaxSelectionDialog(
         amountAdult: amountAdult,
         amountChild: amountChild,
@@ -133,6 +143,17 @@ class _SearchFlightFormState extends State<SearchFlightForm> {
 
     if (!mounted) return;
     setState(() => onChangeTotalPassenger(result));
+  }
+
+  Future<void> onSelectClass() async {
+    final result = await showZoomDialog<SeatClassEntity>(
+      context: context,
+      barrierDismissible: false,
+      child: ClassSelection(param: seatClass),
+    );
+
+    if (!mounted) return;
+    setState(() => onChangeSeatClass(result));
   }
 
   Future<void> onSelectAirport({required bool isDeparture}) async {
@@ -185,6 +206,7 @@ class _SearchFlightFormState extends State<SearchFlightForm> {
       amountAdult: amountAdult,
       amountChild: amountChild,
       amountInfant: amountInfant,
+      seatClass: seatClass,
     );
 
     if (widget.fromSelectingFlight) {
@@ -224,6 +246,7 @@ class _SearchFlightFormState extends State<SearchFlightForm> {
       }
 
       onChangeTotalPassenger([amountAdult, amountChild, amountInfant]);
+      onChangeSeatClass(param.seatClass);
     } else {
       departureDate = DateTime.now();
       departureDateTextController.text = departureDate.toFormattedString(shortDDMMY);
@@ -338,6 +361,7 @@ class _SearchFlightFormState extends State<SearchFlightForm> {
               widget.width(8),
               Expanded(
                 child: InputText(
+                  controller: classTextController,
                   prefixIcon: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -345,6 +369,7 @@ class _SearchFlightFormState extends State<SearchFlightForm> {
                       Iconify(Mdi.car_seat, size: 18, color: AppColor.secondaryColor),
                     ],
                   ),
+                  ontaped: onSelectClass,
                   icon: Icon(Icons.arrow_forward_ios, size: 14, color: Theme.of(context).hintColor),
                   hintText: "Any Class",
                   title: "Class",
