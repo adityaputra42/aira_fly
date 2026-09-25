@@ -42,7 +42,7 @@ class LoggingInterceptor extends InterceptorsWrapper {
       '',
     );
     AppLog.log("${response.statusCode} URL", response.realUri);
-    AppLog.log("DATA", response.data);
+    AppLog.log("DATA ==>", jsonEncode(response.data));
 
     return super.onResponse(response, handler);
   }

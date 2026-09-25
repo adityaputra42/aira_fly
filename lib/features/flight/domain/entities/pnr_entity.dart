@@ -192,8 +192,18 @@ class PnrSummaryEntity extends Equatable {
   final String? bookingCode;
   final String? status;
   final String? paymentStatus;
-  final double? totalAmount;
+  final String? totalAmount;
   final String? currency;
+  final String? flightNumber;
+  final String? departure;
+  final String? arrival;
+  final String? departureName;
+  final String? arrivalName;
+  final String? departureCity;
+  final String? arrivalCity;
+  final DateTime? departureTime;
+  final DateTime? arrivalTime;
+  final String? tripType;
   final DateTime? createdAt;
   final DateTime? expiresAt;
 
@@ -204,6 +214,16 @@ class PnrSummaryEntity extends Equatable {
     this.paymentStatus,
     this.totalAmount,
     this.currency,
+    this.flightNumber,
+    this.departure,
+    this.arrival,
+    this.departureName,
+    this.arrivalName,
+    this.departureCity,
+    this.arrivalCity,
+    this.departureTime,
+    this.arrivalTime,
+    this.tripType,
     this.createdAt,
     this.expiresAt,
   });
@@ -214,6 +234,16 @@ class PnrSummaryEntity extends Equatable {
     bookingCode,
     status,
     paymentStatus,
+    flightNumber,
+    departure,
+    departureName,
+    departureCity,
+    arrival,
+    arrivalName,
+    arrivalCity,
+    departureTime,
+    arrivalTime,
+    tripType,
     totalAmount,
     currency,
     createdAt,

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:iconify_flutter_plus/iconify_flutter_plus.dart';
 import 'package:iconify_flutter_plus/icons/bx.dart';
 import 'package:intl/intl.dart';
+import 'package:pss_app/core/constants/images.dart';
 
 import '../../../../app/routes/route_names.dart';
 import '../../../../app/theme/theme.dart';
@@ -17,7 +18,7 @@ import '../../../flight/domain/entities/pnr_entity.dart';
 class CardTikcetList extends StatelessWidget {
   const CardTikcetList({super.key, required this.pnr, required this.onTap});
 
-  final PnrDetailEntity pnr;
+  final PnrSummaryEntity pnr;
   final VoidCallback onTap;
   Color _statusColor(String? status) {
     switch (status) {
@@ -35,9 +36,6 @@ class CardTikcetList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final segments = pnr.segments;
-    final first = segments.isNotEmpty ? segments.first : null;
-
     return InkWell(
       onTap: () {
         context.goNamed(RouteNames.ticketDetail);
@@ -53,28 +51,56 @@ class CardTikcetList extends StatelessWidget {
               child: Column(
                 children: [
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    spacing: 8,
                     children: [
-                      Text("Aira Fly", style: AppFont.medium14),
-                      Text(pnr.bookingCode ?? '', style: AppFont.reguler14),
-                    ],
-                  ),
-                  height(4),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        first?.flightNumber ?? "",
-                        style: AppFont.reguler12.copyWith(color: Theme.of(context).hintColor),
-                      ),
                       CardGeneral(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                        background: _statusColor(pnr.status).withValues(alpha: 0.12),
-                        radius: 6,
+                        background: Theme.of(context).colorScheme.surface,
+                        padding: EdgeInsets.all(6),
+                        margin: EdgeInsets.zero,
+                        radius: 8,
+                        useShadow: false,
+                        child: Image.asset(
+                          AppImages.whiteLogo,
+                          width: 28,
+                          color: AppColor.primaryColor,
+                        ),
+                      ),
+                      Expanded(
+                        child: Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text("Aira Fly", style: AppFont.medium14),
+                                Text(pnr.bookingCode ?? '', style: AppFont.reguler14),
+                              ],
+                            ),
+                            height(2),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  pnr.flightNumber ?? "",
+                                  style: AppFont.reguler12.copyWith(
+                                    color: Theme.of(context).hintColor,
+                                  ),
+                                ),
+                                CardGeneral(
+                                  margin: EdgeInsets.zero,
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                  background: _statusColor(pnr.status).withValues(alpha: 0.12),
+                                  radius: 4,
 
-                        child: Text(
-                          pnr.status ?? '-',
-                          style: AppFont.medium12.copyWith(color: _statusColor(pnr.status)),
+                                  child: Text(
+                                    pnr.paymentStatus ?? '-',
+                                    style: AppFont.medium10.copyWith(
+                                      color: _statusColor(pnr.status),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                       ),
                     ],
@@ -98,7 +124,7 @@ class CardTikcetList extends StatelessWidget {
                     children: [
                       Expanded(
                         child: Text(
-                          "Jakarta",
+                          pnr.departureCity ?? "",
                           style: AppFont.reguler12.copyWith(color: Theme.of(context).hintColor),
                         ),
                       ),
@@ -111,7 +137,7 @@ class CardTikcetList extends StatelessWidget {
                       ),
                       Expanded(
                         child: Text(
-                          "Denpasar",
+                          pnr.arrivalCity ?? "",
                           style: AppFont.reguler12.copyWith(color: Theme.of(context).hintColor),
                           textAlign: TextAlign.end,
                         ),
@@ -120,7 +146,7 @@ class CardTikcetList extends StatelessWidget {
                   ),
                   Row(
                     children: [
-                      Text("CGK", style: AppFont.medium24),
+                      Text(pnr.departure ?? '', style: AppFont.medium24),
                       Expanded(
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -146,14 +172,14 @@ class CardTikcetList extends StatelessWidget {
                           ],
                         ),
                       ),
-                      Text("DPS", style: AppFont.medium24),
+                      Text(pnr.arrival ?? '', style: AppFont.medium24),
                     ],
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        DateFormat("HH:mm").format(DateTime.now()),
+                        DateFormat("HH:mm").format(pnr.departureTime ?? DateTime.now()),
                         style: AppFont.reguler12.copyWith(color: Theme.of(context).hintColor),
                       ),
                       Expanded(
@@ -164,8 +190,7 @@ class CardTikcetList extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        DateFormat("HH:mm")
-                            .format(DateTime.now().add(Duration(hours: 2, minutes: 45))),
+                        DateFormat("HH:mm").format(pnr.arrivalTime ?? DateTime.now()),
                         style: AppFont.reguler12.copyWith(color: Theme.of(context).hintColor),
                       ),
                     ],

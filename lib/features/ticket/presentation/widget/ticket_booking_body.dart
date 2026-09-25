@@ -9,11 +9,12 @@ import 'package:pss_app/core/common/widget/empty.dart';
 import 'package:pss_app/core/common/widget/input_text.dart';
 import 'package:pss_app/core/common/widget/primary_button.dart';
 import 'package:pss_app/features/flight/domain/entities/pnr_entity.dart';
-import 'package:pss_app/features/flight/domain/usecases/booking/get_pnr_by_booking_code.dart';
 import 'package:pss_app/features/flight/domain/usecases/booking/list_my_pnrs.dart';
 import 'package:pss_app/features/flight/presentation/bloc/booking/booking_bloc.dart';
-import 'package:pss_app/features/ticket/presentation/widget/card_booking_history.dart';
+import 'package:pss_app/features/ticket/presentation/widget/card_ticket_loading.dart';
+import 'package:pss_app/features/ticket/presentation/widget/card_tikcet_list.dart';
 
+import '../../../../core/animation/stagger_in.dart';
 import 'booking_detail_sheet.dart';
 
 class TicketBookingBody extends StatefulWidget {
@@ -25,12 +26,12 @@ class TicketBookingBody extends StatefulWidget {
 
 class _TicketBookingBodyState extends State<TicketBookingBody> {
   late final BookingBloc _bookingBloc;
-  late final GetPnrByBookingCode _getPnrByBookingCode;
+  // late final GetPnrByBookingCode _getPnrByBookingCode;
   final _codeController = TextEditingController();
   bool? _lastLoggedIn;
 
-  List<PnrDetailEntity>? _active;
-  List<PnrDetailEntity>? _history;
+  List<PnrSummaryEntity>? _active;
+  List<PnrSummaryEntity>? _history;
   String? _loadError;
   bool _loading = false;
 
@@ -38,7 +39,7 @@ class _TicketBookingBodyState extends State<TicketBookingBody> {
   void initState() {
     super.initState();
     _bookingBloc = serviceLocator<BookingBloc>();
-    _getPnrByBookingCode = serviceLocator<GetPnrByBookingCode>();
+    // _getPnrByBookingCode = serviceLocator<GetPnrByBookingCode>();
   }
 
   @override
@@ -73,23 +74,22 @@ class _TicketBookingBodyState extends State<TicketBookingBody> {
         });
       },
       (summaries) async {
-        final codes = summaries.map((s) => s.bookingCode).whereType<String>().toList();
+        // final codes = summaries.map((s) => s.bookingCode).whereType<String>().toList();
 
-        final details = await Future.wait(
-          codes.map((code) async {
-            final result = await _getPnrByBookingCode(GetPnrByBookingCodeParams(bookingCode: code));
-            return result.fold((_) => null, (d) => d);
-          }),
-        );
+        // final details = await Future.wait(
+        //   codes.map((code) async {
+        //     final result = await _getPnrByBookingCode(GetPnrByBookingCodeParams(bookingCode: code));
+        //     return result.fold((_) => null, (d) => d);
+        //   }),
+        // );
 
         if (!mounted) return;
 
         final now = DateTime.now();
-        final active = <PnrDetailEntity>[];
-        final history = <PnrDetailEntity>[];
-        for (final detail in details) {
-          if (detail == null) continue;
-          (_isHistory(detail, now) ? history : active).add(detail);
+        final active = <PnrSummaryEntity>[];
+        final history = <PnrSummaryEntity>[];
+        for (final summary in summaries) {
+          (_isHistory(summary, now) ? history : active).add(summary);
         }
         active.sort((a, b) => _earliestDeparture(a, now).compareTo(_earliestDeparture(b, now)));
         history.sort((a, b) => _earliestDeparture(b, now).compareTo(_earliestDeparture(a, now)));
@@ -103,28 +103,18 @@ class _TicketBookingBodyState extends State<TicketBookingBody> {
     );
   }
 
-  DateTime _earliestDeparture(PnrDetailEntity pnr, DateTime fallback) {
+  DateTime _earliestDeparture(PnrSummaryEntity pnr, DateTime fallback) {
     DateTime? earliest;
-    for (final segment in pnr.segments) {
-      final departure = segment.departureTime;
-      if (departure == null) continue;
-      if (earliest == null || departure.isBefore(earliest)) earliest = departure;
-    }
+
+    earliest = pnr.departureTime;
+
     return earliest ?? fallback;
   }
 
-  bool _isHistory(PnrDetailEntity pnr, DateTime now) {
+  bool _isHistory(PnrSummaryEntity pnr, DateTime now) {
     if (pnr.status == 'CANCELLED' || pnr.status == 'EXPIRED') return true;
 
-    DateTime? latest;
-    for (final segment in pnr.segments) {
-      final departure = segment.departureTime;
-      if (departure == null) continue;
-      if (latest == null || departure.isAfter(latest)) latest = departure;
-    }
-
-    if (latest == null) return false;
-    return latest.isBefore(now);
+    return pnr.departureTime!.isBefore(now);
   }
 
   void _searchByCode() {
@@ -198,12 +188,19 @@ class _TicketBookingBodyState extends State<TicketBookingBody> {
     );
   }
 
-  Widget _buildList(List<PnrDetailEntity>? items, {required String emptyText}) {
+  Widget _buildList(List<PnrSummaryEntity>? items, {required String emptyText}) {
     if (_loadError != null) {
       return Empty(title: _loadError!, actionLabel: 'Retry', onAction: _loadAndClassify);
     }
     if (_loading || items == null) {
-      return const Center(child: CircularProgressIndicator());
+      return ListView.separated(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        itemCount: 6,
+        separatorBuilder: (_, _) => const SizedBox(height: 12),
+        itemBuilder: (context, index) {
+          return CardTicketLoading();
+        },
+      );
     }
     if (items.isEmpty) {
       return Empty(title: emptyText);
@@ -216,7 +213,10 @@ class _TicketBookingBodyState extends State<TicketBookingBody> {
         separatorBuilder: (_, _) => const SizedBox(height: 12),
         itemBuilder: (context, index) {
           final pnr = items[index];
-          return CardBookingHistory(pnr: pnr, onTap: () => showBookingDetailSheet(context, pnr));
+          return StaggerItem(
+            index: index,
+            child: CardTikcetList(pnr: pnr, onTap: () {}),
+          );
         },
       ),
     );

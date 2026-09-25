@@ -163,22 +163,40 @@ class PnrSummaryModel extends PnrSummaryEntity {
     super.paymentStatus,
     super.totalAmount,
     super.currency,
+    super.flightNumber,
+    super.departure,
+    super.departureName,
+    super.departureCity,
+    super.arrival,
+    super.arrivalName,
+    super.arrivalCity,
+    super.departureTime,
+    super.arrivalTime,
+    super.tripType,
     super.createdAt,
     super.expiresAt,
   });
 
-  factory PnrSummaryModel.fromJson(Map<String, dynamic> json) {
-    return PnrSummaryModel(
-      id: json['id'] as int?,
-      bookingCode: json['booking_code'] as String?,
-      status: json['status'] as String?,
-      paymentStatus: json['payment_status'] as String?,
-      totalAmount: double.tryParse('${json['total_amount']}'),
-      currency: json['currency'] as String?,
-      createdAt: json['created_at'] == null ? null : DateTime.tryParse(json['created_at']),
-      expiresAt: json['expires_at'] == null ? null : DateTime.tryParse(json['expires_at']),
-    );
-  }
+  factory PnrSummaryModel.fromJson(Map<String, dynamic> json) => PnrSummaryModel(
+    id: json["id"],
+    bookingCode: json["booking_code"],
+    status: json["status"],
+    paymentStatus: json["payment_status"],
+    totalAmount: json["total_amount"],
+    currency: json["currency"],
+    flightNumber: json["flight_number"],
+    departure: json["departure"],
+    arrival: json["arrival"],
+    departureName: json["departure_name"],
+    arrivalName: json["arrival_name"],
+    departureCity: json["departure_city"],
+    arrivalCity: json["arrival_city"],
+    departureTime: json["departure_time"] == null ? null : DateTime.parse(json["departure_time"]),
+    arrivalTime: json["arrival_time"] == null ? null : DateTime.parse(json["arrival_time"]),
+    tripType: json["trip_type"],
+    createdAt: json["created_at"] == null ? null : DateTime.parse(json["created_at"]),
+    expiresAt: json["expires_at"] == null ? null : DateTime.parse(json["expires_at"]),
+  );
 }
 
 class PnrListModel {
