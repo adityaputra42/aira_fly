@@ -41,6 +41,12 @@ class SegmentDetailModel extends SegmentDetailEntity {
     super.fareClassId,
     super.status,
     super.flightNumber,
+    super.departure,
+    super.departureName,
+    super.departureCity,
+    super.arrival,
+    super.arrivalName,
+    super.arrivalCity,
     super.departureTime,
     super.arrivalTime,
     super.flightStatus,
@@ -48,16 +54,20 @@ class SegmentDetailModel extends SegmentDetailEntity {
 
   factory SegmentDetailModel.fromJson(Map<String, dynamic> json) {
     return SegmentDetailModel(
-      id: json['id'] as int?,
-      flightId: json['flight_id'] as int?,
-      fareClassId: json['fare_class_id'] as int?,
-      status: json['status'] as String?,
-      flightNumber: json['flight_number'] as String?,
-      departureTime: json['departure_time'] == null
-          ? null
-          : DateTime.tryParse(json['departure_time']),
-      arrivalTime: json['arrival_time'] == null ? null : DateTime.tryParse(json['arrival_time']),
-      flightStatus: json['flight_status'] as String?,
+      id: json["id"],
+      flightId: json["flight_id"],
+      fareClassId: json["fare_class_id"],
+      status: json["status"],
+      flightNumber: json["flight_number"],
+      departure: json["departure"],
+      departureName: json["departure_name"],
+      departureCity: json["departure_city"],
+      arrival: json["arrival"],
+      arrivalName: json["arrival_name"],
+      arrivalCity: json["arrival_city"],
+      departureTime: json["departure_time"] == null ? null : DateTime.parse(json["departure_time"]),
+      arrivalTime: json["arrival_time"] == null ? null : DateTime.parse(json["arrival_time"]),
+      flightStatus: json["flight_status"],
     );
   }
 }

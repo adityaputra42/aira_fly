@@ -38,7 +38,9 @@ class CardTikcetList extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        context.goNamed(RouteNames.ticketDetail);
+        final bookingCode = pnr.bookingCode;
+        if (bookingCode == null) return;
+        context.goNamed(RouteNames.ticketDetail, extra: bookingCode);
       },
       child: Column(
         children: [
@@ -62,7 +64,7 @@ class CardTikcetList extends StatelessWidget {
                         child: Image.asset(
                           AppImages.whiteLogo,
                           width: 28,
-                          color: AppColor.primaryColor,
+                          color: AppColor.secondaryColor,
                         ),
                       ),
                       Expanded(

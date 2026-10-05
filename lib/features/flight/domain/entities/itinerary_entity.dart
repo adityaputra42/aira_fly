@@ -5,9 +5,11 @@ class SegmentEntity extends Equatable {
   final String? flightNumber;
   final int? departureAirportId;
   final String? departureAirportCode;
+  final String? departureAirportCity;
   final String? departureAirportName;
   final int? arrivalAirportId;
   final String? arrivalAirportCode;
+  final String? arrivalAirportCity;
   final String? arrivalAirportName;
   final int? aircraftId;
   final DateTime? departureTime;
@@ -19,9 +21,11 @@ class SegmentEntity extends Equatable {
     this.flightNumber,
     this.departureAirportId,
     this.departureAirportCode,
+    this.departureAirportCity,
     this.departureAirportName,
     this.arrivalAirportId,
     this.arrivalAirportCode,
+    this.arrivalAirportCity,
     this.arrivalAirportName,
     this.aircraftId,
     this.departureTime,
@@ -35,9 +39,11 @@ class SegmentEntity extends Equatable {
     flightNumber,
     departureAirportId,
     departureAirportCode,
+    departureAirportCity,
     departureAirportName,
     arrivalAirportId,
     arrivalAirportCode,
+    arrivalAirportCity,
     arrivalAirportName,
     aircraftId,
     departureTime,

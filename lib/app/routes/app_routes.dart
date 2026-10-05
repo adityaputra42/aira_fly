@@ -79,7 +79,7 @@ class AppRouter {
             name: RouteNames.ticketDetail,
             pageBuilder: (context, state) => buildPageWithTransition(
               key: state.pageKey,
-              child: const TicketDetailScreen(),
+              child: TicketDetailScreen(bookingCode: state.extra as String),
               transition: PageTransitionType.fadeScale,
             ),
           ),

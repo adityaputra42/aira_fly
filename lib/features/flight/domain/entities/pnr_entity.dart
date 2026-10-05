@@ -49,8 +49,14 @@ class SegmentDetailEntity extends Equatable {
   final int? id;
   final int? flightId;
   final int? fareClassId;
-  final String? status; // segment status: BOOKED, ...
+  final String? status;
   final String? flightNumber;
+  final String? departure;
+  final String? departureName;
+  final String? departureCity;
+  final String? arrival;
+  final String? arrivalName;
+  final String? arrivalCity;
   final DateTime? departureTime;
   final DateTime? arrivalTime;
   final String? flightStatus; // the flight's own status: SCHEDULED, ... -- distinct from `status`
@@ -61,6 +67,12 @@ class SegmentDetailEntity extends Equatable {
     this.fareClassId,
     this.status,
     this.flightNumber,
+    this.departure,
+    this.departureName,
+    this.departureCity,
+    this.arrival,
+    this.arrivalName,
+    this.arrivalCity,
     this.departureTime,
     this.arrivalTime,
     this.flightStatus,
@@ -73,6 +85,12 @@ class SegmentDetailEntity extends Equatable {
     fareClassId,
     status,
     flightNumber,
+    departure,
+    departureName,
+    departureCity,
+    arrival,
+    arrivalName,
+    arrivalCity,
     departureTime,
     arrivalTime,
     flightStatus,
@@ -135,15 +153,15 @@ class PnrAncillaryDetailEntity extends Equatable {
 class PnrDetailEntity extends Equatable {
   final int? id;
   final String? bookingCode;
-  final String? status; // HOLD, BOOKED, CANCELLED, EXPIRED
-  final String? paymentStatus; // UNPAID, PENDING, PAID, FAILED, EXPIRED, REFUNDED
+  final String? status;
+  final String? paymentStatus;
   final double? totalAmount;
   final String? currency;
-  final DateTime? holdExpiresAt; // null if the PNR isn't (or is no longer) in HOLD
+  final DateTime? holdExpiresAt;
   final String? contactName;
   final String? contactEmail;
   final String? contactPhone;
-  final int? createdBy; // null for a guest booking
+  final int? createdBy;
   final List<PassengerDetailEntity> passengers;
   final List<SegmentDetailEntity> segments;
   final List<SeatDetailEntity> seats;

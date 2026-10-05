@@ -420,7 +420,7 @@ class _SearchFlightFormState extends State<SearchFlightForm> {
               margin: EdgeInsets.zero,
               width: double.infinity,
               height: 42,
-              padding: EdgeInsets.all(3),
+              padding: EdgeInsets.all(2),
               child: TabBar(
                 physics: const NeverScrollableScrollPhysics(),
                 automaticIndicatorColorAdjustment: false,
