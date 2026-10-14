@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pss_app/app/theme/theme.dart';
 import 'package:pss_app/core/common/widget/card_general.dart';
+import 'package:pss_app/core/constants/images.dart';
 import 'package:pss_app/core/utils/size_extension.dart';
 import 'package:pss_app/features/flight/presentation/bloc/bloc/seat_class_bloc.dart';
 import 'package:pss_app/features/flight/presentation/bloc/flight/flight_bloc.dart';
 import 'package:pss_app/features/home/presentation/widget/header_home.dart';
 
 import '../../../../app/init_dependencies.dart';
+import '../../../../core/animation/stagger_in.dart';
 import '../widget/app_bar_home.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -29,92 +31,157 @@ class HomeScreen extends StatelessWidget {
             slivers: [
               AppBarHome(),
               HeaderHome(),
-              SliverToBoxAdapter(
-                child: Column(
-                  children: [
-                    Padding(
-                      padding: EdgeInsetsGeometry.symmetric(horizontal: 16),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            "Tips for your flight",
-                            style: AppFont.medium14.copyWith(
-                              color: Theme.of(context).colorScheme.onSurface,
-                            ),
-                          ),
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                "View All",
-                                style: AppFont.reguler12.copyWith(
-                                  color: Theme.of(context).colorScheme.secondary,
-                                ),
-                              ),
-                              width(4),
-                              Icon(
-                                Icons.arrow_forward_ios_rounded,
-                                size: 12,
-                                color: Theme.of(context).colorScheme.secondary,
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    height(8),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: GridView.builder(
-                        padding: EdgeInsets.zero,
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          childAspectRatio: 1.5,
-                          mainAxisSpacing: 8,
-                          crossAxisSpacing: 8,
-                        ),
-                        itemCount: 2,
-                        itemBuilder: (context, index) => CardGeneral(margin: EdgeInsets.zero),
-                      ),
-
-                      // Column(
-                      //   children: List.generate(
-                      //     4,
-                      //     (index) => CardGeneral(margin: EdgeInsets.only(bottom: 8)),
-                      //   ),
-                      // ),
-                    ),
-                    // SizedBox(
-                    //   height: 140,
-                    //   child: ListView.builder(
-                    //     itemCount: 10,
-                    //     scrollDirection: Axis.horizontal,
-                    //     itemBuilder: (context, index) => StaggerItem(
-                    //       index: index,
-                    //       child: CardGeneral(
-                    //         padding: EdgeInsets.zero,
-                    //         radius: 12,
-                    //         margin: EdgeInsets.only(
-                    //           left: index == 0 ? 16 : 0,
-                    //           right: 16,
-                    //           top: 1,
-                    //           bottom: 1,
-                    //         ),
-                    //         width: context.w(0.6),
-                    //       ),
-                    //     ),
-                    //   ),
-                    // ),
-                    height(90),
-                  ],
-                ),
-              ),
+              TipsFlight(),
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class TipsFlight extends StatelessWidget {
+  const new({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    List<Map<String, dynamic>> dataTips = [
+      {
+        "image": AppImages.image1,
+        "title": "Search",
+        "subtitle": "Compare fares across every fare class for your route and date."
+      },
+      {
+        "image": AppImages.image2,
+        "title": "Pick your seat",
+        "subtitle": "See the real aircraft layout and choose where you sit."
+      },
+      {
+        "image": AppImages.image3,
+        "title": "Pay",
+        "subtitle": "Settle up by virtual account or QRIS -- no account required."
+      },
+      {
+        "image": AppImages.image4,
+        "title": "Get your e-ticket",
+        "subtitle": "Your booking code and itinerary, ready right after payment."
+      }
+    ];
+    return SliverToBoxAdapter(
+      child: Column(
+        children: [
+          Padding(
+            padding: EdgeInsetsGeometry.symmetric(horizontal: 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Tips for your flight",
+                  style: AppFont.medium14.copyWith(
+                    color: Theme
+                        .of(context)
+                        .colorScheme
+                        .onSurface,
+                  ),
+                ),
+
+              ],
+            ),
+          ),
+          height(8),
+
+          SizedBox(
+            height: 140,
+            child: ListView.builder(
+              itemCount: dataTips.length,
+              scrollDirection: Axis.horizontal,
+              itemBuilder: (context, index) =>
+                  StaggerItem(
+                    index: index,
+                    child: CardGeneral(
+
+                      radius: 8,
+                      margin: EdgeInsets.only(
+                        left: index == 0 ? 16 : 0,
+                        right: index == 3 ? 16 : 8,
+                        top: 1,
+                        bottom: 1,
+                      ),
+                      width: context.w(0.55),
+                      padding: EdgeInsets.all(4),
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(6),
+
+                            child: Image.asset(
+                              width: double.infinity,
+                              dataTips[index]['image'],
+                              fit: BoxFit.cover,
+                            ),
+                          ), Container(decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                                colors: [AppColor.bgDark
+                                    .withValues(alpha: 0),
+                                  AppColor.bgDark
+                                      .withValues(alpha: 0.2),
+                                  AppColor.bgDark
+                                      .withValues(alpha: 0.45),
+                                  AppColor.bgDark
+                                      .withValues(alpha: 0.75),
+                                ],
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter),
+                            borderRadius: BorderRadius.circular(6),),),
+                          Align(
+                            alignment: Alignment.bottomCenter,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 6, vertical: 4),
+                              decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                      colors: [AppColor.bgDark
+                                          .withValues(alpha: 0.15),
+                                        AppColor.bgDark
+                                            .withValues(alpha: 0.25),
+                                        AppColor.bgDark
+                                            .withValues(alpha: 0.75),
+                                      ],
+                                      begin: Alignment.topCenter,
+                                      end: Alignment.bottomCenter),
+                                  borderRadius: BorderRadius.vertical(
+                                      top: Radius.circular(2),
+                                      bottom: Radius.circular(4))),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment
+                                    .start,
+                                children: [
+                                  Text(dataTips[index]['title'],
+                                      style: AppFont.medium12.copyWith(
+                                          color: AppColor.darkText1)),
+                                  Text(
+                                    dataTips[index]['subtitle'],
+                                    style: AppFont.reguler10.copyWith(
+                                        color: AppColor.darkText1
+                                    ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                              ),),
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+            ),
+          ),
+          height(90),
+        ],
       ),
     );
   }

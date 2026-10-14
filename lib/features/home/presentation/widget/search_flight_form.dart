@@ -448,7 +448,7 @@ class _SearchFlightFormState extends State<SearchFlightForm> {
             ),
             widget.height(12),
             SizedBox(
-              height: context.h(0.45),
+              height: 392,
               child: TabBarView(
                 children: [
                   _buildSearchCard(showReturnDate: false),

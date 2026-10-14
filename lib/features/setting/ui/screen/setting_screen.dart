@@ -32,95 +32,102 @@ class SettingScreen extends StatelessWidget {
           }
           return SafeArea(
             top: false,
-            child: Column(
-              children: [
-                Container(
-                  width: double.infinity,
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-                  decoration: BoxDecoration(
-                    color: AppColor.primaryColor,
-                    borderRadius: BorderRadius.vertical(bottom: Radius.circular(16)),
-                  ),
+            child:LayoutBuilder(
+              builder: (context, constraints) => SingleChildScrollView(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
                   child: Column(
                     children: [
-                      height(48),
                       Container(
-                        padding: EdgeInsets.all(2),
+                        width: double.infinity,
+                        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 24),
                         decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(width: 2, color: AppColor.cardLight),
+                          color: AppColor.primaryColor,
+                          borderRadius: BorderRadius.vertical(bottom: Radius.circular(16)),
                         ),
-                        child: Container(
-                          width: 72,
-                          height: 72,
-                          padding: EdgeInsets.all(2),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: AppColor.cardLight,
-                          ),
+                        child: Column(
+                          children: [
+                            height(48),
+                            Container(
+                              padding: EdgeInsets.all(2),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(width: 2, color: AppColor.cardLight),
+                              ),
+                              child: Container(
+                                width: 72,
+                                height: 72,
+                                padding: EdgeInsets.all(2),
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: AppColor.cardLight,
+                                ),
+                              ),
+                            ),
+                            height(12),
+                            Text(
+                              isLogin ? (user.fullName ?? "") : "Guest User",
+                              style: AppFont.medium16.copyWith(color: AppColor.darkText1),
+                            ),
+                            height(2),
+                            Text(
+                              isLogin ? (user.email ?? "") : "Sign in to make your journey easier",
+                              style: AppFont.reguler12.copyWith(color: AppColor.darkText1),
+                            ),
+                          ],
                         ),
                       ),
                       height(12),
-                      Text(
-                        isLogin ? (user.fullName ?? "") : "Guest User",
-                        style: AppFont.medium16.copyWith(color: AppColor.darkText1),
+                      Visibility(
+                        visible: isLogin,
+                        child: Column(
+                          children: [
+                            CardMenu(icon: Mdi.person, title: "Edit Profile"),
+                            CardMenu(icon: Mdi.account_lock_open, title: "Change Password"),
+                            CardMenu(icon: Mdi.file_report_outline, title: "Report"),
+                          ],
+                        ),
                       ),
-                      height(2),
-                      Text(
-                        isLogin ? (user.email ?? "") : "Sign in to make your journey easier",
-                        style: AppFont.reguler12.copyWith(color: AppColor.darkText1),
+                      CardMenu(icon: Mdi.language, title: "Language"),
+                      BlocBuilder<ThemeCubit, bool>(
+                        builder: (context, isDark) {
+                          return CardMenu(
+                            icon: MaterialSymbols.dark_mode_rounded,
+                            title: "Dark Mode",
+                            rightIcon: FlutterSwitch(
+                              width: 42.0,
+                              height: 24.0,
+                              toggleSize: 20.0,
+                              value: isDark,
+                              activeColor: AppColor.secondaryColor,
+                              inactiveColor: Theme.of(context).highlightColor,
+                              padding: 2.0,
+                              onToggle: (val) {
+                                context.read<ThemeCubit>().toggleTheme(val);
+                              },
+                            ),
+                          );
+                        },
                       ),
+                      isLogin
+                          ? CardMenu(
+                              icon: Mdi.logout,
+                              title: "Log Out",
+                              ontap: () {
+                                serviceLocator<AuthBloc>().add(SignOutRequested());
+                              },
+                            )
+                          : CardMenu(
+                              icon: Mdi.login,
+                              title: "Log In",
+                              ontap: () {
+                                context.goNamed(RouteNames.signin);
+                              },
+                            ),
                     ],
                   ),
                 ),
-                height(12),
-                Visibility(
-                  visible: isLogin,
-                  child: Column(
-                    children: [
-                      CardMenu(icon: Mdi.person, title: "Edit Profile"),
-                      CardMenu(icon: Mdi.account_lock_open, title: "Change Password"),
-                      CardMenu(icon: Mdi.file_report_outline, title: "Report"),
-                    ],
-                  ),
-                ),
-                CardMenu(icon: Mdi.language, title: "Language"),
-                BlocBuilder<ThemeCubit, bool>(
-                  builder: (context, isDark) {
-                    return CardMenu(
-                      icon: MaterialSymbols.dark_mode_rounded,
-                      title: "Dark Mode",
-                      rightIcon: FlutterSwitch(
-                        width: 42.0,
-                        height: 24.0,
-                        toggleSize: 20.0,
-                        value: isDark,
-                        activeColor: AppColor.secondaryColor,
-                        inactiveColor: Theme.of(context).highlightColor,
-                        padding: 2.0,
-                        onToggle: (val) {
-                          context.read<ThemeCubit>().toggleTheme(val);
-                        },
-                      ),
-                    );
-                  },
-                ),
-                isLogin
-                    ? CardMenu(
-                        icon: Mdi.logout,
-                        title: "Log Out",
-                        ontap: () {
-                          serviceLocator<AuthBloc>().add(SignOutRequested());
-                        },
-                      )
-                    : CardMenu(
-                        icon: Mdi.login,
-                        title: "Log In",
-                        ontap: () {
-                          context.goNamed(RouteNames.signin);
-                        },
-                      ),
-              ],
+              ),
             ),
           );
         },

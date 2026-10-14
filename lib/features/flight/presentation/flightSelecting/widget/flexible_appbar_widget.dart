@@ -118,7 +118,7 @@ class _FlexibleAppBarWidgetState extends State<FlexibleAppBarWidget> {
               style: AppFont.semibold20.copyWith(color: AppColor.darkText1),
             ),
             widget.width(8),
-            generateDashedDivider(context.w(0.25), dashColor: AppColor.darkText1),
+            generateDashedDivider(context.w(0.2), dashColor: AppColor.darkText1),
             widget.width(8),
             Container(
               padding: EdgeInsets.all(8),
@@ -129,7 +129,7 @@ class _FlexibleAppBarWidgetState extends State<FlexibleAppBarWidget> {
               child: Iconify(Mdi.airplane_takeoff, color: AppColor.darkText1, size: 20),
             ),
             widget.width(8),
-            generateDashedDivider(context.w(0.25), dashColor: AppColor.darkText1),
+            generateDashedDivider(context.w(0.2), dashColor: AppColor.darkText1),
             widget.width(8),
             Text(
               widget.arguments.destinationCode,
