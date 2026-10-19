@@ -42,6 +42,7 @@ class SegmentModel extends SegmentEntity {
 class ItineraryFareModel extends ItineraryFareEntity {
   const ItineraryFareModel({
     super.fareClassId,
+    super.seatClassId,
     super.prices,
     super.currency,
     super.availableSeats,
@@ -51,6 +52,7 @@ class ItineraryFareModel extends ItineraryFareEntity {
     final rawPrices = json['prices'] as Map<String, dynamic>?;
     return ItineraryFareModel(
       fareClassId: json['fare_class_id'] as int?,
+      seatClassId: json['seat_class_id'] as int?,
       prices: rawPrices?.map((k, v) => MapEntry(k, v.toString())),
       currency: json['currency'] as String?,
       availableSeats: json['available_seats'] as int?,

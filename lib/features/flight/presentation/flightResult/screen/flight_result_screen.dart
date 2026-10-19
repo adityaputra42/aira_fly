@@ -13,7 +13,6 @@ import 'package:pss_app/app/theme/theme.dart';
 import 'package:pss_app/core/utils/widget_helper.dart';
 import 'package:pss_app/features/flight/domain/entities/airport_entity.dart';
 import 'package:pss_app/features/flight/domain/entities/itinerary_entity.dart';
-import 'package:pss_app/features/flight/domain/entities/seat_class_entity.dart';
 import 'package:pss_app/features/flight/presentation/utils/flight_display_utils.dart';
 import 'package:timelines_plus/timelines_plus.dart';
 
@@ -37,7 +36,6 @@ class FlightResultArguments {
   final int amountInfant;
   final ItineraryFareEntity departureFare; // NEW — wajib, bukan optional
   final ItineraryFareEntity? returnFare;
-  final SeatClassEntity? seatClass; // NEW
 
   const FlightResultArguments({
     required this.departure,
@@ -50,7 +48,6 @@ class FlightResultArguments {
     required this.amountInfant,
     required this.departureFare, // NEW
     this.returnFare, // NEW
-    this.seatClass,
   });
 
   bool get isRoundTrip => tripType == 'round_trip';

@@ -86,13 +86,13 @@ class FlightRepositoryImpl implements FlightRepository {
   }
 
   @override
-  Future<Either<Failure, List<FlightSeatEntity>>> getFlightSeats(int flightId) async {
+  Future<Either<Failure, List<FlightSeatEntity>>> getFlightSeats( {required int flightId, int? seatClassId}) async {
     try {
       if (!await connectionChecker.isConnected) {
         return left(Failure('No internet connection'));
       }
 
-      final response = await remoteDataSource.getFlightSeats(flightId);
+      final response = await remoteDataSource.getFlightSeats(flightId: flightId,seatClassId: seatClassId);
       if (response == null) {
         return left(Failure('Failed to load flight seats'));
       }

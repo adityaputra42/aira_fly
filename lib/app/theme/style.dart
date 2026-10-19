@@ -63,6 +63,7 @@ class Styles {
         dayStyle: AppFont.medium12.copyWith(color: colorScheme.onSurface),
         weekdayStyle: AppFont.medium12.copyWith(color: colorScheme.onSurface),
         dividerColor: colorScheme.outline,
+
         dayForegroundColor: WidgetStateColor.resolveWith((states) {
           return colorScheme.onSurface;
         }),

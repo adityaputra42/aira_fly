@@ -59,9 +59,10 @@ class SearchFlightsRequested extends FlightEvent {
 
 class LoadFlightSeatsRequested extends FlightEvent {
   final int flightId;
+  final int? seatClassId;
 
-  const LoadFlightSeatsRequested({required this.flightId});
+  const LoadFlightSeatsRequested({required this.flightId, this.seatClassId});
 
   @override
-  List<Object?> get props => [flightId];
+  List<Object?> get props => [flightId, seatClassId];
 }

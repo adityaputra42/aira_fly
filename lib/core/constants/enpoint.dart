@@ -51,4 +51,12 @@ class Endpoint {
 
   // ===== Master / Reference Data ===== //
   static const countryCodes = "master/country-codes";
+
+  // ===== Notifications ===== //
+  static const notifications = "notifications";
+  static const readNotifById = "read";
+  static const notificationsUnreadCount = "notifications/unread-count";
+  static const notificationsReadAll = "notifications/read-all";
+  static const registerDevice = "devices";
+  static const unregisterDevice = "devices/unregister";
 }

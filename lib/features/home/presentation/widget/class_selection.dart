@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pss_app/app/init_dependencies.dart';
 import 'package:pss_app/features/flight/domain/entities/seat_class_entity.dart';
-import 'package:pss_app/features/flight/presentation/bloc/bloc/seat_class_bloc.dart';
+import 'package:pss_app/features/flight/presentation/bloc/seatClass/seat_class_bloc.dart';
 
 import '../../../../app/theme/theme.dart';
 import '../../../../core/common/widget/card_general.dart';

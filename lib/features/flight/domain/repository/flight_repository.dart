@@ -24,5 +24,5 @@ abstract interface class FlightRepository {
     int limit,
   });
 
-  Future<Either<Failure, List<FlightSeatEntity>>> getFlightSeats(int flightId);
+  Future<Either<Failure, List<FlightSeatEntity>>> getFlightSeats({ required int flightId, int? seatClassId});
 }

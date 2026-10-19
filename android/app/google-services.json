@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "23701204561",
+    "project_id": "aira-fly",
+    "storage_bucket": "aira-fly.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:23701204561:android:d759e388edf95448e99270",
+        "android_client_info": {
+          "package_name": "com.airafly.dev"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDFcwR7murzOmYsRvPcFrGQmjaOgOtihuo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

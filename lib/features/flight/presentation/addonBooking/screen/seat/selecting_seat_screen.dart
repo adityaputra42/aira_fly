@@ -43,7 +43,7 @@ class _SelectingSeatScreenState extends State<SelectingSeatScreen> {
     };
 
     _flightBloc = serviceLocator<FlightBloc>()
-      ..add(LoadFlightSeatsRequested(flightId: widget.arguments.leg.flightId));
+      ..add(LoadFlightSeatsRequested(flightId: widget.arguments.leg.flightId, seatClassId: widget.arguments.leg.fareFlight?.seatClassId));
   }
 
   String _passengerLabel(int index) {
@@ -207,8 +207,8 @@ class _SelectingSeatScreenState extends State<SelectingSeatScreen> {
           padding: EdgeInsets.symmetric(horizontal: maxColumns < 8 ? 3 : 2),
           child: SelectableBox(
             text: seat.seatNumber ?? seat.seatLetter ?? '?',
-            width: maxColumns < 8 ? context.w(0.14) : context.w(0.11),
-            height: maxColumns < 8 ? context.w(0.14) : context.w(0.11),
+            width: maxColumns < 8 ? context.w(0.14) :  context.w(0.085),
+            height: maxColumns < 8 ? context.w(0.14) :  context.w(0.085),
             fontsize: maxColumns < 8 ? 10 : 8,
             isEnable: seat.isAvailable,
             isSelected: currentSeat?.id != null && currentSeat!.id == seat.id,
@@ -220,13 +220,13 @@ class _SelectingSeatScreenState extends State<SelectingSeatScreen> {
   }
 
   Widget _buildAisle(int maxColumns) {
-    return SizedBox(width: maxColumns < 8 ? 20 : 10, height: maxColumns < 8 ? context.w(0.14) : context.w(0.11));
+    return SizedBox(width: maxColumns < 8 ? 20 : 10, height: maxColumns < 8 ? context.w(0.14) :  context.w(0.085));
   }
 
   Widget _buildEmptySeat(int maxColumns) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: maxColumns < 8 ? 3 : 2),
-      child: SizedBox(width: maxColumns < 8 ? context.w(0.14) : context.w(0.11), height: maxColumns < 8 ? context.w(0.14) : context.w(0.11)),
+      child: SizedBox(width: maxColumns < 8 ? context.w(0.14) :  context.w(0.085), height: maxColumns < 8 ? context.w(0.14) :  context.w(0.085)),
     );
   }
 
@@ -240,13 +240,12 @@ class _SelectingSeatScreenState extends State<SelectingSeatScreen> {
         }
 
         return SizedBox(
-          width: maxColumns < 8 ? context.w(0.14) : context.w(0.11),
+          width: maxColumns < 8 ? context.w(0.14) : context.w(0.085),
           child: Center(child: Text(column, style: AppFont.medium14)),
         );
       }).toList(),
     );
   }
-
   @override
   Widget build(BuildContext context) {
     final passengerLabels = List.generate(
@@ -294,16 +293,21 @@ class _SelectingSeatScreenState extends State<SelectingSeatScreen> {
 
             DefaultTabController(
               length: passengerLabels.isEmpty ? 1 : passengerLabels.length,
-              child: CustomTabBarPassager(
-                titles: passengerLabels.isEmpty ? const ["-"] : passengerLabels,
+              child:CustomTabBarPassager(
+                titles: passengerLabels.isEmpty
+                    ? const ['-']
+                    : passengerLabels,
                 selectedIndex: _selectedPassengerIndex,
-                value: currentSeat?.seatNumber,
+                values: List.generate(
+                  passengerLabels.length,
+                      (index) => _selectionByPassenger[index]?.seatNumber,
+                ),
                 onTap: (index) {
                   setState(() {
                     _selectedPassengerIndex = index;
                   });
                 },
-              ),
+              )
             ),
 
             widget.height(12),
@@ -325,15 +329,7 @@ class _SelectingSeatScreenState extends State<SelectingSeatScreen> {
                   if (state is! FlightSeatsLoaded) {
                     return CardGeneral(
                       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      child: Column(
-                        children: List.generate(
-                          6,
-                          (_) => Padding(
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: ShimmerLoading(height: 40, radius: 6),
-                          ),
-                        ),
-                      ),
+                      child: SingleChildScrollView(child: generateSeatLoading())
                     );
                   }
 
@@ -367,9 +363,9 @@ class _SelectingSeatScreenState extends State<SelectingSeatScreen> {
 
                   final clusteredColumns = _applyClusterToColumns(columns, cluster);
 
-                  return SingleChildScrollView(
-                    child: CardGeneral(
-                      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  return CardGeneral(
+                    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    child: SingleChildScrollView(
                       child: Column(
                         children: [
                           Row(
@@ -380,15 +376,15 @@ class _SelectingSeatScreenState extends State<SelectingSeatScreen> {
                               _legendItem(context, label: "Selected", isSelected: true),
                             ],
                           ),
-
+                                        
                           widget.height(16),
                           _buildSeatHeader(
                             clusteredColumns: clusteredColumns,
                             maxColumns: maxColumns,
                           ),
-
+                                        
                           widget.height(8),
-
+                                        
                           for (final row in sortedRows)
                             Padding(
                               padding: const EdgeInsets.only(bottom: 12),
@@ -452,6 +448,29 @@ class _SelectingSeatScreenState extends State<SelectingSeatScreen> {
         ),
       ),
     );
+  }
+
+  Column generateSeatLoading() {
+    List<Widget> widgets = [];
+    for (int i = 0; i < 10; i++) {
+      widgets.add(
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(6, (index) {
+            return Padding(
+              padding: EdgeInsets.only(
+                right: index < 5 ? 8 : 0,
+                bottom: 8,
+                left: (index == 3) ? context.w(0.05) : 0,
+              ),
+              child: ShimmerLoading(height: context.w(0.115), width: context.w(0.115), radius: 4),
+            );
+          }),
+        ),
+      );
+    }
+
+    return Column(mainAxisSize: MainAxisSize.min, children: widgets);
   }
 
   Widget _legendItem(

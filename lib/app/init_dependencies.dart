@@ -54,7 +54,7 @@ import '../features/flight/domain/usecases/payment/create_payment.dart';
 import '../features/flight/domain/usecases/payment/get_payment.dart';
 import '../features/flight/domain/usecases/payment/get_payment_by_pnr.dart';
 import '../features/flight/presentation/bloc/ancillary/ancillary_bloc.dart';
-import '../features/flight/presentation/bloc/bloc/seat_class_bloc.dart';
+import '../features/flight/presentation/bloc/seatClass/seat_class_bloc.dart';
 import '../features/flight/presentation/bloc/booking/booking_bloc.dart';
 import '../features/flight/presentation/bloc/fareClass/fare_class_bloc.dart';
 import '../features/flight/presentation/bloc/flight/flight_bloc.dart';

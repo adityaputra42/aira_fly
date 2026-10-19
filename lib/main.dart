@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pss_app/core/common/cubit/user_cubit.dart';
@@ -8,9 +9,13 @@ import 'app/app.dart';
 import 'app/init_dependencies.dart';
 import 'core/common/cubit/theme_cubit.dart';
 import 'features/main/ui/cubit/main_cubit.dart';
+import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   await PrefHelper.instance.init();
   await initDependencies();
   runApp(

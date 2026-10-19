@@ -18,7 +18,7 @@ abstract interface class FlightRemoteDataSource {
     int limit = 10,
   });
 
-  Future<ApiResponse?> getFlightSeats(int flightId);
+  Future<ApiResponse?> getFlightSeats( {required int flightId, int? seatClassId});
 }
 
 class FlightRemoteDataSourceImpl implements FlightRemoteDataSource {
@@ -78,9 +78,11 @@ class FlightRemoteDataSourceImpl implements FlightRemoteDataSource {
   }
 
   @override
-  Future<ApiResponse?> getFlightSeats(int flightId) async {
+  Future<ApiResponse?> getFlightSeats({required int flightId, int? seatClassId}) async {
     try {
-      var response = await dio.get('${Endpoint.flightInstances}/$flightId/seats');
+
+      var query = <String, dynamic>{"seat_class_id":seatClassId};
+      var response = await dio.get('${Endpoint.flightInstances}/$flightId/seats',queryParameters: query);
       if (response.data == null) {
         return ApiResponse.withError(response, response.statusMessage, null);
       }

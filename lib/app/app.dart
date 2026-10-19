@@ -5,6 +5,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 
 import '../core/common/cubit/theme_cubit.dart';
+import '../core/common/widget/card_general.dart';
+import '../core/utils/size_extension.dart';
 import 'routes/app_routes.dart';
 import 'theme/theme.dart';
 
@@ -25,7 +27,20 @@ class App extends StatelessWidget {
               overlayWidgetBuilder: (progress) {
                 return BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: 4.5, sigmaY: 4.5),
-                  child: Center(child: CircularProgressIndicator(color: AppColor.secondaryColor)),
+                  child: Center(
+                    child: CardGeneral(
+                      padding: EdgeInsets.all(48),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          CircularProgressIndicator(color: AppColor.primaryColor),
+                          height(16),
+                          Text("Loading...", style: AppFont.medium14),
+                        ],
+                      ),
+                    ),
+                  ),
                 );
               },
               child: child ?? SizedBox(),

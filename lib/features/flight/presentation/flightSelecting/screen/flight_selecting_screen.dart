@@ -48,8 +48,9 @@ class FlightSelectingArguments {
   final int amountInfant;
   final FlightLeg leg;
   final ItineraryEntity? selectedDeparture;
-  final ItineraryFareEntity? selectedDepartureFare; // NEW
+  final ItineraryFareEntity? selectedDepartureFare;
   final SeatClassEntity? seatClass;
+  final List<ItineraryEntity>? prefetchedReturnItineraries;
 
   const FlightSelectingArguments({
     required this.departureAirport,
@@ -62,8 +63,9 @@ class FlightSelectingArguments {
     required this.amountInfant,
     this.leg = FlightLeg.departure,
     this.selectedDeparture,
-    this.selectedDepartureFare, // NEW
+    this.selectedDepartureFare,
     this.seatClass,
+    this.prefetchedReturnItineraries,
   });
 
   bool get isRoundTrip => tripType == 'round_trip';
@@ -80,8 +82,9 @@ class FlightSelectingArguments {
 
   FlightSelectingArguments forReturnLeg(
     ItineraryEntity departure,
-    ItineraryFareEntity departureFare, { // NEW required param
+    ItineraryFareEntity departureFare, {
     DateTime? departureDate,
+    List<ItineraryEntity>? returnItineraries,
   }) {
     return FlightSelectingArguments(
       departureAirport: departureAirport,
@@ -94,7 +97,9 @@ class FlightSelectingArguments {
       amountInfant: amountInfant,
       leg: FlightLeg.returnLeg,
       selectedDeparture: departure,
-      selectedDepartureFare: departureFare, // NEW
+      selectedDepartureFare: departureFare,
+      seatClass: seatClass,
+      prefetchedReturnItineraries: returnItineraries,
     );
   }
 }
@@ -122,6 +127,7 @@ class _FlightSelectingScreenState extends State<FlightSelectingScreen> {
 
   late DateTime _departureDate;
   DateTime? _returnDate;
+  List<ItineraryEntity>? _prefetchedReturn;
 
   @override
   void initState() {
@@ -133,7 +139,22 @@ class _FlightSelectingScreenState extends State<FlightSelectingScreen> {
     _departureDate = _arguments.departureDate;
     _returnDate = _arguments.returnDate;
     scrollController.addListener(() => _onScroll());
-    _retrySearch();
+
+    _prefetchedReturn = _arguments.leg == FlightLeg.returnLeg
+        ? _arguments.prefetchedReturnItineraries
+        : null;
+
+    if (_prefetchedReturn != null) {
+      _firstLoading = false;
+    } else {
+      _retrySearch();
+    }
+  }
+
+  @override
+  void dispose() {
+    scrollController.dispose();
+    super.dispose();
   }
 
   void _onScroll() {
@@ -151,12 +172,20 @@ class _FlightSelectingScreenState extends State<FlightSelectingScreen> {
       _returnDate = newArguments.returnDate;
       _firstLoading = true;
       _lastLoaded = null;
+      _prefetchedReturn = null;
     });
     _retrySearch();
   }
 
   void _retrySearch({DateTime? newDate}) {
     final args = _arguments;
+
+    if (_prefetchedReturn != null) {
+      setState(() {
+        _prefetchedReturn = null;
+        _firstLoading = true; // skeleton sampai response datang
+      });
+    }
 
     if (newDate != null) {
       setState(() {
@@ -187,9 +216,17 @@ class _FlightSelectingScreenState extends State<FlightSelectingScreen> {
     final args = _arguments;
 
     if (args.isRoundTrip && args.leg == FlightLeg.departure) {
+      final loaded = _lastLoaded;
       context.pushNamed(
         RouteNames.flightSelecting,
-        extra: args.forReturnLeg(itinerary, fare, departureDate: _departureDate),
+        extra: args.forReturnLeg(
+          itinerary,
+          fare,
+          departureDate: _departureDate,
+          returnItineraries: loaded == null
+              ? null
+              : (loaded.result.returnItineraries ?? const <ItineraryEntity>[]),
+        ),
       );
       return;
     }
@@ -205,7 +242,6 @@ class _FlightSelectingScreenState extends State<FlightSelectingScreen> {
         amountAdult: args.amountAdult,
         amountChild: args.amountChild,
         amountInfant: args.amountInfant,
-
         departureFare: args.leg == FlightLeg.returnLeg ? args.selectedDepartureFare! : fare,
         returnFare: args.leg == FlightLeg.returnLeg ? fare : null,
       ),
@@ -287,14 +323,23 @@ class _FlightSelectingScreenState extends State<FlightSelectingScreen> {
                       }
                     },
                     builder: (context, state) {
-                      final isRefetching = state is! FlightSearchLoaded && state is! FlightError;
-
                       final fareClassState = context.watch<FareClassBloc>().state;
                       final fareClassLabels = fareClassState is FareClassLoaded
                           ? fareClassState.byId.map(
                               (id, fc) => MapEntry(id, fc.name ?? 'Kelas #$id'),
                             )
                           : null;
+
+                      final prefetched = _prefetchedReturn;
+                      if (prefetched != null) {
+                        return _buildItinerarySliver(
+                          prefetched,
+                          fareClassLabels,
+                          isRefetching: false,
+                        );
+                      }
+
+                      final isRefetching = state is! FlightSearchLoaded && state is! FlightError;
 
                       if (state is FlightError && _lastLoaded == null) {
                         return SliverFillRemaining(
@@ -323,39 +368,10 @@ class _FlightSelectingScreenState extends State<FlightSelectingScreen> {
                           ? loaded.result.departure
                           : loaded.result.returnItineraries;
 
-                      if (itineraries == null || itineraries.isEmpty) {
-                        return SliverFillRemaining(
-                          hasScrollBody: false,
-                          child: Empty(
-                            title:
-                                "No flights found for ${args.originCode} \u2192 ${args.destinationCode} "
-                                "on ${args.dateForLeg.toFormattedString(shortDDMMY)}.",
-                          ),
-                        );
-                      }
-
-                      return SliverList(
-                        delegate: SliverChildBuilderDelegate((context, index) {
-                          if (isRefetching && index == 0) {
-                            return Column(
-                              children: [
-                                const LinearProgressIndicator(minHeight: 2),
-                                _buildFlightCard(
-                                  itineraries[0],
-                                  0,
-                                  itineraries.length,
-                                  fareClassLabels,
-                                ),
-                              ],
-                            );
-                          }
-                          return _buildFlightCard(
-                            itineraries[index],
-                            index,
-                            itineraries.length,
-                            fareClassLabels,
-                          );
-                        }, childCount: itineraries.length),
+                      return _buildItinerarySliver(
+                        itineraries,
+                        fareClassLabels,
+                        isRefetching: isRefetching,
                       );
                     },
                   ),
@@ -413,6 +429,39 @@ class _FlightSelectingScreenState extends State<FlightSelectingScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildItinerarySliver(
+    List<ItineraryEntity>? itineraries,
+    Map<int, String>? fareClassLabels, {
+    required bool isRefetching,
+  }) {
+    final args = _arguments;
+
+    if (itineraries == null || itineraries.isEmpty) {
+      return SliverFillRemaining(
+        hasScrollBody: false,
+        child: Empty(
+          title:
+              "No flights found for ${args.originCode} \u2192 ${args.destinationCode} "
+              "on ${args.dateForLeg.toFormattedString(shortDDMMY)}.",
+        ),
+      );
+    }
+
+    return SliverList(
+      delegate: SliverChildBuilderDelegate((context, index) {
+        if (isRefetching && index == 0) {
+          return Column(
+            children: [
+              const LinearProgressIndicator(minHeight: 2),
+              _buildFlightCard(itineraries[0], 0, itineraries.length, fareClassLabels),
+            ],
+          );
+        }
+        return _buildFlightCard(itineraries[index], index, itineraries.length, fareClassLabels);
+      }, childCount: itineraries.length),
     );
   }
 

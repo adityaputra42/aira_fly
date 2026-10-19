@@ -1,17 +1,18 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:math' as math;
 
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconify_flutter_plus/iconify_flutter_plus.dart';
 import 'package:iconify_flutter_plus/icons/bx.dart';
 import 'package:intl/intl.dart';
+import 'package:loader_overlay/loader_overlay.dart';
 import 'package:pss_app/app/theme/theme.dart';
 import 'package:pss_app/core/common/cubit/user_cubit.dart';
 import 'package:pss_app/core/common/widget/card_general.dart';
-import 'package:pss_app/core/common/widget/dropdown_custom.dart';
 import 'package:pss_app/core/common/widget/primary_button.dart';
 import 'package:pss_app/core/utils/clipper.dart';
 import 'package:pss_app/core/utils/dashed_divider.dart';
@@ -52,7 +53,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
   late final PaymentBloc _paymentBloc;
 
   _Step _step = _Step.review;
-  String? _processingMessage;
+  String? processingMessage;
   String? _errorMessage;
 
   PnrDetailEntity? _pnr;
@@ -94,15 +95,17 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
   }
 
   Future<void> _confirmAndPay() async {
+    context.loaderOverlay.show();
     setState(() {
       _step = _Step.processing;
+
       _errorMessage = null;
     });
 
     var pnr = _pnr;
 
     if (pnr == null) {
-      setState(() => _processingMessage = "Creating your booking...");
+      setState(() => processingMessage = "Creating your booking...");
 
       final departureFare = _search.departureFare;
       final returnFare = _search.returnFare;
@@ -157,6 +160,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
       if (!mounted) return;
 
       if (bookingResult is BookingError) {
+        context.loaderOverlay.hide();
         setState(() {
           _step = _Step.review;
           _errorMessage = bookingResult.message;
@@ -171,7 +175,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
       if (!mounted) return;
     }
 
-    setState(() => _processingMessage = "Processing payment...");
+    setState(() => processingMessage = "Processing payment...");
 
     _paymentBloc.add(CreatePaymentRequested(pnrId: pnr.id!, paymentMethod: _paymentMethod));
 
@@ -182,6 +186,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
     if (!mounted) return;
 
     if (result is PaymentError) {
+      context.loaderOverlay.hide();
       setState(() {
         _step = _Step.review;
         _errorMessage = result.message;
@@ -192,6 +197,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
     setState(() {
       _payment = (result as PaymentCreated).payment;
       if (_payment?.pnr != null) _pnr = _payment!.pnr;
+      context.loaderOverlay.hide();
       _step = _Step.done;
     });
   }
@@ -200,7 +206,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
     final allSelections = [...widget.result.baggage, ...widget.result.meals];
     if (allSelections.isEmpty) return;
 
-    setState(() => _processingMessage = "Adding your baggage and meal selections...");
+    setState(() => processingMessage = "Adding your baggage and meal selections...");
 
     for (final selection in allSelections) {
       int? matchedSegmentId;
@@ -231,6 +237,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
 
       if (result is AncillaryError) {
         _ancillaryFailures.add("${selection.item.name ?? 'Item'}: ${result.message}");
+        context.loaderOverlay.hide();
       }
     }
   }
@@ -253,7 +260,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
         body: SafeArea(
           child: switch (_step) {
             _Step.review => _buildReview(context),
-            _Step.processing => _buildProcessing(context),
+            _Step.processing => _buildReview(context),
             _Step.done => _buildDone(context),
             _Step.error => _buildError(context),
           },
@@ -498,26 +505,109 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                       child: Text("Payment Method", style: AppFont.medium14),
                     ),
                     widget.height(8),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: DropDownCustom(
-                        filled: true,
-                        filledColor: Theme.of(context).colorScheme.surface,
-                        hint: "Select payment method",
-                        value: _paymentMethod,
-                        onChange: (value) => setState(() => _paymentMethod = value as String),
-                        listData: [
-                          DropdownItem<String>(
-                            value: 'DOKU_VA',
-                            child: Text("Virtual Account (DOKU)", style: AppFont.reguler12),
-                          ),
-                          if (isLoggedIn)
-                            DropdownItem<String>(
-                              value: 'BALANCE',
-                              child: Text("Wallet Balance", style: AppFont.reguler12),
+                    CardGeneral(
+                      margin: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Column(
+                        spacing: 16,
+                        children: [
+                          InkWell(
+                            onTap: () {
+                              setState(() => _paymentMethod = "DOKU_VA");
+                            },
+                            child: CardGeneral(
+                              background: _paymentMethod == "DOKU_VA"
+                                  ? AppColor.secondaryColor.withValues(alpha: 0.25)
+                                  : Theme.of(context).colorScheme.surface,
+                              margin: EdgeInsets.zero,
+                              useShadow: false,
+                              border: _paymentMethod == "DOKU_VA"
+                                  ? Border.all(width: 1, color: AppColor.secondaryColor)
+                                  : null,
+                              child: Row(
+                                spacing: 16,
+                                children: [
+                                  Icon(
+                                    Icons.credit_card_rounded,
+                                    size: 24,
+                                    color: AppColor.primaryColor,
+                                  ),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text("Virtual Account", style: AppFont.medium14),
+                                        Text(
+                                          "Virtual Account",
+                                          style: AppFont.reguler12.copyWith(
+                                            color: Theme.of(context).hintColor,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
+                          ),
+                          InkWell(
+                            onTap: () {
+                              setState(() => _paymentMethod = "BALANCE");
+                            },
+                            child: CardGeneral(
+                              background: _paymentMethod == "BALANCE"
+                                  ? AppColor.secondaryColor.withValues(alpha: 0.25)
+                                  : Theme.of(context).colorScheme.surface,
+                              margin: EdgeInsets.zero,
+                              useShadow: false,
+                              border: _paymentMethod == "BALANCE"
+                                  ? Border.all(width: 1, color: AppColor.secondaryColor)
+                                  : null,
+                              child: Row(
+                                spacing: 16,
+                                children: [
+                                  Icon(
+                                    Icons.wallet_rounded,
+                                    size: 24,
+                                    color: AppColor.primaryColor,
+                                  ),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text("Wallet Balance", style: AppFont.medium14),
+                                        Text(
+                                          "Virtual Account",
+                                          style: AppFont.reguler12.copyWith(
+                                            color: Theme.of(context).hintColor,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
                         ],
                       ),
+                      // child: DropDownCustom(
+                      //   filled: true,
+                      //   filledColor: Theme.of(context).colorScheme.surface,
+                      //   hint: "Select payment method",
+                      //   value: _paymentMethod,
+                      //   onChange: (value) => setState(() => _paymentMethod = value as String),
+                      //   listData: [
+                      //     DropdownItem<String>(
+                      //       value: 'DOKU_VA',
+                      //       child: Text("Virtual Account (DOKU)", style: AppFont.reguler12),
+                      //     ),
+                      //     if (isLoggedIn)
+                      //       DropdownItem<String>(
+                      //         value: 'BALANCE',
+                      //         child: Text("Wallet Balance", style: AppFont.reguler12),
+                      //       ),
+                      //   ],
+                      // ),
                     ),
                     if (!isLoggedIn) ...[
                       widget.height(4),
@@ -551,21 +641,21 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
     );
   }
 
-  Widget _buildProcessing(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const CircularProgressIndicator(color: AppColor.primaryColor),
-          widget.height(16),
-          Text(
-            _processingMessage ?? "Please wait...",
-            style: AppFont.reguler14.copyWith(color: Theme.of(context).hintColor),
-          ),
-        ],
-      ),
-    );
-  }
+  // Widget _buildProcessing(BuildContext context) {
+  //   return Center(
+  //     child: Column(
+  //       mainAxisSize: MainAxisSize.min,
+  //       children: [
+  //         const CircularProgressIndicator(color: AppColor.primaryColor),
+  //         widget.height(16),
+  //         Text(
+  //           _processingMessage ?? "Please wait...",
+  //           style: AppFont.reguler14.copyWith(color: Theme.of(context).hintColor),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   Widget _buildDone(BuildContext context) {
     final payment = _payment?.payment;

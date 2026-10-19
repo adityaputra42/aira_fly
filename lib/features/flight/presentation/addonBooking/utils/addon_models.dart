@@ -9,8 +9,8 @@ class AddonLeg {
   final String label;
   final int flightId;
   final ItineraryEntity itinerary;
-
-  const AddonLeg({required this.label, required this.flightId, required this.itinerary});
+  final ItineraryFareEntity? fareFlight;
+  const AddonLeg({required this.label,this.fareFlight, required this.flightId, required this.itinerary});
 }
 
 List<AddonLeg> buildAddonLegs(FlightResultArguments args) {
@@ -23,6 +23,7 @@ List<AddonLeg> buildAddonLegs(FlightResultArguments args) {
         label: "Departure Flight",
         flightId: departureSegments.first.flightId!,
         itinerary: args.departure,
+        fareFlight: args.departureFare
       ),
     );
   }
@@ -35,6 +36,7 @@ List<AddonLeg> buildAddonLegs(FlightResultArguments args) {
           label: "Return Flight",
           flightId: returnSegments.first.flightId!,
           itinerary: args.returnItinerary!,
+          fareFlight: args.returnFare,
         ),
       );
     }

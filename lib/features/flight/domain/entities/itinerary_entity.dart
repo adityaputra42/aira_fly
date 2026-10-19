@@ -54,14 +54,17 @@ class SegmentEntity extends Equatable {
 
 class ItineraryFareEntity extends Equatable {
   final int? fareClassId;
+  final int? seatClassId;
   final Map<String, String>? prices; // passenger_type (ADT/CHD/INF) -> price
   final String? currency;
   final int? availableSeats;
 
-  const ItineraryFareEntity({this.fareClassId, this.prices, this.currency, this.availableSeats});
+  const ItineraryFareEntity(
+      {this.fareClassId, this.seatClassId, this.prices, this.currency, this.availableSeats});
 
   @override
-  List<Object?> get props => [fareClassId, prices, currency, availableSeats];
+  List<Object?> get props =>
+      [fareClassId, seatClassId, prices, currency, availableSeats];
 }
 
 class ItineraryEntity extends Equatable {

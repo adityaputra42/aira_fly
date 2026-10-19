@@ -144,7 +144,10 @@ class _AncillaryPickerScreenState extends State<AncillaryPickerScreen> {
               child: CustomTabBarPassager(
                 titles: passengerLabels.isEmpty ? const ["-"] : passengerLabels,
                 selectedIndex: _selectedPassengerIndex,
-                value: currentItem?.name,
+                values: List.generate(
+                  passengerLabels.length,
+                      (index) => _selectionByPassenger[index]?.name,
+                ),
                 price: currentItem != null ? double.tryParse(currentItem.currentPrice ?? '') : null,
                 onTap: (index) => setState(() => _selectedPassengerIndex = index),
               ),

@@ -10,7 +10,7 @@ class CustomTabBarPassager extends StatefulWidget {
   final List<String> titles;
   final Function(int)? onTap;
   final double fonsize;
-  final String? value;
+  final List<String?> values;
   final double? price;
   const CustomTabBarPassager({
     super.key,
@@ -18,7 +18,7 @@ class CustomTabBarPassager extends StatefulWidget {
     this.selectedIndex,
     this.fonsize = 14,
     this.onTap,
-    this.value,
+    this.values = const [],
     this.price,
   });
 
@@ -46,28 +46,24 @@ class _CustomTabBarPassagerState extends State<CustomTabBarPassager> {
         indicatorSize: TabBarIndicatorSize.label,
 
         onTap: (index) {
-          if (widget.onTap != null) {
-            widget.onTap!(index);
-          }
+          widget.onTap?.call(index);
         },
-
-        tabs: widget.titles
-            .map(
-              (e) => Padding(
-                padding: EdgeInsets.only(
-                  left: widget.titles.indexOf(e) == 0 ? 16 : 0,
-                  right: widget.titles.indexOf(e) == (widget.titles.length - 1) ? 16 : 8,
-                ),
-                child: CardTabPassangger(
-                  isSelected: widget.selectedIndex == widget.titles.indexOf(e),
-                  passengger: e,
-                  index: widget.titles.indexOf(e) + 1,
-                  value: widget.value,
-                  price: widget.price,
-                ),
-              ),
-            )
-            .toList(),
+        tabs: List.generate(widget.titles.length, (index) {
+          return Padding(
+            padding: EdgeInsets.only(
+              left: index == 0 ? 16 : 0,
+              right: index == widget.titles.length - 1 ? 16 : 8,
+            ),
+            child: CardTabPassangger(
+              isSelected: widget.selectedIndex == index,
+              passengger: widget.titles[index],
+              index: index + 1,
+              value: index < widget.values.length
+                  ? widget.values[index]
+                  : null,
+            ),
+          );
+        }),
       ),
     );
   }

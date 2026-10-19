@@ -66,7 +66,9 @@ class FlightBloc extends Bloc<FlightEvent, FlightState> {
   Future _onLoadFlightSeatsRequested(LoadFlightSeatsRequested event, Emitter emit) async {
     emit(FlightSeatsLoading());
 
-    final result = await getFlightSeatsUseCase(GetFlightSeatsParams(flightId: event.flightId));
+    final result = await getFlightSeatsUseCase(
+      GetFlightSeatsParams(flightId: event.flightId, seatClassId: event.seatClassId),
+    );
 
     result.fold(
       (failure) => emit(FlightError(failure.message)),

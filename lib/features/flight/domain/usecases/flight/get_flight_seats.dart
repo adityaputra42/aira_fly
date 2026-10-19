@@ -12,12 +12,13 @@ class GetFlightSeats implements UseCase<List<FlightSeatEntity>, GetFlightSeatsPa
 
   @override
   Future<Either<Failure, List<FlightSeatEntity>>> call(GetFlightSeatsParams params) {
-    return flightRepository.getFlightSeats(params.flightId);
+    return flightRepository.getFlightSeats(flightId:  params.flightId,seatClassId: params.seatClassId);
   }
 }
 
 class GetFlightSeatsParams {
   final int flightId;
+  final int? seatClassId;
 
-  const GetFlightSeatsParams({required this.flightId});
+  const GetFlightSeatsParams({required this.flightId, this.seatClassId});
 }
