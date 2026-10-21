@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
+import 'package:go_router/go_router.dart';
 import 'package:pss_app/app/init_dependencies.dart';
 import 'package:pss_app/app/theme/theme.dart';
 import 'package:pss_app/core/common/cubit/user_cubit.dart';
@@ -14,8 +14,8 @@ import 'package:pss_app/features/flight/presentation/bloc/booking/booking_bloc.d
 import 'package:pss_app/features/ticket/presentation/widget/card_ticket_loading.dart';
 import 'package:pss_app/features/ticket/presentation/widget/card_tikcet_list.dart';
 
+import '../../../../app/routes/route_names.dart';
 import '../../../../core/animation/stagger_in.dart';
-import 'booking_detail_sheet.dart';
 
 class TicketBookingBody extends StatefulWidget {
   const TicketBookingBody({super.key});
@@ -26,7 +26,6 @@ class TicketBookingBody extends StatefulWidget {
 
 class _TicketBookingBodyState extends State<TicketBookingBody> {
   late final BookingBloc _bookingBloc;
-  // late final GetPnrByBookingCode _getPnrByBookingCode;
   final _codeController = TextEditingController();
   bool? _lastLoggedIn;
 
@@ -74,15 +73,6 @@ class _TicketBookingBodyState extends State<TicketBookingBody> {
         });
       },
       (summaries) async {
-        // final codes = summaries.map((s) => s.bookingCode).whereType<String>().toList();
-
-        // final details = await Future.wait(
-        //   codes.map((code) async {
-        //     final result = await _getPnrByBookingCode(GetPnrByBookingCodeParams(bookingCode: code));
-        //     return result.fold((_) => null, (d) => d);
-        //   }),
-        // );
-
         if (!mounted) return;
 
         final now = DateTime.now();
@@ -117,11 +107,17 @@ class _TicketBookingBodyState extends State<TicketBookingBody> {
     return pnr.departureTime!.isBefore(now);
   }
 
-  void _searchByCode() {
+  bool isDisable = true;
+  void setDisable() {
     final code = _codeController.text.trim();
-    if (code.isEmpty) return;
-    FocusScope.of(context).unfocus();
-    _bookingBloc.add(LoadPnrByBookingCodeRequested(bookingCode: code));
+    setState(() {
+      if (code.isNotEmpty) {
+        isDisable = false;
+      } else {
+        isDisable = true;
+      }
+    });
+
   }
 
   @override
@@ -208,7 +204,7 @@ class _TicketBookingBodyState extends State<TicketBookingBody> {
     return RefreshIndicator(
       onRefresh: _loadAndClassify,
       child: ListView.separated(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 98),
         itemCount: items.length,
         separatorBuilder: (_, _) => const SizedBox(height: 12),
         itemBuilder: (context, index) {
@@ -223,47 +219,38 @@ class _TicketBookingBodyState extends State<TicketBookingBody> {
   }
 
   Widget _buildGuestSearch(BuildContext context) {
-    return BlocConsumer<BookingBloc, BookingState>(
-      listener: (context, state) {
-        if (state is PnrByBookingCodeLoaded) {
-          showBookingDetailSheet(context, state.pnr);
-        }
-      },
-      builder: (context, state) {
-        return CardGeneral(
-          // padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Find your booking', style: AppFont.medium16),
-              const SizedBox(height: 4),
-              Text(
-                "Not signed in -- enter the booking code from your confirmation to look it up.",
-                style: AppFont.reguler12.copyWith(color: Theme.of(context).hintColor),
-              ),
-              const SizedBox(height: 16),
-              InputText(
-                filled: true,
-                filledColor: Theme.of(context).colorScheme.surface,
-                controller: _codeController,
-                hintText: 'e.g. BF47S8',
-                textInputAction: TextInputAction.search,
-                onComplete: _searchByCode,
-              ),
-              const SizedBox(height: 12),
-              PrimaryButton(
-                title: state is BookingLoading ? 'Searching...' : 'Search',
-                onPressed: state is BookingLoading ? () {} : _searchByCode,
-              ),
-              if (state is BookingError) ...[
-                const SizedBox(height: 16),
-                Text(state.message, style: AppFont.reguler12.copyWith(color: Colors.red)),
-              ],
-            ],
+    return CardGeneral(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Find your booking', style: AppFont.medium16),
+          const SizedBox(height: 4),
+          Text(
+            "Not signed in -- enter the booking code from your confirmation to look it up.",
+            style: AppFont.reguler12.copyWith(color: Theme.of(context).hintColor),
           ),
-        );
-      },
+          const SizedBox(height: 16),
+          InputText(
+            filled: true,
+            filledColor: Theme.of(context).colorScheme.surface,
+            controller: _codeController,
+            onChange: (p0) {
+              setDisable();
+            },
+            hintText: 'e.g. BF47S8',
+            textInputAction: TextInputAction.search,
+          ),
+          const SizedBox(height: 12),
+          PrimaryButton(
+            disable: isDisable,
+            title: 'Search',
+            onPressed: () {
+              context.goNamed(RouteNames.ticketDetail, extra: _codeController.text);
+            },
+          ),
+        ],
+      ),
     );
   }
 }

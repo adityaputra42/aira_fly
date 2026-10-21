@@ -1,7 +1,17 @@
-import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:get_it/get_it.dart';
+import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:pss_app/app/routes/app_routes.dart';
 import 'package:pss_app/core/common/cubit/user_cubit.dart';
+import 'package:pss_app/features/notifications/data/datasources/notification_remote_datasources.dart';
+import 'package:pss_app/features/notifications/data/repositories/notification_repository_impl.dart';
+import 'package:pss_app/features/notifications/domain/repository/notification_repository.dart';
+import 'package:pss_app/features/notifications/domain/usecases/get_list_notification.dart';
+import 'package:pss_app/features/notifications/domain/usecases/get_unread_count.dart';
+import 'package:pss_app/features/notifications/domain/usecases/read_all_notification.dart';
+import 'package:pss_app/features/notifications/domain/usecases/read_notification_by_id.dart';
+import 'package:pss_app/features/notifications/domain/usecases/register_device.dart';
+import 'package:pss_app/features/notifications/domain/usecases/unregister_device.dart';
+import 'package:pss_app/features/notifications/presentations/bloc/notification_bloc.dart';
 
 import '../core/common/cubit/theme_cubit.dart';
 import '../core/network/dio_client.dart';
@@ -54,12 +64,17 @@ import '../features/flight/domain/usecases/payment/create_payment.dart';
 import '../features/flight/domain/usecases/payment/get_payment.dart';
 import '../features/flight/domain/usecases/payment/get_payment_by_pnr.dart';
 import '../features/flight/presentation/bloc/ancillary/ancillary_bloc.dart';
-import '../features/flight/presentation/bloc/seatClass/seat_class_bloc.dart';
 import '../features/flight/presentation/bloc/booking/booking_bloc.dart';
 import '../features/flight/presentation/bloc/fareClass/fare_class_bloc.dart';
 import '../features/flight/presentation/bloc/flight/flight_bloc.dart';
 import '../features/flight/presentation/bloc/payment/payment_bloc.dart';
+import '../features/flight/presentation/bloc/seatClass/seat_class_bloc.dart';
 import '../features/main/ui/cubit/main_cubit.dart';
+import '../features/master/data/datasources/country_code_remote_data_source.dart';
+import '../features/master/data/repositories/country_code_repository_impl.dart';
+import '../features/master/domain/repository/country_code_repository.dart';
+import '../features/master/domain/usecases/list_country_codes.dart';
+import '../features/notifications/presentations/utils/notification_helper.dart';
 import '../features/onboarding/cubit/onboarding_cubit.dart';
 import '../features/profile/data/datasources/profile_remote_data_source.dart'
     show ProfileRemoteDataSource, ProfileRemoteDataSourceImpl;
@@ -68,10 +83,6 @@ import '../features/profile/domain/repository/profile_repository.dart';
 import '../features/profile/domain/usecases/get_profile.dart';
 import '../features/profile/domain/usecases/update_profile.dart';
 import '../features/profile/presentation/bloc/profile_bloc.dart';
-import '../features/master/data/datasources/country_code_remote_data_source.dart';
-import '../features/master/data/repositories/country_code_repository_impl.dart';
-import '../features/master/domain/repository/country_code_repository.dart';
-import '../features/master/domain/usecases/list_country_codes.dart';
 import '../features/splash/cubit/splash_cubit.dart';
 import '../features/ticket/data/datasources/ticket_remote_data_source.dart';
 import '../features/ticket/data/repositories/ticket_repository_impl.dart';
@@ -113,6 +124,7 @@ Future<void> initDependencies() async {
   _initTicket();
   _initProfile();
   _initMaster();
+  _initNotification();
 
   DioClient().configure(
     authLocalDataSource: serviceLocator(),
@@ -140,6 +152,10 @@ void _initAuth() {
         signUpUseCase: serviceLocator(),
         getCurrentUserUseCase: serviceLocator(),
         authLocalDataSource: serviceLocator(),
+        registerDeviceUseCase: serviceLocator(),
+        unregisterDeviceUseCase: serviceLocator(),
+        notificationHelper: serviceLocator(),
+        notificationBloc: serviceLocator(),
       ),
     );
 }
@@ -225,6 +241,34 @@ void _initAncillary() {
         cancelPurchaseUseCase: serviceLocator(),
         listPurchasesByPnrUseCase: serviceLocator(),
       ),
+    );
+}
+
+void _initNotification() {
+  serviceLocator
+    ..registerLazySingleton<NotificationHelper>(() => NotificationHelper())
+    ..registerFactory<NotificationRemoteDataSource>(() =>
+        NotificationRemoteDataSourceImpl())..registerFactory<
+      NotificationRepository>(
+        () => NotificationRepositoryImpl(serviceLocator(), serviceLocator()),
+  )..registerFactory(() =>
+      GetListNotification(serviceLocator()))..registerFactory(() =>
+      GetUnreadCount(serviceLocator()))..registerFactory(() =>
+      ReadAllNotification(serviceLocator()))..registerFactory(() =>
+      ReadNotificationById(serviceLocator()))..registerFactory(() =>
+      RegisterDevice(serviceLocator()))..registerFactory(() =>
+      UnregisterDevice(serviceLocator()))
+    ..registerLazySingleton(
+          () =>
+          NotificationBloc(
+            getList: serviceLocator(),
+            getUnreadCount: serviceLocator(),
+            readAll: serviceLocator(),
+            readById: serviceLocator(),
+            registerDevice: serviceLocator(),
+            unregisterDevice: serviceLocator(),
+            helper: serviceLocator(),
+          ),
     );
 }
 

@@ -144,7 +144,9 @@ class _FlexibleAppBarWidgetState extends State<FlexibleAppBarWidget> {
           endDate: DateTime.now().add(const Duration(days: 100)),
           isSelectingReturn: widget.arguments.leg == FlightLeg.returnLeg,
           canUpdate: true,
-          onPageChange: (index, date) => widget.onDateChanged(date),
+          onPageChange: (index, date) {
+            log("index ==> $index ===> Date ===> $date");
+            widget.onDateChanged(date);},
         ),
       ],
     );

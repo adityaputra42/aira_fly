@@ -1,5 +1,5 @@
-import 'package:dio/src/cancel_token.dart';
-import 'package:fpdart/src/either.dart';
+import 'package:dio/dio.dart';
+import 'package:fpdart/fpdart.dart';
 import 'package:pss_app/core/error/failures.dart';
 import 'package:pss_app/features/notifications/data/datasources/notification_remote_datasources.dart';
 import 'package:pss_app/features/notifications/data/models/notification_model.dart';
@@ -13,15 +13,10 @@ class NotificationRepositoryImpl implements NotificationRepository {
   final NotificationRemoteDataSource remoteDataSource;
   final ConnectionChecker connectionChecker;
 
-  const NotificationRepositoryImpl(
-    this.remoteDataSource,
-    this.connectionChecker,
-  );
+  const NotificationRepositoryImpl(this.remoteDataSource, this.connectionChecker);
 
   @override
-  Future<Either<Failure, int>> getUnreadNotificationCount({
-    CancelToken? cancelToken,
-  }) async {
+  Future<Either<Failure, int>> getUnreadNotificationCount({CancelToken? cancelToken}) async {
     try {
       if (!await connectionChecker.isConnected) {
         return left(Failure('No internet connection'));
@@ -31,8 +26,8 @@ class NotificationRepositoryImpl implements NotificationRepository {
       if (response == null) {
         return left(Failure('Failed to load country list'));
       }
-
-      return right(10);
+var data = response.data['unread_count'];
+      return right(data as int);
     } on ServerException catch (e) {
       return left(Failure(e.message));
     } catch (e) {
@@ -78,9 +73,7 @@ class NotificationRepositoryImpl implements NotificationRepository {
         return left(Failure('No internet connection'));
       }
 
-      final response = await remoteDataSource.readAllNotification(
-        cancelToken: cancelToken,
-      );
+      final response = await remoteDataSource.readAllNotification(cancelToken: cancelToken);
       if (response == null) {
         return left(Failure('Failed to load country list'));
       }
@@ -103,10 +96,7 @@ class NotificationRepositoryImpl implements NotificationRepository {
         return left(Failure('No internet connection'));
       }
 
-      final response = await remoteDataSource.readById(
-        cancelToken: cancelToken,
-        id: id,
-      );
+      final response = await remoteDataSource.readById(cancelToken: cancelToken, id: id);
       if (response == null) {
         return left(Failure('Failed to load country list'));
       }
@@ -144,8 +134,7 @@ class NotificationRepositoryImpl implements NotificationRepository {
         return left(Failure('Failed to load country list'));
       }
 
-
-      return right(response.data);
+      return right(response);
     } on ServerException catch (e) {
       return left(Failure(e.message));
     } catch (e) {

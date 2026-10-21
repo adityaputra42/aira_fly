@@ -12,7 +12,7 @@ import 'package:pss_app/core/constants/images.dart';
 import 'package:pss_app/core/utils/size_extension.dart';
 import 'package:pss_app/features/auth/presentation/bloc/auth_bloc.dart';
 
-import '../../../../core/utils/show_snackbar.dart';
+import '../../../../core/utils/top_snackbar_helper.dart';
 import '../../../../core/utils/widget_helper.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -115,7 +115,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           context.loaderOverlay.hide();
                         }
                         if (state is AuthError) {
-                          showSnackBar(context, state.message);
+                          TopSnackbarHelper.error    (context,message:  state.message);
                         } else if (state is Authenticated) {
                           context.goNamed(RouteNames.main);
                         }

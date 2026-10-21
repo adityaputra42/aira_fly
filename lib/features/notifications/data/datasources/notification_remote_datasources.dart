@@ -18,7 +18,7 @@ abstract interface class NotificationRemoteDataSource {
   Future<ApiResponse?> getUnreadNotificationCount({CancelToken? cancelToken});
 }
 
-class NotificationRemoteDatasourcesImpl implements NotificationRemoteDataSource {
+class NotificationRemoteDataSourceImpl implements NotificationRemoteDataSource {
   final DioClient dio = DioClient();
 
   @override

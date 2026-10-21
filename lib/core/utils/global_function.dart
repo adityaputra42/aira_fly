@@ -27,4 +27,21 @@ class GlobalFunction {
     final bool isMultiline = textPainterFrom.didExceedMaxLines || textPainterTo.didExceedMaxLines;
     return isMultiline;
   }
+
+  String getInitialName(String? name) {
+    if (name == null || name.trim().isEmpty) {
+      return '?';
+    }
+
+    final words = name.trim().split(RegExp(r'\s+'));
+
+    if (words.length == 1) {
+      final word = words.first;
+      return word.length >= 2
+          ? word.substring(0, 2).toUpperCase()
+          : word.toUpperCase();
+    }
+
+    return '${words[0][0]}${words[1][0]}'.toUpperCase();
+  }
 }

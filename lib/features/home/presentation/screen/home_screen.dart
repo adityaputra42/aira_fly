@@ -7,6 +7,7 @@ import 'package:pss_app/core/utils/size_extension.dart';
 import 'package:pss_app/features/flight/presentation/bloc/seatClass/seat_class_bloc.dart';
 import 'package:pss_app/features/flight/presentation/bloc/flight/flight_bloc.dart';
 import 'package:pss_app/features/home/presentation/widget/header_home.dart';
+import 'package:pss_app/features/notifications/presentations/bloc/notification_bloc.dart';
 
 import '../../../../app/init_dependencies.dart';
 import '../../../../core/animation/stagger_in.dart';
@@ -19,6 +20,7 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
+        BlocProvider.value(value: serviceLocator<NotificationBloc>()..add(NotificationUnreadCountRequested())),
         BlocProvider.value(value: serviceLocator<FlightBloc>()),
         BlocProvider.value(
           value: serviceLocator<SeatClassBloc>()..add(LoadSeatClassesRequested(limit: 10)),

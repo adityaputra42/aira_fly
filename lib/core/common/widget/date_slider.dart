@@ -29,64 +29,68 @@ class DateSlider extends StatefulWidget {
   @override
   State<DateSlider> createState() => _DateSliderState();
 }
-
 class _DateSliderState extends State<DateSlider> {
   int _currentIndex = 0;
-  int _initialIndex = 0;
-
-  bool _isProgrammaticJump = false;
-
-  CarouselSliderController carouselController = CarouselSliderController();
+  final CarouselSliderController carouselController = CarouselSliderController();
   List<DateTime> dateList = [];
 
+  DateTime _dateOnly(DateTime d) => DateTime(d.year, d.month, d.day);
+
   List<DateTime> generateDateList() {
-    DateTime startDate = widget.startDate;
-    DateTime endDate = widget.endDate;
+    final today = _dateOnly(DateTime.now());
+    var startDate = _dateOnly(widget.startDate);
+    final endDate = _dateOnly(widget.endDate);
 
-    if (widget.startDate.isBefore(DateTime.now())) {
-      startDate = DateTime.now();
+    if (startDate.isBefore(today)) startDate = today;
+
+    final List<DateTime> list = [];
+    for (var date = startDate; !date.isAfter(endDate); date = DateTime(date.year, date.month, date.day + 1)) {
+      list.add(date);
     }
-
-    final List<DateTime> dateList = [];
-
-    for (
-      var date = startDate;
-      date.isSameDayOrBefore(endDate);
-      date = date.add(const Duration(days: 1))
-    ) {
-      dateList.add(date);
-    }
-
-    return dateList;
+    return list;
   }
+
+  int _indexOf(DateTime date) =>
+      dateList.indexWhere((e) => e.isSameDay(date));
 
   @override
   void initState() {
     super.initState();
     dateList = generateDateList();
-    _currentIndex = dateList.indexWhere((element) => element.isSameDay(widget.departureDate));
-    _initialIndex = dateList.indexWhere((element) => element.isSameDay(widget.departureDate));
+    final idx = _indexOf(widget.departureDate);
+    _currentIndex = idx < 0 ? 0 : idx;
   }
 
   @override
   void didUpdateWidget(DateSlider oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (widget.departureDate != oldWidget.departureDate) {
-      dateList = generateDateList();
-      final newIndex = dateList.indexWhere((element) => element.isSameDay(widget.departureDate));
-      _currentIndex = newIndex;
+    final rangeChanged = !oldWidget.startDate.isSameDay(widget.startDate) ||
+        !oldWidget.endDate.isSameDay(widget.endDate);
+    final dateChanged = !oldWidget.departureDate.isSameDay(widget.departureDate);
 
-      if (newIndex >= 0) {
-        _isProgrammaticJump = true;
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (!mounted) return;
-          carouselController.jumpToPage(newIndex);
-        });
-      }
+    if (!rangeChanged && !dateChanged) return;
 
+    if (rangeChanged) dateList = generateDateList();
+
+    final newIndex = _indexOf(widget.departureDate);
+    if (newIndex < 0) {
       setState(() {});
+      return;
     }
+
+    // Hanya jump kalau memang beda dengan posisi sekarang.
+    // _currentIndex di-set dulu supaya onPageChanged dari jump diabaikan.
+    final needJump = newIndex != _currentIndex || rangeChanged;
+    _currentIndex = newIndex;
+
+    if (needJump) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        carouselController.jumpToPage(newIndex);
+      });
+    }
+    setState(() {});
   }
 
   @override
@@ -98,48 +102,45 @@ class _DateSliderState extends State<DateSlider> {
           _DateNavigation(
             navigationType: _NavigationType.backward,
             onTap: () async {
-              if (widget.canUpdate) {
-                await carouselController.previousPage();
-              } else {}
+              if (widget.canUpdate) await carouselController.previousPage();
             },
           ),
           Expanded(
             child: CarouselSlider.builder(
+              // key supaya carousel di-rebuild bersih kalau range tanggal berubah
+              key: ValueKey('${dateList.length}_${dateList.isEmpty ? 0 : dateList.first.millisecondsSinceEpoch}'),
               itemCount: dateList.length,
               carouselController: carouselController,
               options: CarouselOptions(
                 height: 48,
                 aspectRatio: 7,
-                initialPage: _initialIndex,
+                initialPage: _currentIndex,
                 viewportFraction: .26,
                 reverse: false,
                 autoPlay: false,
                 disableCenter: true,
                 enlargeCenterPage: false,
                 enableInfiniteScroll: false,
+                scrollPhysics: widget.canUpdate
+                    ? null
+                    : const NeverScrollableScrollPhysics(),
                 onPageChanged: (index, reason) {
-                  if (widget.canUpdate) {
-                    _currentIndex = index;
-                    setState(() {});
+                  if (!widget.canUpdate) return;
+                  if (index < 0 || index >= dateList.length) return;
 
-                    if (_isProgrammaticJump) {
-                      _isProgrammaticJump = false;
-                      return;
-                    }
+                  // Sama dengan posisi saat ini = bukan aksi user
+                  // (mis. hasil jumpToPage dari parent), abaikan.
+                  if (index == _currentIndex) return;
 
-                    widget.onPageChange(index, dateList[index]);
-                  } else {}
+                  setState(() => _currentIndex = index);
+                  widget.onPageChange(index, dateList[index]);
                 },
               ),
-              itemBuilder: (BuildContext context, int itemIndex, int pageViewIndex) {
-                bool isActive = itemIndex == _currentIndex;
-
+              itemBuilder: (context, itemIndex, pageViewIndex) {
                 return _DateItem(
                   date: DateFormat('dd MMM').format(dateList[itemIndex]),
-                  isActive: isActive,
-                  onTap: () {
-                    carouselController.animateToPage(pageViewIndex);
-                  },
+                  isActive: itemIndex == _currentIndex,
+                  onTap: () => carouselController.animateToPage(itemIndex),
                 );
               },
             ),
@@ -147,9 +148,7 @@ class _DateSliderState extends State<DateSlider> {
           _DateNavigation(
             navigationType: _NavigationType.forward,
             onTap: () async {
-              if (widget.canUpdate) {
-                await carouselController.nextPage();
-              } else {}
+              if (widget.canUpdate) await carouselController.nextPage();
             },
           ),
         ],
@@ -204,9 +203,18 @@ class _DateNavigation extends StatefulWidget {
 
 class _DateNavigationState extends State<_DateNavigation> {
   final double paddingSize = 3;
-
   Timer? timer;
 
+  void _stopTimer() {
+    timer?.cancel();
+    timer = null;
+  }
+
+  @override
+  void dispose() {
+    _stopTimer();
+    super.dispose();
+  }
   @override
   Widget build(BuildContext context) {
     IconData icon = Icons.keyboard_arrow_left_rounded;

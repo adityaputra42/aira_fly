@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -186,6 +187,8 @@ class _FlightSelectingScreenState extends State<FlightSelectingScreen> {
         _firstLoading = true; // skeleton sampai response datang
       });
     }
+
+    log("Date new ==> $newDate");
 
     if (newDate != null) {
       setState(() {

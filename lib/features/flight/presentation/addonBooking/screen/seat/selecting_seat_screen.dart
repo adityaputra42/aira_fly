@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-
 import 'package:pss_app/app/theme/theme.dart';
 import 'package:pss_app/core/common/widget/card_general.dart';
 import 'package:pss_app/core/common/widget/empty.dart';
 import 'package:pss_app/core/common/widget/primary_button.dart';
 import 'package:pss_app/core/common/widget/selectable_box.dart';
 import 'package:pss_app/core/common/widget/shimmer_loading.dart';
-import 'package:pss_app/core/utils/show_snackbar.dart';
 import 'package:pss_app/core/utils/size_extension.dart';
 import 'package:pss_app/core/utils/widget_helper.dart';
 import 'package:pss_app/features/flight/domain/entities/flight_seat_entity.dart';
@@ -17,6 +15,7 @@ import 'package:pss_app/features/flight/presentation/addonBooking/widget/custom_
 import 'package:pss_app/features/flight/presentation/bloc/flight/flight_bloc.dart';
 
 import '../../../../../../app/init_dependencies.dart';
+import '../../../../../../core/utils/top_snackbar_helper.dart';
 
 class SelectingSeatScreen extends StatefulWidget {
   const SelectingSeatScreen({super.key, required this.arguments});
@@ -67,9 +66,9 @@ class _SelectingSeatScreenState extends State<SelectingSeatScreen> {
     }
 
     if (heldByOther != null) {
-      showSnackBar(
+      TopSnackbarHelper.info(
         context,
-        'That seat is already assigned to '
+        message: 'That seat is already assigned to '
         '${_passengerLabel(heldByOther.key)}.',
       );
 

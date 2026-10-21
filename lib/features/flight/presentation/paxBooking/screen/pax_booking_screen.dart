@@ -6,18 +6,18 @@ import 'package:iconify_flutter_plus/icons/mdi.dart';
 import 'package:pss_app/core/common/widget/card_general.dart';
 import 'package:pss_app/core/common/widget/input_text.dart';
 import 'package:pss_app/core/utils/show_dialog_zoom.dart';
-import 'package:pss_app/core/utils/show_snackbar.dart';
 import 'package:pss_app/features/flight/domain/repository/booking_repository.dart';
 import 'package:pss_app/features/flight/presentation/flightResult/screen/flight_result_screen.dart';
 import 'package:pss_app/features/flight/presentation/paxBooking/widget/contact_information_dialog.dart';
 import 'package:pss_app/features/flight/presentation/paxBooking/widget/passenger_information_dialog.dart';
 import 'package:pss_app/features/flight/presentation/utils/flight_display_utils.dart';
 
-import '../../../../../core/common/widget/primary_button.dart';
 import '../../../../../app/routes/route_names.dart';
 import '../../../../../app/theme/theme.dart';
+import '../../../../../core/common/widget/primary_button.dart';
 import '../../../../../core/utils/dashed_divider.dart';
 import '../../../../../core/utils/size_extension.dart';
+import '../../../../../core/utils/top_snackbar_helper.dart';
 import '../../../../../core/utils/widget_helper.dart';
 
 part "../widget/appbar_pax_booking.dart";
@@ -102,7 +102,8 @@ class _PaxBookingScreenState extends State<PaxBookingScreen> {
 
   void _onContinue() {
     if (!_isComplete) {
-      showSnackBar(context, 'Please fill in contact and all passenger details first.');
+      TopSnackbarHelper.info(context,
+          message: 'Please fill in contact and all passenger details first.');
       return;
     }
 

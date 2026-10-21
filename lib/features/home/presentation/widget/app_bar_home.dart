@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:pss_app/app/routes/route_names.dart';
 import 'package:pss_app/core/common/cubit/user_cubit.dart';
+import 'package:pss_app/features/notifications/presentations/bloc/notification_bloc.dart';
 
 import '../../../../app/theme/app_color.dart';
 import '../../../../app/theme/app_font.dart';
@@ -43,13 +46,48 @@ class AppBarHome extends StatelessWidget {
               },
             ),
           ),
-          Container(
-            padding: EdgeInsets.all(4),
-            decoration: BoxDecoration(
-              color: AppColor.cardLight.withValues(alpha: .25),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(Icons.notifications, size: 20, color: AppColor.cardLight),
+          BlocBuilder<NotificationBloc, NotificationState>(
+              builder: (context, state) {
+                int count = 0;
+                if (state.status == NotificationStatus.success) {
+                  count = state.unreadCount;
+                }
+                return SizedBox(width: 40, height: 40,
+                  child: Stack(
+                    children: [
+                      InkWell(onTap: () {
+                        context.goNamed(RouteNames.notifications);
+                      },
+                          child: Align(alignment: Alignment.bottomRight,
+                            child:Container(
+                                padding: EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color:AppColor.cardLight.withValues(
+                                      alpha: .25),
+                                  shape: BoxShape.circle,
+                                ),
+
+                                child: Icon(Icons.notifications, size: 20,
+                                    color: AppColor.cardLight)),
+                          )
+                      ), Visibility(visible: count > 0,
+                        child: Align(alignment: Alignment.topLeft,
+
+                          child: Container(
+                            padding: EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              color: AppColor.redColor,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Text(count.toString(), style: AppFont.medium12
+                                .copyWith(color: AppColor.darkText1),),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }
           ),
         ],
       ),

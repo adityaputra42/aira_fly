@@ -515,6 +515,8 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                               setState(() => _paymentMethod = "DOKU_VA");
                             },
                             child: CardGeneral(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 8),
                               background: _paymentMethod == "DOKU_VA"
                                   ? AppColor.secondaryColor.withValues(alpha: 0.25)
                                   : Theme.of(context).colorScheme.surface,
@@ -529,7 +531,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                                   Icon(
                                     Icons.credit_card_rounded,
                                     size: 24,
-                                    color: AppColor.primaryColor,
+                                    color: AppColor.secondaryColor,
                                   ),
                                   Expanded(
                                     child: Column(
@@ -545,6 +547,13 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                                       ],
                                     ),
                                   ),
+                                  Icon(_paymentMethod == "DOKU_VA" ? Icons
+                                      .radio_button_checked : Icons
+                                      .radio_button_unchecked, size: 20,
+                                      color: _paymentMethod == "DOKU_VA"
+                                          ? AppColor.greenColor : Theme
+                                          .of(context)
+                                          .hintColor)
                                 ],
                               ),
                             ),
@@ -553,7 +562,8 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                             onTap: () {
                               setState(() => _paymentMethod = "BALANCE");
                             },
-                            child: CardGeneral(
+                            child: CardGeneral(padding: EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 8),
                               background: _paymentMethod == "BALANCE"
                                   ? AppColor.secondaryColor.withValues(alpha: 0.25)
                                   : Theme.of(context).colorScheme.surface,
@@ -568,7 +578,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                                   Icon(
                                     Icons.wallet_rounded,
                                     size: 24,
-                                    color: AppColor.primaryColor,
+                                    color: AppColor.secondaryColor,
                                   ),
                                   Expanded(
                                     child: Column(
@@ -584,6 +594,13 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                                       ],
                                     ),
                                   ),
+                                  Icon(_paymentMethod == "BALANCE" ? Icons
+                                      .radio_button_checked : Icons
+                                      .radio_button_unchecked, size: 20,
+                                      color: _paymentMethod == "BALANCE"
+                                          ? AppColor.greenColor : Theme
+                                          .of(context)
+                                          .hintColor)
                                 ],
                               ),
                             ),

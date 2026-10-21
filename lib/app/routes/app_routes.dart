@@ -17,6 +17,7 @@ import '../../features/flight/presentation/addonBooking/utils/addon_models.dart'
 import '../../features/flight/presentation/flightResult/screen/flight_result_screen.dart';
 import '../../features/flight/presentation/paxBooking/screen/pax_booking_screen.dart';
 import '../../features/main/ui/screen/main_screen.dart';
+import '../../features/notifications/presentations/screen/notification_screen.dart';
 import '../../features/splash/ui/splash_screen.dart';
 import '../../features/auth/presentation/screen/sign_in_screen.dart';
 import '../../features/auth/presentation/screen/sign_up_screen.dart';
@@ -94,6 +95,11 @@ class AppRouter {
                 transition: PageTransitionType.fadeScale,
               );
             },
+          ),
+          GoRoute(
+            path: '/notifications',
+            name: RouteNames.notifications,
+            builder: (context, state) => NotificationScreen(onItemTap: (context, item) {}),
           ),
           GoRoute(
             path: RouteNames.searchAirport,

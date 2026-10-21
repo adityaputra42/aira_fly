@@ -8,12 +8,13 @@ import 'package:pss_app/core/common/widget/card_general.dart';
 import 'package:pss_app/core/common/widget/dropdown_custom.dart';
 import 'package:pss_app/core/common/widget/input_text.dart';
 import 'package:pss_app/core/common/widget/primary_button.dart';
-import 'package:pss_app/core/utils/show_snackbar.dart';
 import 'package:pss_app/core/utils/size_extension.dart';
 import 'package:pss_app/features/flight/domain/repository/booking_repository.dart';
 import 'package:pss_app/features/master/domain/entities/country_code_entity.dart';
 import 'package:pss_app/features/master/domain/usecases/list_country_codes.dart';
 import 'package:pss_app/features/master/presentation/widget/country_search_dialog.dart';
+
+import '../../../../../core/utils/top_snackbar_helper.dart';
 
 class PassengerInformationDialog extends StatefulWidget {
   const PassengerInformationDialog({
@@ -138,9 +139,11 @@ class _PassengerInformationDialogState extends State<PassengerInformationDialog>
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
     if (_birthDateRequired && _birthDate == null) {
-      showSnackBar(
+      TopSnackbarHelper.info(
         context,
-        'Birth date is required for ${widget.passengerType == 'CHD' ? 'child' : 'infant'} passengers.',
+        message: 'Birth date is required for ${widget.passengerType == 'CHD'
+            ? 'child'
+            : 'infant'} passengers.',
       );
       return;
     }

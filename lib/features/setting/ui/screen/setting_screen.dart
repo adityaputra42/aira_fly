@@ -7,11 +7,12 @@ import 'package:iconify_flutter_plus/icons/material_symbols.dart';
 import 'package:iconify_flutter_plus/icons/mdi.dart';
 import 'package:pss_app/app/init_dependencies.dart';
 import 'package:pss_app/app/routes/route_names.dart';
+import 'package:pss_app/app/theme/theme.dart';
 import 'package:pss_app/core/common/cubit/theme_cubit.dart';
 import 'package:pss_app/core/common/cubit/user_cubit.dart';
 import 'package:pss_app/core/common/entities/user.dart';
 import 'package:pss_app/core/common/widget/card_general.dart';
-import 'package:pss_app/app/theme/theme.dart';
+import 'package:pss_app/core/utils/global_function.dart';
 import 'package:pss_app/features/auth/presentation/bloc/auth_bloc.dart';
 
 import '../../../../core/utils/size_extension.dart';
@@ -62,6 +63,12 @@ class SettingScreen extends StatelessWidget {
                                   shape: BoxShape.circle,
                                   color: AppColor.cardLight,
                                 ),
+                                child: Center(child: Text(
+                                  GlobalFunction().getInitialName(isLogin
+                                      ? (user.fullName ?? "")
+                                      : "Guest User"),
+                                  style: AppFont.bold24.copyWith(
+                                      color: Theme.of(context).hintColor, fontSize: 36),)),
                               ),
                             ),
                             height(12),

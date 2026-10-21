@@ -61,7 +61,6 @@ class NotificationHelper {
     FutureOr<void> Function(String token)? onTokenChanged,
   }) {
     if (_isInitialized) return Future.value();
-    // Concurrent callers share one in-flight init instead of racing.
     return _initFuture ??= _initialize(
       channelId: channelId,
       channelName: channelName,

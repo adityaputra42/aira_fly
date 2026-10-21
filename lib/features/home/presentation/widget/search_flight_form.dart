@@ -5,7 +5,6 @@ import 'package:iconify_flutter_plus/iconify_flutter_plus.dart';
 import 'package:iconify_flutter_plus/icons/mdi.dart';
 import 'package:pss_app/app/routes/route_names.dart';
 import 'package:pss_app/core/utils/show_dialog_zoom.dart';
-import 'package:pss_app/core/utils/show_snackbar.dart';
 import 'package:pss_app/core/utils/size_extension.dart';
 import 'package:pss_app/features/flight/domain/entities/airport_entity.dart';
 import 'package:pss_app/features/flight/domain/entities/seat_class_entity.dart';
@@ -20,6 +19,7 @@ import '../../../../core/common/widget/card_general.dart';
 import '../../../../core/common/widget/input_text.dart';
 import '../../../../core/common/widget/primary_button.dart';
 import '../../../../core/utils/date_extension.dart';
+import '../../../../core/utils/top_snackbar_helper.dart';
 import 'date_picker_screen.dart';
 
 class SearchFlightForm extends StatefulWidget {
@@ -180,19 +180,19 @@ class _SearchFlightFormState extends State<SearchFlightForm> {
 
   void onSearchFlight() {
     if (departureAirport == null || arrivalAirport == null) {
-      showSnackBar(context, 'Please select both departure and arrival airports.');
+      TopSnackbarHelper.info(context, message: 'Please select both departure and arrival airports.');
       return;
     }
     if (departureAirport!.id == arrivalAirport!.id) {
-      showSnackBar(context, 'Departure and arrival airports cannot be the same.');
+      TopSnackbarHelper.info(context,  message:'Departure and arrival airports cannot be the same.');
       return;
     }
     if (isReturn && returnDate == null) {
-      showSnackBar(context, 'Please select a return date.');
+      TopSnackbarHelper.info(context,  message:'Please select a return date.');
       return;
     }
     if (amountAdult < 1) {
-      showSnackBar(context, 'At least one adult passenger is required.');
+      TopSnackbarHelper.info(context, message: 'At least one adult passenger is required.');
       return;
     }
 
