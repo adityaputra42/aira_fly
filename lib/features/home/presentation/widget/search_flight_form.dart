@@ -36,6 +36,7 @@ class _SearchFlightFormState extends State<SearchFlightForm> {
   int amountAdult = 1;
   int amountChild = 0;
   int amountInfant = 0;
+  bool isDisable = true;
 
   late DateTime departureDate;
   DateTime? returnDate;
@@ -60,6 +61,7 @@ class _SearchFlightFormState extends State<SearchFlightForm> {
       selectedTab = index;
       isReturn = index == 1;
     });
+    validateDisable();
   }
 
   Future<void> onSelectDate() async {
@@ -101,6 +103,7 @@ class _SearchFlightFormState extends State<SearchFlightForm> {
         returnDateTextController.clear();
       }
     });
+    validateDisable();
   }
 
   void onChangeTotalPassenger(List<int>? value) {
@@ -127,7 +130,7 @@ class _SearchFlightFormState extends State<SearchFlightForm> {
   void onChangeSeatClass(SeatClassEntity? value) {
     if (value == null) return;
     seatClass = value;
-    classTextController.text = value.name ?? '';
+    classTextController.text = value.name??"";
   }
 
   Future<void> onSelectPax() async {
@@ -143,6 +146,7 @@ class _SearchFlightFormState extends State<SearchFlightForm> {
 
     if (!mounted) return;
     setState(() => onChangeTotalPassenger(result));
+    validateDisable();
   }
 
   Future<void> onSelectClass() async {
@@ -154,6 +158,7 @@ class _SearchFlightFormState extends State<SearchFlightForm> {
 
     if (!mounted) return;
     setState(() => onChangeSeatClass(result));
+    validateDisable();
   }
 
   Future<void> onSelectAirport({required bool isDeparture}) async {
@@ -175,6 +180,20 @@ class _SearchFlightFormState extends State<SearchFlightForm> {
         arrivalAirport = result;
         arrivalTextController.text = label;
       }
+    });
+    validateDisable();
+  }
+
+
+  void validateDisable() {
+    final isValid = departureAirport != null &&
+        arrivalAirport != null &&
+        (isReturn == false || returnDate != null) &&
+        amountAdult > 0 &&
+        seatClass != null;
+
+    setState(() {
+      isDisable = !isValid;
     });
   }
 
@@ -251,6 +270,9 @@ class _SearchFlightFormState extends State<SearchFlightForm> {
       departureDate = DateTime.now();
       departureDateTextController.text = departureDate.toFormattedString(shortDDMMY);
       paxTextController.text = "$amountAdult Adult";
+      seatClass = SeatClassEntity(name: "All Class", code: "ALL");
+      classTextController.text =
+          classTextController.text = seatClass?.name??'';
     }
   }
 
@@ -380,7 +402,7 @@ class _SearchFlightFormState extends State<SearchFlightForm> {
             ],
           ),
           widget.height(24),
-          PrimaryButton(title: "Search Flight", onPressed: onSearchFlight),
+          PrimaryButton(disable: isDisable, title: "Search Flight", onPressed: onSearchFlight),
         ],
       ),
     );

@@ -5,7 +5,7 @@ class Endpoint {
   static const getUser = "auth/me";
   static const updateUser = "auth/me";
   static const refreshToken = "auth/refresh-token";
-  static const register = "auth/register";
+  static const register = "auth/signup";
   static const resetPassword = "auth/reset-password";
 
   // ===== Ancillaries ===== //

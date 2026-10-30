@@ -5,7 +5,6 @@ import '../../../../../core/usecase/usecase.dart';
 import '../../entities/pnr_entity.dart';
 import '../../repository/booking_repository.dart';
 
-/// NOTE: backed by an admin-only endpoint (`booking:pnr:view` permission).
 class GetPnr implements UseCase<PnrDetailEntity, GetPnrParams> {
   final BookingRepository bookingRepository;
 

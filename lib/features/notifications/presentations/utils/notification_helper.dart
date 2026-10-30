@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
@@ -270,6 +272,7 @@ class NotificationHelper {
       log('Error showing custom notification: $e');
     }
   }
+
   void _onDidReceiveNotificationResponse(NotificationResponse response) {
     log('Local notification tapped: ${response.payload}');
     final data = _decodePayload(response.payload);

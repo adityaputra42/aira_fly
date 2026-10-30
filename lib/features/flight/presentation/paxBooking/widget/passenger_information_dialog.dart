@@ -80,14 +80,7 @@ class _PassengerInformationDialogState extends State<PassengerInformationDialog>
     result.fold((failure) => setState(() => _countriesError = failure.message), (countries) {
       setState(() {
         _countries = countries;
-        // A previously-saved nationality that isn't one of the codes we
-        // just got back (e.g. old free-text data like "Indonesia" from
-        // before this was wired to the country list, or a country
-        // dropped from the reference table) would silently render as a
-        // blank field with no way to tell "unset" apart from "set to
-        // something we can no longer display". Clear it so the person
-        // re-picks explicitly rather than unknowingly resubmitting a
-        // stale, unverifiable value.
+
         if (_nationality != null && !countries.any((c) => c.alpha3 == _nationality)) {
           _nationality = null;
         }

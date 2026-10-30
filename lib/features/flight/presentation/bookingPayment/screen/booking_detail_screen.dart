@@ -1,7 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'dart:math' as math;
-
+import 'dart:async';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -30,6 +30,7 @@ import 'package:pss_app/features/flight/presentation/utils/flight_display_utils.
 
 import '../../../../../app/init_dependencies.dart';
 import '../../../../../app/routes/route_names.dart';
+import '../../../../../core/utils/top_snackbar_helper.dart';
 import '../../flightResult/screen/flight_result_screen.dart';
 
 part '../widget/card_ticket_booking_detail.dart';
@@ -94,112 +95,117 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
     return parts.whereType<String>().join(' ');
   }
 
+  static const _blocTimeout = Duration(seconds: 60);
+
+  void _fail(String message) {
+    if (!mounted) return;
+    context.loaderOverlay.hide();
+    setState(() => _step = _Step.review);
+    TopSnackbarHelper.error(context, message: message);
+  }
+
   Future<void> _confirmAndPay() async {
+    if (_step == _Step.processing) return; // cegah double tap
+
     context.loaderOverlay.show();
     setState(() {
       _step = _Step.processing;
-
       _errorMessage = null;
     });
 
-    var pnr = _pnr;
+    try {
+      var pnr = _pnr;
 
-    if (pnr == null) {
-      setState(() => processingMessage = "Creating your booking...");
+      if (pnr == null) {
+        setState(() => processingMessage = "Creating your booking...");
 
-      final departureFare = _search.departureFare;
-      final returnFare = _search.returnFare;
+        final departureFare = _search.departureFare;
+        final returnFare = _search.returnFare;
 
-      if (departureFare.fareClassId == null ||
-          (_search.isRoundTrip && returnFare?.fareClassId == null)) {
-        setState(() {
-          _step = _Step.error;
-          _errorMessage =
-              "This itinerary has no available fare class to book. Please search again.";
-        });
-        return;
-      }
+        if (departureFare.fareClassId == null ||
+            (_search.isRoundTrip && returnFare?.fareClassId == null)) {
+          _fail("This itinerary has no available fare class to book. Please search again.");
+          return;
+        }
 
-      final segments = <BookingSegmentInput>[
-        for (final s in _search.departure.segments ?? const [])
-          if (s.flightId != null)
-            BookingSegmentInput(flightId: s.flightId!, fareClassId: departureFare.fareClassId!),
-        if (_search.returnItinerary != null)
-          for (final s in _search.returnItinerary!.segments ?? const [])
+        final segments = <BookingSegmentInput>[
+          for (final s in _search.departure.segments ?? const [])
             if (s.flightId != null)
-              BookingSegmentInput(flightId: s.flightId!, fareClassId: returnFare!.fareClassId!),
-      ];
+              BookingSegmentInput(flightId: s.flightId!, fareClassId: departureFare.fareClassId!),
+          if (_search.returnItinerary != null)
+            for (final s in _search.returnItinerary!.segments ?? const [])
+              if (s.flightId != null)
+                BookingSegmentInput(flightId: s.flightId!, fareClassId: returnFare!.fareClassId!),
+        ];
 
-      final allSegments = _allSegments;
-      final seatSelections = <SeatSelectionInput>[
-        for (final selected in widget.result.seats)
-          if (() {
-            final idx = allSegments.indexWhere((s) => s.flightId == selected.flightId);
-            return idx != -1;
-          }())
+        final allSegments = _allSegments;
+        final seatSelections = <SeatSelectionInput>[];
+        for (final selected in widget.result.seats) {
+          final idx = allSegments.indexWhere((s) => s.flightId == selected.flightId);
+          if (idx == -1 || selected.seat.id == null) continue;
+          seatSelections.add(
             SeatSelectionInput(
               passengerIndex: selected.passengerIndex,
-              segmentIndex: allSegments.indexWhere((s) => s.flightId == selected.flightId),
+              segmentIndex: idx,
               flightSeatId: selected.seat.id!,
             ),
-      ];
+          );
+        }
 
-      _bookingBloc.add(
-        CreatePnrRequested(
-          contact: _contact,
-          passengers: _passengers,
-          segments: segments,
-          seatSelections: seatSelections,
-        ),
-      );
+        _bookingBloc.add(
+          CreatePnrRequested(
+            contact: _contact,
+            passengers: _passengers,
+            segments: segments,
+            seatSelections: seatSelections,
+          ),
+        );
 
-      final bookingResult = await _bookingBloc.stream.firstWhere(
-        (s) => s is PnrCreated || s is BookingError,
-      );
+        final bookingResult = await _bookingBloc.stream
+            .firstWhere((s) => s is PnrCreated || s is BookingError)
+            .timeout(_blocTimeout);
+
+        if (!mounted) return;
+
+        if (bookingResult is BookingError) {
+          _fail(bookingResult.message);
+          return;
+        }
+
+        pnr = (bookingResult as PnrCreated).pnr;
+        setState(() => _pnr = pnr);
+
+        await _purchaseAncillaries(pnr);
+        if (!mounted) return;
+      }
+
+      setState(() => processingMessage = "Processing payment...");
+
+      _paymentBloc.add(CreatePaymentRequested(pnrId: pnr.id!, paymentMethod: _paymentMethod));
+
+      final result = await _paymentBloc.stream
+          .firstWhere((s) => s is PaymentCreated || s is PaymentError)
+          .timeout(_blocTimeout);
 
       if (!mounted) return;
 
-      if (bookingResult is BookingError) {
-        context.loaderOverlay.hide();
-        setState(() {
-          _step = _Step.review;
-          _errorMessage = bookingResult.message;
-        });
+      if (result is PaymentError) {
+        _fail(result.message);
         return;
       }
 
-      pnr = (bookingResult as PnrCreated).pnr;
-      setState(() => _pnr = pnr);
-
-      await _purchaseAncillaries(pnr);
-      if (!mounted) return;
-    }
-
-    setState(() => processingMessage = "Processing payment...");
-
-    _paymentBloc.add(CreatePaymentRequested(pnrId: pnr.id!, paymentMethod: _paymentMethod));
-
-    final result = await _paymentBloc.stream.firstWhere(
-      (s) => s is PaymentCreated || s is PaymentError,
-    );
-
-    if (!mounted) return;
-
-    if (result is PaymentError) {
-      context.loaderOverlay.hide();
       setState(() {
-        _step = _Step.review;
-        _errorMessage = result.message;
+        _payment = (result as PaymentCreated).payment;
+        if (_payment?.pnr != null) _pnr = _payment!.pnr;
+        _step = _Step.done;
       });
-      return;
+    } on TimeoutException {
+      _fail("The server took too long to respond. Please try again.");
+    } catch (e) {
+      _fail("Something went wrong. Please try again.");
+    } finally {
+      if (mounted) context.loaderOverlay.hide();
     }
-
-    setState(() {
-      _payment = (result as PaymentCreated).payment;
-      if (_payment?.pnr != null) _pnr = _payment!.pnr;
-      context.loaderOverlay.hide();
-      _step = _Step.done;
-    });
   }
 
   Future<void> _purchaseAncillaries(PnrDetailEntity pnr) async {
@@ -231,17 +237,21 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
         ),
       );
 
-      final result = await _ancillaryBloc.stream.firstWhere(
-        (s) => s is AncillaryPurchased || s is AncillaryError,
-      );
+      final name = selection.item.name ?? 'Item';
 
-      if (result is AncillaryError) {
-        _ancillaryFailures.add("${selection.item.name ?? 'Item'}: ${result.message}");
-        context.loaderOverlay.hide();
+      try {
+        final result = await _ancillaryBloc.stream
+            .firstWhere((s) => s is AncillaryPurchased || s is AncillaryError)
+            .timeout(_blocTimeout);
+
+        if (result is AncillaryError) {
+          _ancillaryFailures.add("$name: ${result.message}");
+        }
+      } on TimeoutException {
+        _ancillaryFailures.add("$name: request timed out");
       }
     }
   }
-
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
@@ -422,7 +432,6 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                           ],
                         ),
                       ),
-                    // Booking Detail -- real flight/segment data per leg.
                     CarouselTicket(legs: _buildLegs()),
                     widget.height(4),
                     Padding(
@@ -558,73 +567,59 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                               ),
                             ),
                           ),
-                          InkWell(
-                            onTap: () {
-                              setState(() => _paymentMethod = "BALANCE");
-                            },
-                            child: CardGeneral(padding: EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 8),
-                              background: _paymentMethod == "BALANCE"
-                                  ? AppColor.secondaryColor.withValues(alpha: 0.25)
-                                  : Theme.of(context).colorScheme.surface,
-                              margin: EdgeInsets.zero,
-                              useShadow: false,
-                              border: _paymentMethod == "BALANCE"
-                                  ? Border.all(width: 1, color: AppColor.secondaryColor)
-                                  : null,
-                              child: Row(
-                                spacing: 16,
-                                children: [
-                                  Icon(
-                                    Icons.wallet_rounded,
-                                    size: 24,
-                                    color: AppColor.secondaryColor,
-                                  ),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                          Visibility(visible: isLoggedIn,
+                                child: InkWell(
+                                  onTap: () {
+                                    setState(() => _paymentMethod = "BALANCE");
+                                  },
+                                  child: CardGeneral(padding: EdgeInsets.symmetric(
+                                      horizontal: 16, vertical: 8),
+                                    background: _paymentMethod == "BALANCE"
+                                        ? AppColor.secondaryColor.withValues(alpha: 0.25)
+                                        : Theme.of(context).colorScheme.surface,
+                                    margin: EdgeInsets.zero,
+                                    useShadow: false,
+                                    border: _paymentMethod == "BALANCE"
+                                        ? Border.all(width: 1, color: AppColor.secondaryColor)
+                                        : null,
+                                    child: Row(
+                                      spacing: 16,
                                       children: [
-                                        Text("Wallet Balance", style: AppFont.medium14),
-                                        Text(
-                                          "Virtual Account",
-                                          style: AppFont.reguler12.copyWith(
-                                            color: Theme.of(context).hintColor,
+                                        Icon(
+                                          Icons.wallet_rounded,
+                                          size: 24,
+                                          color: AppColor.secondaryColor,
+                                        ),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text("Wallet Balance", style: AppFont.medium14),
+                                              Text(
+                                                "Virtual Account",
+                                                style: AppFont.reguler12.copyWith(
+                                                  color: Theme.of(context).hintColor,
+                                                ),
+                                              ),
+                                            ],
                                           ),
                                         ),
+                                        Icon(_paymentMethod == "BALANCE" ? Icons
+                                            .radio_button_checked : Icons
+                                            .radio_button_unchecked, size: 20,
+                                            color: _paymentMethod == "BALANCE"
+                                                ? AppColor.greenColor : Theme
+                                                .of(context)
+                                                .hintColor)
                                       ],
                                     ),
                                   ),
-                                  Icon(_paymentMethod == "BALANCE" ? Icons
-                                      .radio_button_checked : Icons
-                                      .radio_button_unchecked, size: 20,
-                                      color: _paymentMethod == "BALANCE"
-                                          ? AppColor.greenColor : Theme
-                                          .of(context)
-                                          .hintColor)
-                                ],
-                              ),
-                            ),
+                                ),
+
                           ),
                         ],
                       ),
-                      // child: DropDownCustom(
-                      //   filled: true,
-                      //   filledColor: Theme.of(context).colorScheme.surface,
-                      //   hint: "Select payment method",
-                      //   value: _paymentMethod,
-                      //   onChange: (value) => setState(() => _paymentMethod = value as String),
-                      //   listData: [
-                      //     DropdownItem<String>(
-                      //       value: 'DOKU_VA',
-                      //       child: Text("Virtual Account (DOKU)", style: AppFont.reguler12),
-                      //     ),
-                      //     if (isLoggedIn)
-                      //       DropdownItem<String>(
-                      //         value: 'BALANCE',
-                      //         child: Text("Wallet Balance", style: AppFont.reguler12),
-                      //       ),
-                      //   ],
-                      // ),
+
                     ),
                     if (!isLoggedIn) ...[
                       widget.height(4),
@@ -646,7 +641,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
               buttonLabel: isRetryingPayment ? "Retry Payment" : "Confirm & Pay",
               onPressed: () {
                 if (_paymentMethod == 'BALANCE' && !isLoggedIn) {
-                  setState(() => _errorMessage = "Sign in to pay with your wallet balance.");
+                  TopSnackbarHelper.error(context, message: "Sign in to pay with your wallet balance.");
                   return;
                 }
                 _confirmAndPay();
@@ -658,21 +653,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
     );
   }
 
-  // Widget _buildProcessing(BuildContext context) {
-  //   return Center(
-  //     child: Column(
-  //       mainAxisSize: MainAxisSize.min,
-  //       children: [
-  //         const CircularProgressIndicator(color: AppColor.primaryColor),
-  //         widget.height(16),
-  //         Text(
-  //           _processingMessage ?? "Please wait...",
-  //           style: AppFont.reguler14.copyWith(color: Theme.of(context).hintColor),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
+
 
   Widget _buildDone(BuildContext context) {
     final payment = _payment?.payment;
@@ -745,9 +726,14 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
               textAlign: TextAlign.center,
             ),
             widget.height(24),
+
             PrimaryButton(
               title: "Try Again",
-              onPressed: () => setState(() => _step = _Step.review),
+              onPressed: () =>
+                  setState(() {
+                    _step = _Step.review;
+                    _errorMessage = null;
+                  }),
             ),
           ],
         ),

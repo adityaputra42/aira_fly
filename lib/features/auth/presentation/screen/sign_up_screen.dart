@@ -117,7 +117,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         if (state is AuthError) {
                           TopSnackbarHelper.error    (context,message:  state.message);
                         } else if (state is Authenticated) {
-                          context.goNamed(RouteNames.main);
+                          context.goNamed(RouteNames.successSignUp);
                         }
                       },
                       builder: (context, state) {

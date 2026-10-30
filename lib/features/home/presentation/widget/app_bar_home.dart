@@ -46,46 +46,58 @@ class AppBarHome extends StatelessWidget {
               },
             ),
           ),
-          BlocBuilder<NotificationBloc, NotificationState>(
-              builder: (context, state) {
-                int count = 0;
-                if (state.status == NotificationStatus.success) {
-                  count = state.unreadCount;
-                }
-                return SizedBox(width: 40, height: 40,
-                  child: Stack(
-                    children: [
-                      InkWell(onTap: () {
-                        context.goNamed(RouteNames.notifications);
-                      },
-                          child: Align(alignment: Alignment.bottomRight,
-                            child:Container(
-                                padding: EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color:AppColor.cardLight.withValues(
-                                      alpha: .25),
-                                  shape: BoxShape.circle,
+          BlocSelector<UserCubit, UserState, bool>(
+              selector: (state) {
+                return state is UserLoggedIn;
+              },
+              builder: (ctx, isLoggedIn) {
+                return BlocBuilder<NotificationBloc, NotificationState>(
+                    builder: (context, state) {
+                      int count = 0;
+                      if (state.status == NotificationStatus.success) {
+                        count = state.unreadCount;
+                      }
+                      return SizedBox(width: 40, height: 40,
+                        child: Stack(
+                          children: [
+                            InkWell(onTap: () {
+                              if (!isLoggedIn) {
+                                ctx.goNamed(RouteNames.signin);
+                              } else {
+                                context.goNamed(RouteNames.notifications);
+                              }
+                            },
+                                child: Align(alignment: Alignment.bottomRight,
+                                  child: Container(
+                                      padding: EdgeInsets.all(8),
+                                      decoration: BoxDecoration(
+                                        color: AppColor.cardLight.withValues(
+                                            alpha: .25),
+                                        shape: BoxShape.circle,
+                                      ),
+
+                                      child: Icon(Icons.notifications, size: 20,
+                                          color: AppColor.cardLight)),
+                                )
+                            ), Visibility(visible: count > 0,
+                              child: Align(alignment: Alignment.topLeft,
+
+                                child: Container(
+                                  padding: EdgeInsets.all(6),
+                                  decoration: BoxDecoration(
+                                    color: AppColor.redColor,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Text(
+                                    count.toString(), style: AppFont.medium12
+                                      .copyWith(color: AppColor.darkText1),),
                                 ),
-
-                                child: Icon(Icons.notifications, size: 20,
-                                    color: AppColor.cardLight)),
-                          )
-                      ), Visibility(visible: count > 0,
-                        child: Align(alignment: Alignment.topLeft,
-
-                          child: Container(
-                            padding: EdgeInsets.all(6),
-                            decoration: BoxDecoration(
-                              color: AppColor.redColor,
-                              shape: BoxShape.circle,
+                              ),
                             ),
-                            child: Text(count.toString(), style: AppFont.medium12
-                                .copyWith(color: AppColor.darkText1),),
-                          ),
+                          ],
                         ),
-                      ),
-                    ],
-                  ),
+                      );
+                    }
                 );
               }
           ),

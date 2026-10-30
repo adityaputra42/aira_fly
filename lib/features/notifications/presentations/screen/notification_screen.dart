@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:pss_app/core/common/widget/empty.dart';
 import 'package:pss_app/features/notifications/domain/entities/notification_entity.dart';
 import 'package:pss_app/features/notifications/presentations/bloc/notification_bloc.dart';
 
 import '../../../../app/init_dependencies.dart';
 import '../../../../app/theme/theme.dart';
 import '../../../../core/utils/size_extension.dart';
+import '../../../../core/utils/top_snackbar_helper.dart';
 import '../../../../core/utils/widget_helper.dart';
 import '../widget/notification_tile.dart';
 
@@ -93,74 +95,68 @@ class _NotificationViewState extends State<_NotificationView> {
           )
       ),
 
-      body: BlocConsumer<NotificationBloc, NotificationState>(
-        listenWhen: (p, c) =>
-        p.errorMessage != c.errorMessage && c.errorMessage != null &&
-            c.items.isNotEmpty,
-        listener: (context, state) {
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(SnackBar(content: Text(state.errorMessage!)));
-        },
-        builder: (context, state) {
-          if (state.items.isEmpty &&
-              (state.status == NotificationStatus.initial ||
-                  state.status == NotificationStatus.loading)) {
-            return const Center(child: CircularProgressIndicator());
-          }
+      body: SafeArea(
+        child: BlocConsumer<NotificationBloc, NotificationState>(
+          listenWhen: (p, c) =>
+          p.errorMessage != c.errorMessage && c.errorMessage != null &&
+              c.items.isNotEmpty,
+          listener: (context, state) {
+            TopSnackbarHelper.error(context, message: state.errorMessage!);
+          },
+          builder: (context, state) {
+            if (state.items.isEmpty &&
+                (state.status == NotificationStatus.initial ||
+                    state.status == NotificationStatus.loading)) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-          if (state.items.isEmpty &&
-              state.status == NotificationStatus.failure) {
-            return Message(
-              icon: Icons.error_outline,
-              text: state.errorMessage ?? 'Gagal memuat notifikasi',
-              actionLabel: 'Coba lagi',
-              onAction: () =>
-                  context.read<NotificationBloc>().add(
-                      const NotificationRefreshed()),
-            );
-          }
+            if (state.items.isEmpty &&
+                state.status == NotificationStatus.failure) {
+              return Empty(title: state.errorMessage ?? 'Gagal memuat notifikasi',);
 
-          return RefreshIndicator(
-            onRefresh: _refresh,
-            child: state.items.isEmpty
-                ? ListView(
-              // ListView supaya pull-to-refresh tetap jalan di empty state.
-              physics: const AlwaysScrollableScrollPhysics(),
-              children: const [
-                SizedBox(height: 120),
-                Message(icon: Icons.notifications_none,
-                    text: 'Belum ada notifikasi'),
-              ],
-            )
-                : ListView.separated(
-              controller: _scroll,padding: EdgeInsets.only(top: 16),
-              physics: const AlwaysScrollableScrollPhysics(),
-              itemCount: state.items.length + (state.isLoadingMore ? 1 : 0),
-              separatorBuilder: (_, _) => widget.height(12),
-              itemBuilder: (context, i) {
-                if (i >= state.items.length) {
-                  return const Padding(
-                    padding: EdgeInsets.all(16),
-                    child: Center(child: CircularProgressIndicator()),
+            }
+
+            return RefreshIndicator(
+              onRefresh: _refresh,
+              child: state.items.isEmpty
+                  ? ListView(
+               physics: const AlwaysScrollableScrollPhysics(),
+                children: const [
+                  SizedBox(height: 120),
+                  Message(icon: Icons.notifications_none,
+                      text: 'Belum ada notifikasi'),
+                ],
+              )
+                  : ListView.separated(
+                controller: _scroll,
+                padding: EdgeInsets.only(top: 16,bottom: 24),
+                physics: const AlwaysScrollableScrollPhysics(),
+                itemCount: state.items.length + (state.isLoadingMore ? 1 : 0),
+                separatorBuilder: (_, _) => widget.height(12),
+                itemBuilder: (context, i) {
+                  if (i >= state.items.length) {
+                    return const Padding(
+                      padding: EdgeInsets.all(16),
+                      child: Center(child: CircularProgressIndicator()),
+                    );
+                  }
+                  final item = state.items[i];
+                  return NotificationTile(
+                    item: item,
+                    onTap: () {
+                      if (item.id != null) {
+                        context.read<NotificationBloc>().add(
+                          NotificationReadRequested(item.id!),
+                        );
+                      }
+                      widget.onItemTap?.call(context, item);
+                    },
                   );
-                }
-                final item = state.items[i];
-                return NotificationTile(
-                  item: item,
-                  onTap: () {
-                    if (item.id != null) {
-                      context.read<NotificationBloc>().add(
-                        NotificationReadRequested(item.id!),
-                      );
-                    }
-                    widget.onItemTap?.call(context, item);
-                  },
-                );
-              },
-            ),
-          );
-        },
+                },
+              ),
+            );
+          },
+        ),
       ),
     );
   }

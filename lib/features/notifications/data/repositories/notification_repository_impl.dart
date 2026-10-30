@@ -26,7 +26,7 @@ class NotificationRepositoryImpl implements NotificationRepository {
       if (response == null) {
         return left(Failure('Failed to load country list'));
       }
-var data = response.data['unread_count'];
+      var data = response.data['unread_count'];
       return right(data as int);
     } on ServerException catch (e) {
       return left(Failure(e.message));
@@ -111,7 +111,7 @@ var data = response.data['unread_count'];
   }
 
   @override
-  Future<Either<Failure, void>> registerDevice({
+  Future<Either<Failure, bool>> registerDevice({
     CancelToken? cancelToken,
     String? appVersion,
     deviceId,
@@ -134,7 +134,7 @@ var data = response.data['unread_count'];
         return left(Failure('Failed to load country list'));
       }
 
-      return right(response);
+      return right(true);
     } on ServerException catch (e) {
       return left(Failure(e.message));
     } catch (e) {
@@ -143,7 +143,7 @@ var data = response.data['unread_count'];
   }
 
   @override
-  Future<Either<Failure, void>> unregisterDevice({
+  Future<Either<Failure, bool>> unregisterDevice({
     CancelToken? cancelToken,
     String? fcmToken,
   }) async {
@@ -160,7 +160,7 @@ var data = response.data['unread_count'];
         return left(Failure('Failed to load country list'));
       }
 
-      return right(response);
+      return right(true);
     } on ServerException catch (e) {
       return left(Failure(e.message));
     } catch (e) {

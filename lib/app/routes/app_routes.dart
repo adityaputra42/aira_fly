@@ -1,5 +1,6 @@
 import 'package:go_router/go_router.dart';
 import 'package:pss_app/core/animation/page_transition.dart';
+import 'package:pss_app/features/auth/presentation/screen/success_signup_screen.dart';
 import 'package:pss_app/features/flight/presentation/addonBooking/screen/meal/addon_meal_screen.dart';
 import 'package:pss_app/features/flight/presentation/bookingPayment/screen/booking_detail_screen.dart';
 import 'package:pss_app/features/flight/presentation/flightSelecting/screen/flight_selecting_screen.dart';
@@ -7,6 +8,8 @@ import 'package:pss_app/features/flight/presentation/searchAirport/screen/search
 import 'package:pss_app/features/home/presentation/widget/date_picker_screen.dart';
 import 'package:pss_app/features/ticket/presentation/screen/ticket_detail.dart';
 
+import '../../features/auth/presentation/screen/sign_in_screen.dart';
+import '../../features/auth/presentation/screen/sign_up_screen.dart';
 import '../../features/flight/presentation/addonBooking/screen/addon_booking_screen.dart';
 import '../../features/flight/presentation/addonBooking/screen/baggage/addon_bagage_screen.dart';
 import '../../features/flight/presentation/addonBooking/screen/baggage/selecting_baggage_screen.dart';
@@ -18,10 +21,8 @@ import '../../features/flight/presentation/flightResult/screen/flight_result_scr
 import '../../features/flight/presentation/paxBooking/screen/pax_booking_screen.dart';
 import '../../features/main/ui/screen/main_screen.dart';
 import '../../features/notifications/presentations/screen/notification_screen.dart';
-import '../../features/splash/ui/splash_screen.dart';
-import '../../features/auth/presentation/screen/sign_in_screen.dart';
-import '../../features/auth/presentation/screen/sign_up_screen.dart';
 import '../../features/onboarding/ui/screen/onboarding_screen.dart';
+import '../../features/splash/ui/splash_screen.dart';
 import 'route_names.dart';
 
 class AppRouter {
@@ -72,7 +73,16 @@ class AppRouter {
                   child: const SignUpScreen(),
                   transition: PageTransitionType.fadeScale,
                 ),
+
               ),
+              GoRoute(path: RouteNames.successSignUp,
+                name: RouteNames.successSignUp,
+                pageBuilder: (context, state) =>
+                    buildPageWithTransition(
+                      key: state.pageKey,
+                      child: const SuccessSignupScreen(),
+                      transition: PageTransitionType.sharedAxisVertical,
+                    ),)
             ],
           ),
           GoRoute(

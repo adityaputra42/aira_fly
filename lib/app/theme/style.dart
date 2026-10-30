@@ -57,20 +57,44 @@ class Styles {
       datePickerTheme: DatePickerThemeData(
         backgroundColor: colorScheme.surface,
         surfaceTintColor: colorScheme.surfaceContainer,
-        headerBackgroundColor: isDarkTheme ? AppColor.cardDark : AppColor.cardLight,
+        headerBackgroundColor:
+        isDarkTheme ? AppColor.cardDark : AppColor.cardLight,
         headerForegroundColor: colorScheme.onSurface,
-        yearStyle: AppFont.medium12.copyWith(color: colorScheme.onSurface),
-        dayStyle: AppFont.medium12.copyWith(color: colorScheme.onSurface),
-        weekdayStyle: AppFont.medium12.copyWith(color: colorScheme.onSurface),
+
+        yearStyle: AppFont.medium12.copyWith(
+          color: colorScheme.onSurface,
+        ),
+        dayStyle: AppFont.medium12.copyWith(
+          color: colorScheme.onSurface,
+        ),
+        weekdayStyle: AppFont.medium12.copyWith(
+          color: colorScheme.onSurface,
+        ),
+
         dividerColor: colorScheme.outline,
 
         dayForegroundColor: WidgetStateColor.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return Colors.white; // Selected date
+          }
           return colorScheme.onSurface;
         }),
+
+        dayBackgroundColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return colorScheme.primary;
+          }
+          return null;
+        }),
+
         dayOverlayColor: WidgetStateColor.resolveWith((states) {
           return colorScheme.primary.withValues(alpha: 0.2);
         }),
+
         yearForegroundColor: WidgetStateColor.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return Colors.white;
+          }
           return colorScheme.onSurface;
         }),
       ),

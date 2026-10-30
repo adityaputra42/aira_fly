@@ -40,47 +40,66 @@ class PriceDetail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CardGeneral(
-      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      padding: EdgeInsets.all(12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text("Price Detail", style: AppFont.semibold16),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [ Text("Price Detail", style: AppFont.medium14),
           height(8),
-          for (var i = 0; i < segments.length; i++) ...[
-            if (i > 0) height(8),
-            CardPricePerSegment(segment: segments[i]),
-          ],
-          if (baggageTotal > 0) ...[
-            height(8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          CardGeneral(
+            margin: EdgeInsets.zero,
+            padding: EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("Baggage", style: AppFont.reguler14),
-                Text(_format(baggageTotal), style: AppFont.medium14),
+
+                for (var i = 0; i < segments.length; i++) ...[
+                  if (i > 0) height(8),
+                  CardPricePerSegment(segment: segments[i]),
+                ],
+                if (baggageTotal > 0) ...[
+                  height(8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text("Baggage", style: AppFont.reguler14),
+                      Text(_format(baggageTotal), style: AppFont.medium14),
+                    ],
+                  ),
+                ],
+                if (mealTotal > 0) ...[
+                  height(8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text("Meal", style: AppFont.reguler14),
+                      Text(_format(mealTotal), style: AppFont.medium14),
+                    ],
+                  ),
+                ],
+
+                segments.isNotEmpty ?
+                Column(mainAxisSize: MainAxisSize.min,
+                  children: [
+                    height(8),
+                    SizedBox(
+                        height: 1, child: Divider(thickness: 1, color: Theme
+                        .of(context)
+                        .hintColor)),
+                    height(8),
+                  ],
+                ) : SizedBox(),
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text("Total", style: AppFont.reguler14),
+                    Text(_format(total), style: AppFont.medium14.copyWith(
+                        color: AppColor.greenColor)),
+                  ],
+                ),
               ],
             ),
-          ],
-          if (mealTotal > 0) ...[
-            height(8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text("Meal", style: AppFont.reguler14),
-                Text(_format(mealTotal), style: AppFont.medium14),
-              ],
-            ),
-          ],
-          height(8),
-          SizedBox(height: 1, child: Divider(thickness: 1, color: Theme.of(context).hintColor)),
-          height(8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text("Total", style: AppFont.reguler14),
-              Text(_format(total), style: AppFont.medium14.copyWith(color: AppColor.greenColor)),
-            ],
           ),
         ],
       ),
