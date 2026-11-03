@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 
-import '../../../../core/constants/enpoint.dart';
+import '../../../../core/constants/endpoint.dart';
 import '../../../../core/network/network.dart';
 
 abstract interface class NotificationRemoteDataSource {

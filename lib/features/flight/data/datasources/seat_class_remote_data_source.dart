@@ -1,6 +1,6 @@
 import 'package:pss_app/core/network/network.dart';
 
-import '../../../../core/constants/enpoint.dart';
+import '../../../../core/constants/endpoint.dart';
 
 abstract interface class SeatClassRemoteDataSource {
   Future<ApiResponse?> getSeatClasses({int page = 1, int limit = 200});

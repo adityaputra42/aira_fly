@@ -16,6 +16,20 @@ import 'package:pss_app/features/notifications/presentations/bloc/notification_b
 import '../core/common/cubit/theme_cubit.dart';
 import '../core/network/dio_client.dart';
 import '../core/utils/connection_checker.dart';
+import '../features/AiAssistant/data/datasources/ai_assistant_remote_data_sources.dart';
+import '../features/AiAssistant/data/repositories/ai_assistant_repository_impl.dart';
+import '../features/AiAssistant/domain/repository/ai_assistant_repository.dart';
+import '../features/AiAssistant/domain/usecases/cancel_ai_conversation.dart';
+import '../features/AiAssistant/domain/usecases/confirm_ai_booking.dart';
+import '../features/AiAssistant/domain/usecases/confirm_ai_payment.dart';
+import '../features/AiAssistant/domain/usecases/get_active_ai_conversation.dart';
+import '../features/AiAssistant/domain/usecases/get_ai_conversation.dart';
+import '../features/AiAssistant/domain/usecases/refresh_ai_payment.dart';
+import '../features/AiAssistant/domain/usecases/select_ai_flight.dart';
+import '../features/AiAssistant/domain/usecases/send_ai_message.dart';
+import '../features/AiAssistant/domain/usecases/start_ai_conversation.dart';
+import '../features/AiAssistant/domain/usecases/submit_ai_passengers.dart';
+import '../features/AiAssistant/presentation/bloc/ai_assistant_bloc.dart';
 import '../features/auth/data/datasources/auth_local_datasource.dart';
 import '../features/auth/data/datasources/auth_remote_data_source.dart';
 import '../features/auth/data/repositories/auth_repository_impl.dart';
@@ -125,6 +139,7 @@ Future<void> initDependencies() async {
   _initProfile();
   _initMaster();
   _initNotification();
+  _initAiAssistant();
 
   DioClient().configure(
     authLocalDataSource: serviceLocator(),
@@ -286,6 +301,40 @@ void _initPayment() {
         createPaymentUseCase: serviceLocator(),
         getPaymentUseCase: serviceLocator(),
         getPaymentByPnrUseCase: serviceLocator(),
+      ),
+    );
+}
+
+void _initAiAssistant() {
+  serviceLocator
+    ..registerFactory<AiAssistantRemoteDataSources>(() => AiAssistantRemoteDataSourcesImpl())
+    ..registerFactory<AiAssistantRepository>(
+      () => AiAssistantRepositoryImpl(serviceLocator(), serviceLocator()),
+    )
+    ..registerFactory(() => StartAiConversation(serviceLocator()))
+    ..registerFactory(() => GetActiveAiConversation(serviceLocator()))
+    ..registerFactory(() => GetAiConversation(serviceLocator()))
+    ..registerFactory(() => SendAiMessage(serviceLocator()))
+    ..registerFactory(() => SelectAiFlight(serviceLocator()))
+    ..registerFactory(() => SubmitAiPassengers(serviceLocator()))
+    ..registerFactory(() => ConfirmAiBooking(serviceLocator()))
+    ..registerFactory(() => ConfirmAiPayment(serviceLocator()))
+    ..registerFactory(() => RefreshAiPayment(serviceLocator()))
+    ..registerFactory(() => CancelAiConversation(serviceLocator()))
+    // Factory (not singleton): a fresh bloc per chat screen. The conversation
+    // itself lives on the server and is resumed via GET /ai/conversations/active.
+    ..registerFactory(
+      () => AiAssistantBloc(
+        startConversationUseCase: serviceLocator(),
+        getActiveConversationUseCase: serviceLocator(),
+        getConversationUseCase: serviceLocator(),
+        sendMessageUseCase: serviceLocator(),
+        selectFlightUseCase: serviceLocator(),
+        submitPassengersUseCase: serviceLocator(),
+        confirmBookingUseCase: serviceLocator(),
+        confirmPaymentUseCase: serviceLocator(),
+        refreshPaymentUseCase: serviceLocator(),
+        cancelConversationUseCase: serviceLocator(),
       ),
     );
 }

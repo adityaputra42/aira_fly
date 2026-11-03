@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../app/theme/app_color.dart';
 import '../../app/theme/app_font.dart';
 
 class WidgetHelper {
@@ -21,6 +22,10 @@ class WidgetHelper {
   }) {
     return AppBar(
       elevation: 0.1,
+      iconTheme: const IconThemeData(
+      color: AppColor.darkText1,
+      size: 24,
+    ),
       title: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,

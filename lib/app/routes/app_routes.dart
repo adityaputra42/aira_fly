@@ -1,5 +1,6 @@
 import 'package:go_router/go_router.dart';
 import 'package:pss_app/core/animation/page_transition.dart';
+import 'package:pss_app/features/AiAssistant/presentation/screen/chat_screen.dart';
 import 'package:pss_app/features/auth/presentation/screen/success_signup_screen.dart';
 import 'package:pss_app/features/flight/presentation/addonBooking/screen/meal/addon_meal_screen.dart';
 import 'package:pss_app/features/flight/presentation/bookingPayment/screen/booking_detail_screen.dart';
@@ -84,6 +85,14 @@ class AppRouter {
                       transition: PageTransitionType.sharedAxisVertical,
                     ),)
             ],
+          ),GoRoute(
+            path: RouteNames.aiAssistent,
+            name: RouteNames.aiAssistent,
+            pageBuilder: (context, state) => buildPageWithTransition(
+              key: state.pageKey,
+              child: ChatScreen(),
+              transition: PageTransitionType.fadeScale,
+            ),
           ),
           GoRoute(
             path: RouteNames.ticketDetail,

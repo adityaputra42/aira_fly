@@ -20,4 +20,5 @@ class RouteNames {
   static const selectDate = 'selectDate';
   static const notifications = 'notifications';
   static const successSignUp = 'successSignUp';
+  static const aiAssistent ="aiAssistent";
 }

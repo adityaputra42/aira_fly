@@ -25,7 +25,7 @@ class PrimaryButton extends StatelessWidget {
   });
 
   final String title;
-  final double width;
+  final double? width;
   final EdgeInsets margin;
   final EdgeInsets? buttonPadding;
   final double? height;

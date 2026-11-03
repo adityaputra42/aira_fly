@@ -7,7 +7,7 @@ class Styles {
   static ThemeData themeData(bool isDarkTheme, BuildContext context) {
     final colorScheme = ColorScheme(
       brightness: isDarkTheme ? Brightness.dark : Brightness.light,
-      primary: AppColor.primaryColor,
+      primary: isDarkTheme ?AppColor.secondaryColor:AppColor.primaryColor,
       onPrimary: isDarkTheme ? AppColor.darkText1 : AppColor.lightText1,
       secondary: AppColor.secondaryColor,
       onSecondary: isDarkTheme ? AppColor.darkText1 : AppColor.lightText1,
@@ -101,7 +101,16 @@ class Styles {
       cardColor: isDarkTheme ? AppColor.cardDark : AppColor.cardLight,
       hintColor: isDarkTheme ? AppColor.darkText2 : AppColor.lightText2,
       canvasColor: isDarkTheme ? AppColor.darkText3 : AppColor.lightText3,
-
+      drawerTheme: const DrawerThemeData(
+        backgroundColor: AppColor.darkText1,
+        surfaceTintColor: Colors.transparent,
+        scrimColor: Colors.black54,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.horizontal(
+            right: Radius.circular(16),
+          ),
+        ),
+      ),
       appBarTheme: AppBarTheme(
         elevation: 0.5,
         backgroundColor: colorScheme.surface,

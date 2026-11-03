@@ -59,4 +59,17 @@ class Endpoint {
   static const notificationsReadAll = "notifications/read-all";
   static const registerDevice = "devices";
   static const unregisterDevice = "devices/unregister";
+
+
+  // ===== Ai Assistant ===== //
+  static const startAiConversation = "ai/conversations";
+  static const getActiveConversation = "ai/conversations/active";
+  static const cancelConversation = "cancel";
+  static const confirmBookingConversation = "confirmations/booking";
+  static const confirmPaymentConversation = "confirmations/payment";
+  static const sendMessages = "messages";
+  static const submitPassangerConversations = "passengers";
+  static const checkPaymentConversation = "payment/refresh";
+  static const selectFlightConversations = "selection";
+
 }

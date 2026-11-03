@@ -1,4 +1,4 @@
-import 'package:pss_app/core/constants/enpoint.dart';
+import 'package:pss_app/core/constants/endpoint.dart';
 import 'package:pss_app/core/network/network.dart';
 
 abstract interface class CountryCodeRemoteDataSource {

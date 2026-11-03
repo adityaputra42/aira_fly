@@ -61,15 +61,15 @@ class CustomBottomNavbar extends StatelessWidget {
             context,
             title: "Wallet",
             icon: Mdi.wallet_outline,
-            isSelected: selectedIndex == 3,
-            index: 3,
+            isSelected: selectedIndex == 2,
+            index: 2,
           ),
           navbarItem(
             context,
             title: "Setting",
             icon: Uil.setting,
-            isSelected: selectedIndex == 4,
-            index: 4,
+            isSelected: selectedIndex == 3,
+            index: 3,
           ),
         ],
       ),
@@ -109,7 +109,7 @@ class CustomBottomNavbar extends StatelessWidget {
       padding: EdgeInsets.all(title.isNotEmpty ? 2 : 4),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
-        color: Theme.of(context).colorScheme.primary,
+        color: AppColor.primaryColor,
       ),
       child: title.isEmpty ? Container(
         width: 40,

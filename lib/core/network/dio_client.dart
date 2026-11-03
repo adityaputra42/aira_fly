@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:dio/dio.dart';
-import 'package:pss_app/core/constants/enpoint.dart';
+import 'package:pss_app/core/constants/endpoint.dart';
 
 import '../../features/auth/data/datasources/auth_local_datasource.dart';
 import '../constants/environment.dart';

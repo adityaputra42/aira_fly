@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pss_app/core/utils/size_extension.dart';
+
 import '../../../app/theme/theme.dart';
 
 class InputText extends StatelessWidget {
@@ -38,6 +39,7 @@ class InputText extends StatelessWidget {
   final BorderSide? borderSide;
   final Color? borderColor;
   final Function()? onComplete;
+  final Function(String)? onSubmited;
   final TextAlign? textAlign;
   const InputText({
     super.key,
@@ -46,6 +48,7 @@ class InputText extends StatelessWidget {
     this.initialValue,
     required this.hintText,
     this.enable = true,
+    this.onSubmited,
     this.cursor = true,
     this.autoFocus = false,
     this.readOnly = false,
@@ -122,6 +125,7 @@ class InputText extends StatelessWidget {
           maxLines: maxLine,
           readOnly: readOnly,
           maxLength: maxLength,
+          onFieldSubmitted: onSubmited,
           onEditingComplete: onComplete,
           style:
               textStyle ??

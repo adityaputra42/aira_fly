@@ -13,4 +13,6 @@ class AppImages {
   static const successSignUp1 = "assets/images/success_signup1.png";
   static const successSignUp2 = "assets/images/success_signup2.png";
   static const successSignUp3 = "assets/images/success_signup3.png";
+
+  static const aiIcon = "assets/images/ai_icon.png";
 }
