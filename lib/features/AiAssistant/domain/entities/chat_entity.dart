@@ -5,9 +5,7 @@ enum ChatMessageType {
   flightResults,
   bookingDetails,
   paymentConfirmation,
-  /// Virtual account / payment status after the user confirmed payment.
   paymentStatus,
-  /// Server wants passenger data; collected by a form, never by chat.
   passengerForm,
   error,
 }
@@ -20,7 +18,6 @@ class ChatMessageEntity {
   final DateTime createdAt;
   final Map<String, dynamic>? data;
 
-  /// Server payload behind this bubble (offers, confirmation, payment...).
   final AiTurnEntity? turn;
 
   const ChatMessageEntity({

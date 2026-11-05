@@ -74,18 +74,19 @@ class AppRouter {
                   child: const SignUpScreen(),
                   transition: PageTransitionType.fadeScale,
                 ),
-
               ),
-              GoRoute(path: RouteNames.successSignUp,
+              GoRoute(
+                path: RouteNames.successSignUp,
                 name: RouteNames.successSignUp,
-                pageBuilder: (context, state) =>
-                    buildPageWithTransition(
-                      key: state.pageKey,
-                      child: const SuccessSignupScreen(),
-                      transition: PageTransitionType.sharedAxisVertical,
-                    ),)
+                pageBuilder: (context, state) => buildPageWithTransition(
+                  key: state.pageKey,
+                  child: const SuccessSignupScreen(),
+                  transition: PageTransitionType.sharedAxisVertical,
+                ),
+              ),
             ],
-          ),GoRoute(
+          ),
+          GoRoute(
             path: RouteNames.aiAssistent,
             name: RouteNames.aiAssistent,
             pageBuilder: (context, state) => buildPageWithTransition(
@@ -93,6 +94,14 @@ class AppRouter {
               child: ChatScreen(),
               transition: PageTransitionType.fadeScale,
             ),
+            // routes:[  GoRoute(path: RouteNames.successSignUp,
+            //   name: RouteNames.successSignUp,
+            //   pageBuilder: (context, state) =>
+            //       buildPageWithTransition(
+            //         key: state.pageKey,
+            //         child: const PassangerContactFormScreen(arguments: FlightResultArguments(departure: departure, departureAirport: departureAirport, arrivalAirport: arrivalAirport, tripType: tripType, amountAdult: amountAdult, amountChild: amountChild, amountInfant: amountInfant, departureFare: departureFare)),
+            //         transition: PageTransitionType.sharedAxisVertical,
+            //       ),)]
           ),
           GoRoute(
             path: RouteNames.ticketDetail,

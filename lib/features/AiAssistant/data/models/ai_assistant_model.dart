@@ -184,12 +184,75 @@ class AiPaymentModel extends AiPaymentEntity {
   );
 }
 
+/// Maps `dto.PassengerSummary`.
+class AiPassengerSummaryModel extends AiPassengerSummaryEntity {
+  const AiPassengerSummaryModel({
+    super.total,
+    super.adults,
+    super.children,
+    super.infants,
+    super.seatsRequired,
+  });
+
+  factory AiPassengerSummaryModel.fromJson(Map<String, dynamic> j) {
+    final adults = _int(j['adults']);
+    final children = _int(j['children']);
+    final infants = _int(j['infants']);
+    return AiPassengerSummaryModel(
+      adults: adults,
+      children: children,
+      infants: infants,
+      // Fall back to the sums if the backend ever omits them.
+      total: j['total'] == null ? adults + children + infants : _int(j['total']),
+      seatsRequired: j['seats_required'] == null ? adults + children : _int(j['seats_required']),
+    );
+  }
+}
+
+/// Maps `dto.SearchView`.
+class AiSearchModel extends AiSearchEntity {
+  const AiSearchModel({
+    required super.origin,
+    required super.destination,
+    required super.tripType,
+    super.originCity,
+    super.destinationCity,
+    super.departureDate,
+    super.departureDateText,
+    super.returnDate,
+    super.returnDateText,
+    super.passengers,
+    super.passengersText,
+    super.maxStops,
+    super.sort,
+  });
+
+  factory AiSearchModel.fromJson(Map<String, dynamic> j) => AiSearchModel(
+    origin: _str(j['origin']),
+    originCity: _strN(j['origin_city']),
+    destination: _str(j['destination']),
+    destinationCity: _strN(j['destination_city']),
+    tripType: _str(j['trip_type'], AiSearchEntity.oneWay),
+    departureDate: _dt(j['departure_date']),
+    departureDateText: _str(j['departure_date_text']),
+    returnDate: _dt(j['return_date']),
+    returnDateText: _strN(j['return_date_text']),
+    passengers: j['passengers'] is Map
+        ? AiPassengerSummaryModel.fromJson(Map<String, dynamic>.from(j['passengers'] as Map))
+        : const AiPassengerSummaryEntity(),
+    passengersText: _str(j['passengers_text']),
+    maxStops: j['max_stops'] == null ? 1 : _int(j['max_stops'], 1),
+    sort: _str(j['sort'], 'cheapest'),
+  );
+}
+
 class AiTurnModel extends AiTurnEntity {
   const AiTurnModel({
     required super.conversationId,
     required super.state,
     super.message,
     super.speakable,
+    super.search,
     super.offers,
     super.selectedFareClassId,
     super.selectedOffers,
@@ -209,6 +272,9 @@ class AiTurnModel extends AiTurnEntity {
     state: _str(j['state']),
     message: _str(j['message']),
     speakable: _str(j['speakable']),
+    search: j['search'] is Map
+        ? AiSearchModel.fromJson(Map<String, dynamic>.from(j['search'] as Map))
+        : null,
     offers: j['offers'] is Map
         ? AiOffersModel.fromJson(Map<String, dynamic>.from(j['offers'] as Map))
         : null,
@@ -256,7 +322,7 @@ abstract final class AiPassengerRequest {
   }) => {
     'contact': {
       'full_name': contact.fullName.trim(),
-      'email': contact.email.trim(),
+      if (contact.email.trim().isNotEmpty) 'email': contact.email.trim(),
       'phone': contact.phone.trim(),
     },
     'passengers': passengers.map(_passenger).toList(),

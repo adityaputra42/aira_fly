@@ -21,4 +21,5 @@ class RouteNames {
   static const notifications = 'notifications';
   static const successSignUp = 'successSignUp';
   static const aiAssistent ="aiAssistent";
+  static const paxContactForm ="paxContactForm";
 }

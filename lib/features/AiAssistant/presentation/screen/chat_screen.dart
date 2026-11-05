@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pss_app/features/AiAssistant/domain/entities/ai_assistant_entity.dart';
 import 'package:pss_app/features/AiAssistant/domain/entities/chat_entity.dart';
+import 'package:pss_app/features/AiAssistant/presentation/screen/passanger_contact_form_screen.dart';
 
 import '../../../../app/init_dependencies.dart';
 import '../../../../app/theme/app_color.dart';
@@ -11,11 +12,9 @@ import '../bloc/ai_assistant_bloc.dart';
 import '../widget/chat_drawer.dart';
 import '../widget/chat_input.dart';
 import '../widget/chat_message_bubble.dart';
-import '../widget/chat_suggestions.dart';
 import '../widget/chat_typing_indicator.dart';
 import 'chat_history_screen.dart';
 
-/// Provides the bloc and resumes (or starts) the conversation on open.
 class ChatScreen extends StatelessWidget {
   const ChatScreen({super.key});
 
@@ -52,7 +51,6 @@ class _ChatViewState extends State<_ChatView> {
     final text = (value ?? _messageController.text).trim();
     if (text.isEmpty || !_bloc.state.canSendMessage) return;
 
-    // For speech-to-text use: AiMessageSent(text, inputType: AiInputType.voiceTranscript)
     _bloc.add(AiMessageSent(text));
     _messageController.clear();
   }
@@ -80,6 +78,26 @@ class _ChatViewState extends State<_ChatView> {
         updatedAt: s.messages.last.createdAt,
       ),
     ];
+  }
+
+  void _openPassengerForm(AiTurnEntity? turn) {
+    final pax = turn?.search?.passengers;
+    if (pax == null || pax.total == 0) {
+      TopSnackbarHelper.error(
+        context,
+        message: 'Jumlah penumpang belum diterima dari asisten. Coba kirim ulang pesan.',
+      );
+      return;
+    }
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => BlocProvider.value(
+          value: _bloc,
+          child: PassangerContactFormScreen(pax: pax, totalText: passengerFormTotalText(turn!)),
+        ),
+      ),
+    );
   }
 
   void _openHistory(List<ChatConversationEntity> conversations) {
@@ -180,10 +198,7 @@ class _ChatViewState extends State<_ChatView> {
                                 ? () => _bloc.add(const AiPaymentRefreshed())
                                 : null,
                             onFillPassengers: active
-                                ? () => TopSnackbarHelper.error(
-                                    context,
-                                    message: 'Form data penumpang belum tersedia.',
-                                  )
+                                ? () => _openPassengerForm(message.turn ?? state.turn)
                                 : null,
                             onRetry: index == lastIndex && !state.isBusy
                                 ? () => state.conversationId == null
@@ -206,7 +221,7 @@ class _ChatViewState extends State<_ChatView> {
                     ),
                   ),
                 ),
-              if (state.canSendMessage) ChatSuggestions(onSelected: _sendMessage),
+              // if (state.canSendMessage) ChatSuggestions(onSelected: _sendMessage),
             ],
           ),
           bottomNavigationBar: ChatInput(

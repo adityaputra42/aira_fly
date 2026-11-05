@@ -2,21 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pss_app/app/theme/app_color.dart';
 import 'package:pss_app/app/theme/app_font.dart';
+import 'package:pss_app/core/common/widget/card_general.dart';
 import 'package:pss_app/features/AiAssistant/domain/entities/ai_assistant_entity.dart';
 import 'package:pss_app/features/AiAssistant/domain/entities/chat_entity.dart';
 
 import '../../../../core/constants/images.dart';
 
-
 class ChatMessageBubble extends StatelessWidget {
   final ChatMessageEntity message;
-  /// Callbacks are null on stale bubbles / while a request is running, which
-  /// disables the buttons. Only the LATEST bubble may act: its summary_hash is
-  /// the only one the server still accepts.
   final void Function(AiOfferEntity departure, AiFareEntity fare, AiOfferEntity? returnOffer)?
   onSelectFlight;
   final VoidCallback? onConfirmBooking;
-  final ValueChanged<String>? onPay; // channel
+  final ValueChanged<String>? onPay;
   final VoidCallback? onRefreshPayment;
   final VoidCallback? onFillPassengers;
   final VoidCallback? onRetry;
@@ -52,10 +49,7 @@ class ChatMessageBubble extends StatelessWidget {
               bottomRight: Radius.circular(4),
             ),
           ),
-          child: Text(
-            message.text,
-            style: AppFont.medium12.copyWith(color: AppColor.darkText1)
-          ),
+          child: Text(message.text, style: AppFont.medium12.copyWith(color: AppColor.darkText1)),
         ),
       );
     }
@@ -68,7 +62,7 @@ class ChatMessageBubble extends StatelessWidget {
           CircleAvatar(
             radius: 17,
             backgroundColor: colors.secondary.withAlpha(36),
-            child: Image.asset(AppImages.aiIcon,width: 20,),
+            child: Image.asset(AppImages.aiIcon, width: 20),
           ),
           const SizedBox(width: 9),
           Expanded(
@@ -87,26 +81,29 @@ class ChatMessageBubble extends StatelessWidget {
                       bottomRight: Radius.circular(16),
                     ),
                   ),
-                  child: Text(message.text, style:AppFont.medium12),
+                  child: Text(message.text, style: AppFont.medium12),
                 ),
                 if (message.type == ChatMessageType.flightResults && message.turn?.offers != null)
                   _FlightResultCard(offers: message.turn!.offers!, onSelect: onSelectFlight),
-                if (message.type == ChatMessageType.bookingDetails && message.turn?.confirmation != null)
-                  _BookingDetailsCard(confirmation: message.turn!.confirmation!, onConfirm: onConfirmBooking),
-                if (message.type == ChatMessageType.paymentConfirmation && message.turn?.confirmation != null)
+                if (message.type == ChatMessageType.bookingDetails &&
+                    message.turn?.confirmation != null)
+                  _BookingDetailsCard(
+                    confirmation: message.turn!.confirmation!,
+                    onConfirm: onConfirmBooking,
+                  ),
+                if (message.type == ChatMessageType.paymentConfirmation &&
+                    message.turn?.confirmation != null)
                   _PaymentConfirmationCard(confirmation: message.turn!.confirmation!, onPay: onPay),
                 if (message.type == ChatMessageType.paymentStatus && message.turn?.payment != null)
                   _PaymentStatusCard(turn: message.turn!, onRefresh: onRefreshPayment),
                 if (message.type == ChatMessageType.passengerForm)
                   _PassengerFormCard(onFill: onFillPassengers),
-                if (message.type == ChatMessageType.error)
-                  _ErrorCard(onRetry: onRetry),
+                if (message.type == ChatMessageType.error) _ErrorCard(onRetry: onRetry),
                 const SizedBox(height: 4),
                 Text(
                   _formatTime(message.createdAt),
-                  style:AppFont.reguler10.copyWith(color: colors.onSurfaceVariant)
+                  style: AppFont.reguler10.copyWith(color: colors.onSurfaceVariant),
                 ),
-
               ],
             ),
           ),
@@ -121,7 +118,8 @@ class ChatMessageBubble extends StatelessWidget {
 
 class _FlightResultCard extends StatefulWidget {
   final AiOffersEntity offers;
-  final void Function(AiOfferEntity departure, AiFareEntity fare, AiOfferEntity? returnOffer)? onSelect;
+  final void Function(AiOfferEntity departure, AiFareEntity fare, AiOfferEntity? returnOffer)?
+  onSelect;
 
   const _FlightResultCard({required this.offers, this.onSelect});
 
@@ -141,64 +139,69 @@ class _FlightResultCardState extends State<_FlightResultCard> {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
 
-    return Card(
-      margin: const EdgeInsets.only(top: 9),
-      child: Padding(
-        padding: const EdgeInsets.all(13),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (_needsReturn) const Text('Departure', style: AppFont.semibold14),
-            for (final offer in widget.offers.departure) ...[
-              _OfferHeader(offer: offer),
-              Wrap(
-                spacing: 8,
-                children: [
-                  for (final fare in offer.fares)
-                    ChoiceChip(
-                      label: Text('${fare.name} • ${fare.totalText}'),
-                      selected: _offer == offer && _fare == fare,
-                      onSelected: widget.onSelect == null || fare.availableSeats <= 0
-                          ? null
-                          : (_) => setState(() {
-                              _offer = offer;
-                              _fare = fare;
-                            }),
+    return CardGeneral(
+      margin: const EdgeInsets.only(top: 8),
+      padding: const EdgeInsets.all(12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (_needsReturn) const Text('Departure', style: AppFont.semibold14),
+          for (final offer in widget.offers.departure) ...[
+            _OfferHeader(offer: offer),
+            Wrap(
+              spacing: 8,
+              children: [
+                for (final fare in offer.fares)
+                  ChoiceChip(
+                    backgroundColor: colors.surface,
+                    selectedColor: AppColor.primaryColor,
+                    disabledColor: colors.shadow,
+
+                    label: Text(
+                      '${fare.name} • ${fare.totalText}',
+                      style: AppFont.medium12.copyWith(color: colors.onSurface),
                     ),
-                ],
-              ),
-              const Divider(height: 20),
-            ],
-            if (_needsReturn) ...[
-              const Text('Return', style: AppFont.semibold14),
-              for (final offer in widget.offers.returnOffers)
-                InkWell(
-                  onTap: widget.onSelect == null ? null : () => setState(() => _return = offer),
-                  child: Container(
-                    margin: const EdgeInsets.only(top: 6),
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: _return == offer ? colors.primary : colors.outlineVariant,
-                      ),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: _OfferHeader(offer: offer),
+                    selected: _offer == offer && _fare == fare,
+                    onSelected: widget.onSelect == null || fare.availableSeats <= 0
+                        ? null
+                        : (_) => setState(() {
+                            _offer = offer;
+                            _fare = fare;
+                          }),
                   ),
-                ),
-              const SizedBox(height: 12),
-            ],
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton(
-                onPressed: widget.onSelect == null || !_ready
-                    ? null
-                    : () => widget.onSelect!(_offer!, _fare!, _return),
-                child: const Text('Select this flight'),
-              ),
+              ],
             ),
+            const Divider(height: 20),
           ],
-        ),
+          if (_needsReturn) ...[
+            const Text('Return', style: AppFont.semibold14),
+            for (final offer in widget.offers.returnOffers)
+              InkWell(
+                onTap: widget.onSelect == null ? null : () => setState(() => _return = offer),
+                child: Container(
+                  margin: const EdgeInsets.only(top: 6),
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: _return == offer ? colors.primary : colors.outlineVariant,
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: _OfferHeader(offer: offer),
+                ),
+              ),
+            const SizedBox(height: 12),
+          ],
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton(
+              onPressed: widget.onSelect == null || !_ready
+                  ? null
+                  : () => widget.onSelect!(_offer!, _fare!, _return),
+              child: const Text('Select this flight', style: AppFont.medium12),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -210,7 +213,6 @@ class _OfferHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
     if (offer.segments.isEmpty) return const SizedBox.shrink();
     final first = offer.segments.first;
     final last = offer.segments.last;
@@ -234,10 +236,13 @@ class _OfferHeader extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 4),
-          Text('${first.from} ${first.departText}  →  ${last.to} ${last.arriveText}'),
+          Text(
+            '${first.from} ${first.departText}  →  ${last.to} ${last.arriveText}',
+            style: AppFont.medium12,
+          ),
           Text(
             '$flights  •  ${offer.durationText}${offer.stops > 0 ? '  •  ${offer.stops} stop' : ''}',
-            style: TextStyle(color: colors.onSurfaceVariant),
+            style: AppFont.medium12,
           ),
         ],
       ),
@@ -253,47 +258,47 @@ class _BookingDetailsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    return Card(
-      margin: const EdgeInsets.only(top: 9),
-      child: Padding(
-        padding: const EdgeInsets.all(13),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Booking summary', style: TextStyle(fontWeight: FontWeight.w700)),
-            const SizedBox(height: 10),
-            if (confirmation.priceChanged)
-              Container(
-                width: double.infinity,
-                margin: const EdgeInsets.only(bottom: 10),
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: colors.errorContainer,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  'Harga berubah'
-                  '${confirmation.previousTotalText != null ? ' dari ${confirmation.previousTotalText}' : ''}'
-                  '. Periksa total baru sebelum melanjutkan.',
-                  style: TextStyle(color: colors.onErrorContainer),
-                ),
-              ),
-            for (final line in confirmation.lines)
-              Padding(padding: const EdgeInsets.symmetric(vertical: 2), child: Text(line)),
-            for (final seat in confirmation.seats)
-              _InfoRow(
-                label: 'Seat • ${seat.flightNumber} • Pax ${seat.passengerIndex + 1}',
-                value: seat.seatNumber,
-              ),
-            const Divider(height: 20),
-            _InfoRow(label: 'Total', value: confirmation.totalText, bold: true),
-            const SizedBox(height: 12),
-            SizedBox(
+    return CardGeneral(
+      margin: EdgeInsets.only(top: 8),
+      padding: EdgeInsets.all(12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('Booking summary', style: AppFont.semibold14),
+          const SizedBox(height: 10),
+          if (confirmation.priceChanged)
+            CardGeneral(
               width: double.infinity,
-              child: FilledButton(onPressed: onConfirm, child: const Text('Confirm booking')),
+              margin: const EdgeInsets.only(bottom: 10),
+              padding: const EdgeInsets.all(10),
+              useShadow: false,
+              background: colors.errorContainer,
+              child: Text(
+                'Harga berubah'
+                '${confirmation.previousTotalText != null ? ' dari ${confirmation.previousTotalText}' : ''}'
+                '. Periksa total baru sebelum melanjutkan.',
+                style: AppFont.medium14.copyWith(color: colors.errorContainer),
+              ),
             ),
-          ],
-        ),
+          for (final line in confirmation.lines)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 2),
+              child: Text(line, style: AppFont.medium12),
+            ),
+          for (final seat in confirmation.seats)
+            _InfoRow(
+              label: 'Seat • ${seat.flightNumber} • Pax ${seat.passengerIndex + 1}',
+              value: seat.seatNumber,
+            ),
+          const Divider(height: 20),
+          _InfoRow(label: 'Total', value: confirmation.totalText, bold: true),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton(onPressed: onConfirm, child:  Text('Confirm booking',
+                  style: AppFont.medium12.copyWith(color: Colors.white),)),
+          ),
+        ],
       ),
     );
   }
@@ -320,51 +325,60 @@ class _PaymentConfirmationCardState extends State<_PaymentConfirmationCard> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     final c = widget.confirmation;
-    return Card(
-      margin: const EdgeInsets.only(top: 9),
-      child: Padding(
-        padding: const EdgeInsets.all(13),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Payment confirmation', style: TextStyle(fontWeight: FontWeight.w700)),
-            const SizedBox(height: 10),
-            for (final line in c.lines)
-              Padding(padding: const EdgeInsets.symmetric(vertical: 2), child: Text(line)),
-            const SizedBox(height: 8),
-            const Text('Payment method (Virtual Account)'),
-            // Channels come from the server; never hard-code them.
-            Wrap(
-              spacing: 8,
-              children: [
-                for (final ch in c.channels)
-                  ChoiceChip(
-                    label: Text(ch),
-                    selected: _channel == ch,
-                    onSelected: widget.onPay == null ? null : (_) => setState(() => _channel = ch),
-                  ),
-              ],
+    return CardGeneral(
+      margin: const EdgeInsets.only(top: 8),
+      padding: const EdgeInsets.all(12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('Payment confirmation', style: AppFont.semibold14),
+          const SizedBox(height: 8),
+          for (final line in c.lines)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 2),
+              child: Text(line, style: AppFont.reguler12),
             ),
-            const Divider(height: 20),
-            _InfoRow(label: 'Amount', value: c.totalText, bold: true),
-            const SizedBox(height: 8),
-            Text(
-              'Payment will only be processed after your confirmation.',
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-            const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton(
-                onPressed: widget.onPay == null || _channel == null
-                    ? null
-                    : () => widget.onPay!(_channel!),
-                child: Text(_channel == null ? 'Pay' : 'Pay with $_channel'),
+          const SizedBox(height: 8),
+          const Text('Payment method (Virtual Account)', style: AppFont.medium14),
+          // Channels come from the server; never hard-code them
+          Wrap(
+            spacing: 8,
+            children: [
+              for (final ch in c.channels)
+                ChoiceChip(
+                  backgroundColor: colors.surface,
+                  selectedColor: AppColor.primaryColor,
+                  disabledColor: colors.shadow,
+
+                  label: Text(ch, style: AppFont.medium12),
+                  selected: _channel == ch,
+                  onSelected: widget.onPay == null ? null : (_) => setState(() => _channel = ch),
+                ),
+            ],
+          ),
+          const Divider(height: 20),
+          _InfoRow(label: 'Amount', value: c.totalText, bold: true),
+          const SizedBox(height: 8),
+          Text(
+            'Payment will only be processed after your confirmation.',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton(
+              onPressed: widget.onPay == null || _channel == null
+                  ? null
+                  : () => widget.onPay!(_channel!),
+              child: Text(
+                _channel == null ? 'Pay' : 'Pay with $_channel',
+                style: AppFont.medium12.copyWith(color: Colors.white),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -381,44 +395,51 @@ class _PaymentStatusCard extends StatelessWidget {
     final booking = turn.booking;
     final va = p.virtualAccountNo;
 
-    return Card(
-      margin: const EdgeInsets.only(top: 9),
-      child: Padding(
-        padding: const EdgeInsets.all(13),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              p.isPaid ? 'Payment received' : 'Waiting for payment',
-              style: const TextStyle(fontWeight: FontWeight.w700),
+    return CardGeneral(
+      margin: const EdgeInsets.only(top: 8),
+      padding: const EdgeInsets.all(12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(p.isPaid ? 'Payment received' : 'Waiting for payment', style: AppFont.semibold14),
+          const SizedBox(height: 10),
+          if (booking != null)
+            _InfoRow(label: 'Booking code', value: booking.bookingCode, bold: true),
+          _InfoRow(label: 'Channel', value: p.channel),
+          _InfoRow(label: 'Amount', value: p.amountText, bold: true),
+          _InfoRow(label: 'Status', value: p.status),
+          if (va != null && va.isNotEmpty && !p.isPaid)
+            Row(
+              children: [
+                Expanded(
+                  child: _InfoRow(label: 'Virtual account', value: va, bold: true),
+                ),
+                IconButton(
+                  tooltip: 'Copy',
+                  icon: const Icon(Icons.copy_rounded, size: 18),
+                  onPressed: () => Clipboard.setData(ClipboardData(text: va)),
+                ),
+              ],
             ),
-            const SizedBox(height: 10),
-            if (booking != null) _InfoRow(label: 'Booking code', value: booking.bookingCode, bold: true),
-            _InfoRow(label: 'Channel', value: p.channel),
-            _InfoRow(label: 'Amount', value: p.amountText, bold: true),
-            _InfoRow(label: 'Status', value: p.status),
-            if (va != null && va.isNotEmpty && !p.isPaid)
-              Row(
-                children: [
-                  Expanded(child: _InfoRow(label: 'Virtual account', value: va, bold: true)),
-                  IconButton(
-                    tooltip: 'Copy',
-                    icon: const Icon(Icons.copy_rounded, size: 18),
-                    onPressed: () => Clipboard.setData(ClipboardData(text: va)),
-                  ),
-                ],
+          if (p.expiresAt != null && p.isPending)
+            _InfoRow(
+              label: 'Pay before',
+              value: p.expiresAt!.toLocal().toString().substring(0, 16),
+            ),
+          if (p.isPending) ...[
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                onPressed: onRefresh,
+                child: Text(
+                  'Check payment status',
+                  style: AppFont.medium12.copyWith(color: Colors.white),
+                ),
               ),
-            if (p.expiresAt != null && p.isPending)
-              _InfoRow(label: 'Pay before', value: p.expiresAt!.toLocal().toString().substring(0, 16)),
-            if (p.isPending) ...[
-              const SizedBox(height: 12),
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton(onPressed: onRefresh, child: const Text('Check payment status')),
-              ),
-            ],
+            ),
           ],
-        ),
+        ],
       ),
     );
   }
@@ -430,26 +451,27 @@ class _PassengerFormCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(top: 9),
-      child: Padding(
-        padding: const EdgeInsets.all(13),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Passenger details', style: TextStyle(fontWeight: FontWeight.w700)),
-            const SizedBox(height: 6),
-            Text(
-              'Data penumpang diisi lewat formulir, bukan lewat chat.',
-              style: Theme.of(context).textTheme.bodySmall,
+    return CardGeneral(
+      margin: const EdgeInsets.only(top: 8),
+      padding: const EdgeInsets.all(12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Passenger details', style: AppFont.medium14),
+          const SizedBox(height: 6),
+          Text('Data penumpang diisi lewat formulir, bukan lewat chat.', style: AppFont.reguler12),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton(
+              onPressed: onFill,
+              child: Text(
+                'Fill passenger details',
+                style: AppFont.medium12.copyWith(color: Colors.white),
+              ),
             ),
-            const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton(onPressed: onFill, child: const Text('Fill passenger details')),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -468,7 +490,9 @@ class _ErrorCard extends StatelessWidget {
         leading: Icon(Icons.error_outline_rounded, color: colors.error),
         title: const Text('Something went wrong'),
         subtitle: const Text('Please try again.'),
-        trailing: onRetry == null ? null : TextButton(onPressed: onRetry, child: const Text('Retry')),
+        trailing: onRetry == null
+            ? null
+            : TextButton(onPressed: onRetry, child: const Text('Retry')),
       ),
     );
   }
@@ -486,8 +510,8 @@ class _InfoRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
-          Expanded(child: Text(label, style: Theme.of(context).textTheme.bodySmall)),
-          Text(value, style: TextStyle(fontWeight: bold ? FontWeight.w700 : FontWeight.w500)),
+          Expanded(child: Text(label, style: AppFont.medium12)),
+          Text(value, style: AppFont.medium12),
         ],
       ),
     );

@@ -11,8 +11,7 @@ abstract final class AiState {
   static const awaitingPaymentConfirmation = 'awaiting_payment_confirmation';
   static const paymentPending = 'payment_pending';
 
-  static bool isTerminal(String s) =>
-      s == completed || s == failed || s == cancelled;
+  static bool isTerminal(String s) => s == completed || s == failed || s == cancelled;
 }
 
 abstract final class AiAction {
@@ -87,13 +86,7 @@ class AiFareEntity extends Equatable {
   });
 
   @override
-  List<Object?> get props => [
-    fareClassId,
-    name,
-    seatClass,
-    total,
-    availableSeats,
-  ];
+  List<Object?> get props => [fareClassId, name, seatClass, total, availableSeats];
 }
 
 class AiOfferEntity extends Equatable {
@@ -121,10 +114,7 @@ class AiOffersEntity extends Equatable {
   final List<AiOfferEntity> departure;
   final List<AiOfferEntity> returnOffers;
 
-  const AiOffersEntity({
-    this.departure = const [],
-    this.returnOffers = const [],
-  });
+  const AiOffersEntity({this.departure = const [], this.returnOffers = const []});
 
   bool get isEmpty => departure.isEmpty && returnOffers.isEmpty;
 
@@ -157,7 +147,7 @@ class AiConfirmationEntity extends Equatable {
   final bool priceChanged;
   final String? previousTotalText;
   final List<AiSeatEntity> seats;
-  final List<String> channels; // PAYMENT only
+  final List<String> channels;
   final DateTime? validUntil;
 
   const AiConfirmationEntity({
@@ -179,13 +169,7 @@ class AiConfirmationEntity extends Equatable {
   bool get isPayment => kind == 'PAYMENT';
 
   @override
-  List<Object?> get props => [
-    kind,
-    summaryHash,
-    totalText,
-    priceChanged,
-    channels,
-  ];
+  List<Object?> get props => [kind, summaryHash, totalText, priceChanged, channels];
 }
 
 class AiBookingEntity extends Equatable {
@@ -240,11 +224,92 @@ class AiPaymentEntity extends Equatable {
   List<Object?> get props => [paymentId, paymentCode, status, virtualAccountNo];
 }
 
+class AiPassengerSummaryEntity extends Equatable {
+  final int total;
+  final int adults;
+  final int children;
+  final int infants;
+  final int seatsRequired;
+
+  const AiPassengerSummaryEntity({
+    this.total = 0,
+    this.adults = 0,
+    this.children = 0,
+    this.infants = 0,
+    this.seatsRequired = 0,
+  });
+
+  bool get hasChildren => children > 0;
+  bool get hasInfants => infants > 0;
+
+  List<({String type, String label})> get slots => [
+    for (var i = 1; i <= adults; i++) (type: 'ADT', label: 'Adult $i'),
+    for (var i = 1; i <= children; i++) (type: 'CHD', label: 'Child $i'),
+    for (var i = 1; i <= infants; i++) (type: 'INF', label: 'Infant $i'),
+  ];
+
+  @override
+  List<Object?> get props => [total, adults, children, infants, seatsRequired];
+}
+
+class AiSearchEntity extends Equatable {
+  static const oneWay = 'one_way';
+  static const roundTrip = 'round_trip';
+
+  final String origin; // IATA, e.g. CGK
+  final String? originCity;
+  final String destination; // IATA, e.g. DPS
+  final String? destinationCity;
+  final String tripType; // one_way | round_trip
+  final DateTime? departureDate;
+  final String departureDateText; // "24 Des 2026"
+  final DateTime? returnDate; // only for round_trip
+  final String? returnDateText;
+  final AiPassengerSummaryEntity passengers;
+  final String passengersText; // "2 dewasa, 1 anak, 1 bayi"
+  final int maxStops; // 0 = direct only, 1 = allow one connection
+  final String sort; // cheapest | earliest | fastest
+
+  const AiSearchEntity({
+    required this.origin,
+    required this.destination,
+    required this.tripType,
+    this.originCity,
+    this.destinationCity,
+    this.departureDate,
+    this.departureDateText = '',
+    this.returnDate,
+    this.returnDateText,
+    this.passengers = const AiPassengerSummaryEntity(),
+    this.passengersText = '',
+    this.maxStops = 1,
+    this.sort = 'cheapest',
+  });
+
+  bool get isRoundTrip => tripType == roundTrip;
+  bool get isDirectOnly => maxStops == 0;
+
+  @override
+  List<Object?> get props => [
+    origin,
+    originCity,
+    destination,
+    destinationCity,
+    tripType,
+    departureDate,
+    returnDate,
+    passengers,
+    maxStops,
+    sort,
+  ];
+}
+
 class AiTurnEntity extends Equatable {
   final String conversationId;
   final String state;
   final String message;
   final String speakable;
+  final AiSearchEntity? search;
   final AiOffersEntity? offers;
   final int? selectedFareClassId;
   final List<String> selectedOffers;
@@ -260,6 +325,7 @@ class AiTurnEntity extends Equatable {
     required this.state,
     this.message = '',
     this.speakable = '',
+    this.search,
     this.offers,
     this.selectedFareClassId,
     this.selectedOffers = const [],
@@ -280,6 +346,7 @@ class AiTurnEntity extends Equatable {
     conversationId,
     state,
     message,
+    search,
     offers,
     confirmation,
     booking,
@@ -312,11 +379,7 @@ class AiConversationEntity extends Equatable {
   final List<AiHistoryMessageEntity> messages;
   final DateTime? expiresAt;
 
-  const AiConversationEntity({
-    required this.turn,
-    this.messages = const [],
-    this.expiresAt,
-  });
+  const AiConversationEntity({required this.turn, this.messages = const [], this.expiresAt});
 
   @override
   List<Object?> get props => [turn, messages, expiresAt];
@@ -327,11 +390,7 @@ class AiContactEntity extends Equatable {
   final String email;
   final String phone;
 
-  const AiContactEntity({
-    required this.fullName,
-    required this.email,
-    required this.phone,
-  });
+  const AiContactEntity({required this.fullName, required this.email, required this.phone});
 
   @override
   List<Object?> get props => [fullName, email, phone];
@@ -363,13 +422,7 @@ class AiPassengerEntity extends Equatable {
   });
 
   @override
-  List<Object?> get props => [
-    passengerType,
-    firstName,
-    lastName,
-    birthDate,
-    documentNumber,
-  ];
+  List<Object?> get props => [passengerType, firstName, lastName, birthDate, documentNumber];
 }
 
 class AiFailure extends Failure {

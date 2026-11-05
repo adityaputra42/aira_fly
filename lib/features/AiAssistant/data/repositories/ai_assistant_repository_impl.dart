@@ -15,7 +15,6 @@ class AiAssistantRepositoryImpl implements AiAssistantRepository {
 
   const AiAssistantRepositoryImpl(this.remoteDataSource, this.connectionChecker);
 
-  // ------------------------------------------------------------ conversation
 
   @override
   Future<Either<Failure, AiTurnEntity>> startConversation() {
@@ -29,7 +28,6 @@ class AiAssistantRepositoryImpl implements AiAssistantRepository {
       (json) => AiConversationModel.fromJson(json),
       'Gagal memuat percakapan',
     );
-    // 404 = nothing to resume. That is a normal outcome, not an error.
     return result.fold<Either<Failure, AiConversationEntity?>>((f) {
       if (f is AiFailure && f.statusCode == 404) return right(null);
       return left(f);
@@ -129,7 +127,6 @@ class AiAssistantRepositoryImpl implements AiAssistantRepository {
     return _turn(() => remoteDataSource.cancelConversation(id: id), 'Gagal membatalkan percakapan');
   }
 
-  // ---------------------------------------------------------------- helpers
 
   Future<Either<Failure, AiTurnEntity>> _turn(
     Future<ApiResponse?> Function() request,
@@ -158,7 +155,6 @@ class AiAssistantRepositoryImpl implements AiAssistantRepository {
     } on AiApiException catch (e) {
       return left(_toFailure(e));
     } catch (_) {
-      // Do not leak raw exception text (TypeError etc.) to the chat.
       return left(AiFailure(errorMessage));
     }
   }

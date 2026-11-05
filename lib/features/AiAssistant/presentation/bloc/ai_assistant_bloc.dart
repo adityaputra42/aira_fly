@@ -248,7 +248,6 @@ class AiAssistantBloc extends Bloc<AiAssistantEvent, AiAssistantState> {
     emit(state.copyWith(status: AiChatStatus.sending, clearFailure: true));
 
     final result = await refreshPaymentUseCase(RefreshAiPaymentParams(id: id));
-    // Update the existing payment bubble instead of stacking a new one per tap.
     result.fold((f) => _emitFailure(emit, f), (t) => _emitTurn(emit, t, replacePayment: true));
   }
 
