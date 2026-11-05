@@ -7,8 +7,8 @@ class Styles {
   static ThemeData themeData(bool isDarkTheme, BuildContext context) {
     final colorScheme = ColorScheme(
       brightness: isDarkTheme ? Brightness.dark : Brightness.light,
-      primary: isDarkTheme ?AppColor.secondaryColor:AppColor.primaryColor,
-      onPrimary: isDarkTheme ? AppColor.darkText1 : AppColor.lightText1,
+      primary: isDarkTheme ?AppColor.primaryColor:AppColor.primaryColor,
+      onPrimary: isDarkTheme ? AppColor.darkText1 : AppColor.darkText1,
       secondary: AppColor.secondaryColor,
       onSecondary: isDarkTheme ? AppColor.darkText1 : AppColor.lightText1,
       error: AppColor.redColor,

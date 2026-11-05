@@ -322,7 +322,7 @@ abstract final class AiPassengerRequest {
   }) => {
     'contact': {
       'full_name': contact.fullName.trim(),
-      if (contact.email.trim().isNotEmpty) 'email': contact.email.trim(),
+      'email': contact.email.trim(),
       'phone': contact.phone.trim(),
     },
     'passengers': passengers.map(_passenger).toList(),

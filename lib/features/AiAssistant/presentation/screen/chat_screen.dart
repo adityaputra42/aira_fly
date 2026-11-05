@@ -135,16 +135,16 @@ class _ChatViewState extends State<_ChatView> {
         final lastIndex = state.messages.length - 1;
 
         return Scaffold(
-          endDrawer: ChatDrawer(
-            conversations: conversations,
-            activeConversationId: state.conversationId,
-            onNewChat: () {
-              Navigator.pop(context);
-              _bloc.add(const AiNewChatRequested());
-            },
-            onViewAll: () => _openHistory(conversations),
-            onConversationSelected: (_) => Navigator.pop(context),
-          ),
+          // endDrawer: ChatDrawer(
+          //   conversations: conversations,
+          //   activeConversationId: state.conversationId,
+          //   onNewChat: () {
+          //     Navigator.pop(context);
+          //     _bloc.add(const AiNewChatRequested());
+          //   },
+          //   onViewAll: () => _openHistory(conversations),
+          //   onConversationSelected: (_) => Navigator.pop(context),
+          // ),
           appBar: WidgetHelper.appBar(
             context: context,
             title: 'AI Assistant',

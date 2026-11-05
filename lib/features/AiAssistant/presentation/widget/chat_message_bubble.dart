@@ -295,8 +295,11 @@ class _BookingDetailsCard extends StatelessWidget {
           const SizedBox(height: 12),
           SizedBox(
             width: double.infinity,
-            child: FilledButton(onPressed: onConfirm, child:  Text('Confirm booking',
-                  style: AppFont.medium12.copyWith(color: Colors.white),)),
+            child: FilledButton(
+              onPressed: onConfirm,
+              child: Text('Confirm booking',
+                  style: AppFont.medium12.copyWith(color: Colors.white)),
+            ),
           ),
         ],
       ),
@@ -325,8 +328,8 @@ class _PaymentConfirmationCardState extends State<_PaymentConfirmationCard> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
     final c = widget.confirmation;
+    final colors = Theme.of(context).colorScheme;
     return CardGeneral(
       margin: const EdgeInsets.only(top: 8),
       padding: const EdgeInsets.all(12),
@@ -334,15 +337,12 @@ class _PaymentConfirmationCardState extends State<_PaymentConfirmationCard> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text('Payment confirmation', style: AppFont.semibold14),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
           for (final line in c.lines)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 2),
-              child: Text(line, style: AppFont.reguler12),
-            ),
+            Padding(padding: const EdgeInsets.symmetric(vertical: 2),
+                child: Text(line, style: AppFont.reguler12)),
           const SizedBox(height: 8),
-          const Text('Payment method (Virtual Account)', style: AppFont.medium14),
-          // Channels come from the server; never hard-code them
+          const Text('Payment method', style: AppFont.medium14),
           Wrap(
             spacing: 8,
             children: [
@@ -352,7 +352,11 @@ class _PaymentConfirmationCardState extends State<_PaymentConfirmationCard> {
                   selectedColor: AppColor.primaryColor,
                   disabledColor: colors.shadow,
 
-                  label: Text(ch, style: AppFont.medium12),
+                  avatar: AiPaymentChannel.isWallet(ch)
+                      ? const Icon(
+                      Icons.account_balance_wallet_outlined, size: 18)
+                      : null,
+                  label: Text(AiPaymentChannel.label(ch),style:AppFont.medium12),
                   selected: _channel == ch,
                   onSelected: widget.onPay == null ? null : (_) => setState(() => _channel = ch),
                 ),
@@ -363,7 +367,7 @@ class _PaymentConfirmationCardState extends State<_PaymentConfirmationCard> {
           const SizedBox(height: 8),
           Text(
             'Payment will only be processed after your confirmation.',
-            style: Theme.of(context).textTheme.bodySmall,
+              style: AppFont.reguler12
           ),
           const SizedBox(height: 12),
           SizedBox(
@@ -373,8 +377,9 @@ class _PaymentConfirmationCardState extends State<_PaymentConfirmationCard> {
                   ? null
                   : () => widget.onPay!(_channel!),
               child: Text(
-                _channel == null ? 'Pay' : 'Pay with $_channel',
-                style: AppFont.medium12.copyWith(color: Colors.white),
+                  _channel == null ? 'Pay' : 'Pay with ${AiPaymentChannel.label(
+                      _channel!)}',
+                  style: AppFont.medium14.copyWith(color: AppColor.darkText1)
               ),
             ),
           ),

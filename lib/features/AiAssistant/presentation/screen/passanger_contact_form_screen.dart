@@ -115,7 +115,6 @@ class _PassangerContactFormScreenState extends State<PassangerContactFormScreen>
       );
       return;
     }
-    Navigator.pop(context);
     final bloc = context.read<AiAssistantBloc>();
     if (bloc.state.isBusy) return;
     setState(() => _submitting = true);
@@ -125,23 +124,20 @@ class _PassangerContactFormScreenState extends State<PassangerContactFormScreen>
         passengers: _passengers.whereType<AiPassengerEntity>().toList(),
       ),
     );
+    Navigator.of(context).pop();
   }
 
   void _onBlocChanged(BuildContext context, AiAssistantState state) {
-    if (!_submitting) return;
+    if (!_submitting || !mounted) return;
+
     if (state.status == AiChatStatus.failure) {
       setState(() => _submitting = false);
-    } else if (state.status == AiChatStatus.ready) {
-      setState(() => _submitting = false);
-      final turn = state.turn;
-      if (turn != null && turn.can(AiAction.submitPassengers)) {
-        TopSnackbarHelper.error(
-          context,
-          message: turn.message.isEmpty ? 'Data penumpang ditolak. Periksa kembali.' : turn.message,
-        );
-      } else {
-        Navigator.of(context).pop();
-      }
+
+      TopSnackbarHelper.error(
+        context,
+        message: state.turn?.message ??
+            'Failed to submit passenger information.',
+      );
     }
   }
 

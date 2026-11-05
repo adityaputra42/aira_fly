@@ -147,7 +147,7 @@ class AiConfirmationEntity extends Equatable {
   final bool priceChanged;
   final String? previousTotalText;
   final List<AiSeatEntity> seats;
-  final List<String> channels;
+  final List<String> channels; // PAYMENT only
   final DateTime? validUntil;
 
   const AiConfirmationEntity({
@@ -222,6 +222,19 @@ class AiPaymentEntity extends Equatable {
 
   @override
   List<Object?> get props => [paymentId, paymentCode, status, virtualAccountNo];
+}
+
+abstract final class AiPaymentChannel {
+  static const balance = 'BALANCE';
+
+  static bool isWallet(String channel) => channel == balance;
+
+  static String label(String channel) {
+    if (isWallet(channel)) return 'Saldo dompet';
+    var s = channel.replaceFirst('VIRTUAL_ACCOUNT_', '').replaceFirst('BANK_', '');
+    s = s.replaceAll('_', ' ').toLowerCase();
+    return s.isEmpty ? channel : s[0].toUpperCase() + s.substring(1);
+  }
 }
 
 class AiPassengerSummaryEntity extends Equatable {
