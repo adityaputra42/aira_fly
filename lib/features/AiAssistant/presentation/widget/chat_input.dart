@@ -9,12 +9,22 @@ class ChatInput extends StatelessWidget {
   final VoidCallback? onAttachment;
   final bool enabled;
 
+  final VoidCallback? onMic;
+  final bool listening;
+
+  final bool voiceReplies;
+  final VoidCallback? onToggleVoiceReplies;
+
   const ChatInput({
     super.key,
     required this.controller,
     required this.onSend,
     this.onAttachment,
     this.enabled = true,
+    this.onMic,
+    this.listening = false,
+    this.voiceReplies = false,
+    this.onToggleVoiceReplies,
   });
 
   @override
@@ -48,19 +58,50 @@ class ChatInput extends StatelessWidget {
                   child: InputText(
                     controller: controller,
                     enable: enabled,
-                    hintText: "Type Message...",
+                    hintText: listening ? "Mendengarkan..." : "Type Message...",
                     textInputAction: TextInputAction.send,
                     onSubmited: (_) => onSend(),
                   ),
                 ),
-                InkWell(
-                  onTap: enabled ? onSend : null,
-                  child: CardGeneral(
-                    background: AppColor.primaryColor,
-                    padding: EdgeInsets.all(10),
-                    margin: EdgeInsets.zero,
-                    child: const Icon(Icons.send_rounded, size: 24,color: AppColor.darkText1),
+                if (onToggleVoiceReplies != null)
+                  Tooltip(
+                    message: voiceReplies ? 'Suara balasan: aktif' : 'Suara balasan: mati',
+                    child: InkWell(
+                      onTap: onToggleVoiceReplies,
+                      child: CardGeneral(
+                        background: voiceReplies ? AppColor.primaryColor : colors.hintColor.withValues(alpha: 0.2),
+                        padding: const EdgeInsets.all(8),
+                        margin: EdgeInsets.zero,
+                        child: Icon(
+                          voiceReplies ? Icons.volume_up_rounded : Icons.volume_off_rounded,
+                          size: 24,
+                          color: voiceReplies ? AppColor.darkText1 : colors.hintColor,
+                        ),
+                      ),
+                    ),
                   ),
+                ListenableBuilder(
+                  listenable: controller,
+                  builder: (context, _) {
+                    final showMic = onMic != null && (listening || controller.text.trim().isEmpty);
+                    final active = enabled || (showMic && listening);
+                    return Tooltip(
+                      message: showMic ? (listening ? 'Berhenti merekam' : 'Bicara') : 'Kirim',
+                      child: InkWell(
+                        onTap: active ? (showMic ? onMic : onSend) : null,
+                        child: CardGeneral(
+                          background: listening ? colors.colorScheme.error : AppColor.primaryColor,
+                          padding: const EdgeInsets.all(8),
+                          margin: EdgeInsets.zero,
+                          child: Icon(
+                            showMic ? (listening ? Icons.stop_rounded : Icons.mic_rounded) : Icons.send_rounded,
+                            size: 24,
+                            color: listening ? colors.colorScheme.onError : AppColor.darkText1,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ],
             ),

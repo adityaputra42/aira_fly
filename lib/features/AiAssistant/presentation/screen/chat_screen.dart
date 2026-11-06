@@ -1,19 +1,24 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pss_app/features/AiAssistant/domain/entities/ai_assistant_entity.dart';
 import 'package:pss_app/features/AiAssistant/domain/entities/chat_entity.dart';
-import 'package:pss_app/features/AiAssistant/presentation/screen/passanger_contact_form_screen.dart';
 
 import '../../../../app/init_dependencies.dart';
 import '../../../../app/theme/app_color.dart';
 import '../../../../core/utils/top_snackbar_helper.dart';
 import '../../../../core/utils/widget_helper.dart';
 import '../bloc/ai_assistant_bloc.dart';
-import '../widget/chat_drawer.dart';
+import '../voice/ai_voice_controller.dart';
+import '../voice/ai_voice_overlay.dart';
+import '../voice/ai_voice_ports.dart';
+// import '../widget/chat_drawer.dart';
 import '../widget/chat_input.dart';
 import '../widget/chat_message_bubble.dart';
+// import '../widget/chat_suggestions.dart';
 import '../widget/chat_typing_indicator.dart';
-import 'chat_history_screen.dart';
+// import 'chat_history_screen.dart';
 
 class ChatScreen extends StatelessWidget {
   const ChatScreen({super.key});
@@ -34,12 +39,36 @@ class _ChatView extends StatefulWidget {
   State<_ChatView> createState() => _ChatViewState();
 }
 
-class _ChatViewState extends State<_ChatView> {
+class _ChatViewState extends State<_ChatView> with WidgetsBindingObserver {
+  static const _autoSendVoice = true;
+
   final _messageController = TextEditingController();
   final _scrollController = ScrollController();
+  late final AiVoiceController _voice;
+  String? _voiceConversationId;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _voice = AiVoiceController(
+      input: SttVoiceInput(),
+      output: TtsVoiceOutput(),
+      onPartial: _showTranscript,
+      onFinal: _onVoiceFinal,
+      onCancel: _messageController.clear,
+    );
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed) unawaited(_voice.stopAll());
+  }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _voice.dispose();
     _messageController.dispose();
     _scrollController.dispose();
     super.dispose();
@@ -47,12 +76,36 @@ class _ChatViewState extends State<_ChatView> {
 
   AiAssistantBloc get _bloc => context.read<AiAssistantBloc>();
 
-  void _sendMessage([String? value]) {
+  void _sendMessage([String? value, bool voice = false]) {
     final text = (value ?? _messageController.text).trim();
     if (text.isEmpty || !_bloc.state.canSendMessage) return;
 
-    _bloc.add(AiMessageSent(text));
+    _voice.noteSent(voice: voice);
+    _bloc.add(
+      AiMessageSent(text, inputType: voice ? AiInputType.voiceTranscript : AiInputType.text),
+    );
     _messageController.clear();
+  }
+
+  void _showTranscript(String text) {
+    _messageController.value = TextEditingValue(
+      text: text,
+      selection: TextSelection.collapsed(offset: text.length),
+    );
+  }
+
+  void _onVoiceFinal(String text) {
+    if (_autoSendVoice && _bloc.state.canSendMessage) {
+      _sendMessage(text, true);
+    } else {
+      _showTranscript(text);
+    }
+  }
+
+  Future<void> _onMic() async {
+    FocusScope.of(context).unfocus();
+    final problem = await _voice.toggleMic();
+    if (problem != null && mounted) TopSnackbarHelper.error(context, message: problem);
   }
 
   void _scrollToBottom() {
@@ -79,55 +132,47 @@ class _ChatViewState extends State<_ChatView> {
       ),
     ];
   }
-
-  void _openPassengerForm(AiTurnEntity? turn) {
-    final pax = turn?.search?.passengers;
-    if (pax == null || pax.total == 0) {
-      TopSnackbarHelper.error(
-        context,
-        message: 'Jumlah penumpang belum diterima dari asisten. Coba kirim ulang pesan.',
-      );
-      return;
-    }
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => BlocProvider.value(
-          value: _bloc,
-          child: PassangerContactFormScreen(pax: pax, totalText: passengerFormTotalText(turn!)),
-        ),
-      ),
-    );
-  }
-
-  void _openHistory(List<ChatConversationEntity> conversations) {
-    Navigator.pop(context);
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => ChatHistoryScreen(
-          conversations: conversations,
-          onConversationSelected: (_) => Navigator.pop(context),
-        ),
-      ),
-    );
-  }
+  //
+  // void _openHistory(List<ChatConversationEntity> conversations) {
+  //   Navigator.pop(context);
+  //   Navigator.push(
+  //     context,
+  //     MaterialPageRoute(
+  //       builder: (_) => ChatHistoryScreen(
+  //         conversations: conversations,
+  //         onConversationSelected: (_) => Navigator.pop(context),
+  //       ),
+  //     ),
+  //   );
+  // }
 
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<AiAssistantBloc, AiAssistantState>(
       listenWhen: (a, b) =>
-          a.messages.length != b.messages.length || a.status != b.status || a.failure != b.failure,
+          a.messages.length != b.messages.length ||
+          a.status != b.status ||
+          a.failure != b.failure ||
+          a.conversationId != b.conversationId,
       listener: (context, state) {
         _scrollToBottom();
+
+        if (state.conversationId != _voiceConversationId) {
+          _voiceConversationId = state.conversationId;
+          unawaited(_voice.stopAll());
+        }
+
+        final last = state.messages.isEmpty ? null : state.messages.last;
+        if (last != null && !last.isUser && last.type != ChatMessageType.error && !state.isBusy) {
+          final spoken = last.turn?.speakable ?? '';
+          unawaited(_voice.onAssistantMessage(spoken.isNotEmpty ? spoken : last.text));
+        }
 
         final failure = state.failure;
         if (state.status == AiChatStatus.failure && failure != null) {
           TopSnackbarHelper.error(context, message: failure.message);
 
-          if (failure.conversationGone) {
-            context.read<AiAssistantBloc>().add(const AiNewChatRequested());
-          }
+          if (failure.conversationGone) context.read<AiAssistantBloc>().add(const AiNewChatRequested());
         }
       },
       builder: (context, state) {
@@ -151,7 +196,9 @@ class _ChatViewState extends State<_ChatView> {
             color: AppColor.primaryColor,
             titleColor: AppColor.darkText1,
           ),
-          body: Column(
+          body: Stack(
+            children: [
+              Column(
             children: [
               if (state.shouldFallbackToForm)
                 MaterialBanner(
@@ -188,17 +235,14 @@ class _ChatViewState extends State<_ChatView> {
                                     ),
                                   )
                                 : null,
-                            onConfirmBooking: active
-                                ? () => _bloc.add(const AiBookingConfirmed())
-                                : null,
-                            onPay: active
-                                ? (channel) => _bloc.add(AiPaymentConfirmed(channel))
-                                : null,
-                            onRefreshPayment: active
-                                ? () => _bloc.add(const AiPaymentRefreshed())
-                                : null,
+                            onConfirmBooking: active ? () => _bloc.add(const AiBookingConfirmed()) : null,
+                            onPay: active ? (channel) => _bloc.add(AiPaymentConfirmed(channel)) : null,
+                            onRefreshPayment: active ? () => _bloc.add(const AiPaymentRefreshed()) : null,
                             onFillPassengers: active
-                                ? () => _openPassengerForm(message.turn ?? state.turn)
+                                ? () => TopSnackbarHelper.error(
+                                    context,
+                                    message: 'Form data penumpang belum tersedia.',
+                                  )
                                 : null,
                             onRetry: index == lastIndex && !state.isBusy
                                 ? () => state.conversationId == null
@@ -224,12 +268,21 @@ class _ChatViewState extends State<_ChatView> {
               // if (state.canSendMessage) ChatSuggestions(onSelected: _sendMessage),
             ],
           ),
-          bottomNavigationBar: ChatInput(
-            controller: _messageController,
-            onSend: _sendMessage,
-            onAttachment: () =>
-                TopSnackbarHelper.error(context, message: 'Attachment is not available yet.'),
-            enabled: state.canSendMessage,
+              Positioned.fill(child: AiVoiceOverlay(controller: _voice)),
+            ],
+          ),
+          bottomNavigationBar: ListenableBuilder(
+            listenable: _voice,
+            builder: (context, _) => ChatInput(
+              controller: _messageController,
+              onSend: _sendMessage,
+              onMic: _onMic,
+              listening: _voice.listening,
+              voiceReplies: _voice.voiceReplies,
+              onToggleVoiceReplies: () => _voice.setVoiceReplies(!_voice.voiceReplies),
+              onAttachment: () => TopSnackbarHelper.error(context, message: 'Attachment is not available yet.'),
+              enabled: state.canSendMessage,
+            ),
           ),
         );
       },

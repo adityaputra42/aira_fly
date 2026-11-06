@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pss_app/app/theme/app_color.dart';
 import 'package:pss_app/app/theme/app_font.dart';
-import 'package:pss_app/core/common/widget/card_general.dart';
 import 'package:pss_app/features/AiAssistant/domain/entities/ai_assistant_entity.dart';
 import 'package:pss_app/features/AiAssistant/domain/entities/chat_entity.dart';
 
+import '../../../../core/common/widget/card_general.dart';
 import '../../../../core/constants/images.dart';
 
 class ChatMessageBubble extends StatelessWidget {
@@ -13,7 +13,7 @@ class ChatMessageBubble extends StatelessWidget {
   final void Function(AiOfferEntity departure, AiFareEntity fare, AiOfferEntity? returnOffer)?
   onSelectFlight;
   final VoidCallback? onConfirmBooking;
-  final ValueChanged<String>? onPay;
+  final ValueChanged<String>? onPay; // channel
   final VoidCallback? onRefreshPayment;
   final VoidCallback? onFillPassengers;
   final VoidCallback? onRetry;
@@ -61,7 +61,7 @@ class ChatMessageBubble extends StatelessWidget {
         children: [
           CircleAvatar(
             radius: 17,
-            backgroundColor: colors.secondary.withAlpha(36),
+            backgroundColor: colors.secondary.withValues(alpha: .14),
             child: Image.asset(AppImages.aiIcon, width: 20),
           ),
           const SizedBox(width: 9),
@@ -297,8 +297,7 @@ class _BookingDetailsCard extends StatelessWidget {
             width: double.infinity,
             child: FilledButton(
               onPressed: onConfirm,
-              child: Text('Confirm booking',
-                  style: AppFont.medium12.copyWith(color: Colors.white)),
+              child: Text('Confirm booking', style: AppFont.medium12.copyWith(color: Colors.white)),
             ),
           ),
         ],
@@ -339,8 +338,10 @@ class _PaymentConfirmationCardState extends State<_PaymentConfirmationCard> {
           const Text('Payment confirmation', style: AppFont.semibold14),
           const SizedBox(height: 10),
           for (final line in c.lines)
-            Padding(padding: const EdgeInsets.symmetric(vertical: 2),
-                child: Text(line, style: AppFont.reguler12)),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 2),
+              child: Text(line, style: AppFont.reguler12),
+            ),
           const SizedBox(height: 8),
           const Text('Payment method', style: AppFont.medium14),
           Wrap(
@@ -353,10 +354,9 @@ class _PaymentConfirmationCardState extends State<_PaymentConfirmationCard> {
                   disabledColor: colors.shadow,
 
                   avatar: AiPaymentChannel.isWallet(ch)
-                      ? const Icon(
-                      Icons.account_balance_wallet_outlined, size: 18)
+                      ? const Icon(Icons.account_balance_wallet_outlined, size: 18)
                       : null,
-                  label: Text(AiPaymentChannel.label(ch),style:AppFont.medium12),
+                  label: Text(AiPaymentChannel.label(ch), style: AppFont.medium12),
                   selected: _channel == ch,
                   onSelected: widget.onPay == null ? null : (_) => setState(() => _channel = ch),
                 ),
@@ -365,10 +365,7 @@ class _PaymentConfirmationCardState extends State<_PaymentConfirmationCard> {
           const Divider(height: 20),
           _InfoRow(label: 'Amount', value: c.totalText, bold: true),
           const SizedBox(height: 8),
-          Text(
-            'Payment will only be processed after your confirmation.',
-              style: AppFont.reguler12
-          ),
+          Text('Payment will only be processed after your confirmation.', style: AppFont.reguler12),
           const SizedBox(height: 12),
           SizedBox(
             width: double.infinity,
@@ -377,9 +374,8 @@ class _PaymentConfirmationCardState extends State<_PaymentConfirmationCard> {
                   ? null
                   : () => widget.onPay!(_channel!),
               child: Text(
-                  _channel == null ? 'Pay' : 'Pay with ${AiPaymentChannel.label(
-                      _channel!)}',
-                  style: AppFont.medium14.copyWith(color: AppColor.darkText1)
+                _channel == null ? 'Pay' : 'Pay with ${AiPaymentChannel.label(_channel!)}',
+                style: AppFont.medium14.copyWith(color: AppColor.darkText1),
               ),
             ),
           ),

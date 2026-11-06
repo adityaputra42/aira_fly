@@ -24,6 +24,10 @@
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Mikrofon dipakai agar Anda bisa berbicara dengan asisten AI untuk mencari dan memesan penerbangan.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Pengenalan suara dipakai untuk mengubah ucapan Anda menjadi teks pesan ke asisten AI.</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>UIApplicationSceneManifest</key>
