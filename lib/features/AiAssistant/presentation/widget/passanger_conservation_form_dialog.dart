@@ -10,6 +10,7 @@ import 'package:pss_app/core/common/widget/input_text.dart';
 import 'package:pss_app/core/common/widget/primary_button.dart';
 import 'package:pss_app/core/utils/size_extension.dart';
 import 'package:pss_app/features/AiAssistant/domain/entities/ai_assistant_entity.dart';
+import 'package:pss_app/features/AiAssistant/domain/rules/ai_passenger_rules.dart';
 import 'package:pss_app/features/master/domain/entities/country_code_entity.dart';
 import 'package:pss_app/features/master/domain/usecases/list_country_codes.dart';
 import 'package:pss_app/features/master/presentation/widget/country_search_dialog.dart';
@@ -22,11 +23,16 @@ class PassangerConservationFormDialog extends StatefulWidget {
     required this.passengerType,
     required this.label,
     this.initial,
+    this.firstTravel,
+    this.lastTravel,
   });
 
   final String passengerType;
   final String label;
   final AiPassengerEntity? initial;
+
+  final DateTime? firstTravel;
+  final DateTime? lastTravel;
 
   @override
   State<PassangerConservationFormDialog> createState() => _PassangerConservationFormDialogState();
@@ -78,7 +84,7 @@ class _PassangerConservationFormDialogState extends State<PassangerConservationF
       setState(() {
         _countries = countries;
 
-        if (_nationality != null && !countries.any((c) => c.alpha3 == _nationality)) {
+        if (_nationality != null && !countries.any((c) => c.alpha2 == _nationality)) {
           _nationality = null;
         }
       });
@@ -100,13 +106,28 @@ class _PassangerConservationFormDialogState extends State<PassangerConservationF
 
   Future<void> _pickBirthDate() async {
     final now = DateTime.now();
-    final initialDate = _birthDate ?? (_birthDateRequired ? now : DateTime(now.year - 25));
+    var firstDate = DateTime(now.year - 100);
+    var lastDate = now;
+    var initialDate = _birthDate ?? (_birthDateRequired ? now : DateTime(now.year - 25));
+
+    final travelStart = widget.firstTravel;
+    if (travelStart != null) {
+      final (first, last, initial) = AiPassengerRules.birthPickerRange(
+        type: widget.passengerType,
+        firstTravel: travelStart,
+        lastTravel: widget.lastTravel ?? travelStart,
+      );
+      firstDate = first;
+      lastDate = last;
+      initialDate = _birthDate ?? initial;
+      if (initialDate.isBefore(firstDate) || initialDate.isAfter(lastDate)) initialDate = lastDate;
+    }
 
     final picked = await showDatePicker(
       context: context,
       initialDate: initialDate,
-      firstDate: DateTime(now.year - 100),
-      lastDate: now,
+      firstDate: firstDate,
+      lastDate: lastDate,
     );
 
     if (picked != null) setState(() => _birthDate = picked);
@@ -135,6 +156,20 @@ class _PassangerConservationFormDialogState extends State<PassangerConservationF
             'Birth date is required for ${widget.passengerType == 'CHD' ? 'child' : 'infant'} passengers.',
       );
       return;
+    }
+
+    final travelStart = widget.firstTravel;
+    if (travelStart != null) {
+      final problem = AiPassengerRules.birthDate(
+        type: widget.passengerType,
+        birth: _birthDate,
+        firstTravel: travelStart,
+        lastTravel: widget.lastTravel ?? travelStart,
+      );
+      if (problem != null) {
+        TopSnackbarHelper.info(context, message: problem);
+        return;
+      }
     }
 
     Navigator.of(context).pop(
@@ -228,7 +263,7 @@ class _PassangerConservationFormDialogState extends State<PassangerConservationF
         final picked = await showCountrySearchDialog(
           context,
           countries: countries,
-          initialAlpha3: _nationality,
+          initialAlpha3: selected?.alpha3,
         );
         if (picked != null) setState(() => _nationality = picked.alpha2);
       },

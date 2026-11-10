@@ -61,7 +61,7 @@ class AuthRepositoryImpl implements AuthRepository {
 
       final response = await remoteDataSource.getCurrentUserData();
       if (response == null) {
-        return left(Failure('Register Failed'));
+        return left(Failure('Get User Failed'));
       }
       var user = userModelFromJson(response.data);
 
@@ -86,7 +86,7 @@ class AuthRepositoryImpl implements AuthRepository {
       final response = await remoteDataSource.login(email: email, password: password);
 
       if (response == null) {
-        return left(Failure('Register Failed'));
+        return left(Failure('Login Failed, Please check your email or password correct'));
       }
 
       var loginResponse = loginResponseModelFromJson(response.data);

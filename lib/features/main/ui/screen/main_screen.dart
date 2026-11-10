@@ -53,10 +53,10 @@ class MainScreen extends StatelessWidget {
           context.goNamed(RouteNames.aiAssistent);
         },
           child: Container(
-              padding: EdgeInsets.all(8),
+              padding: EdgeInsets.all(4),
               decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: AppColor.cardLight
+                  color: AppColor.secondaryColor
 
               ),
               child:

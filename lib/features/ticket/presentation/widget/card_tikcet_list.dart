@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconify_flutter_plus/iconify_flutter_plus.dart';
 import 'package:iconify_flutter_plus/icons/bx.dart';
+import 'package:iconify_flutter_plus/icons/material_symbols.dart';
 import 'package:intl/intl.dart';
 import 'package:pss_app/core/constants/images.dart';
 
@@ -158,6 +159,11 @@ class CardTikcetList extends StatelessWidget {
                               dashColor: AppColor.secondaryColor,
                             ),
                             width(4),
+                            pnr.tripType == "ROUND_TRIP" ? Iconify(
+                              MaterialSymbols.connecting_airports_rounded,
+                              color: AppColor.secondaryColor,
+                              size: 24,
+                            ) :
                             Transform.rotate(
                               angle: -math.pi / 0.66,
                               child: Iconify(

@@ -17,37 +17,30 @@ class AiVoiceOverlay extends StatelessWidget {
       listenable: controller,
       builder: (context, _) {
         final phase = controller.phase;
-        final idle = phase == VoicePhase.idle;
-        return IgnorePointer(
-          ignoring: idle,
-          child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 200),
-            child: idle
-                ? const SizedBox.expand(key: ValueKey('voice-idle'))
-                : _Panel(
-                    key: ValueKey(phase),
-                    controller: controller,
-                    phase: phase,
-                  ),
+        final Widget child = switch (phase) {
+          VoicePhase.idle => const SizedBox.shrink(key: ValueKey('voice-idle')),
+          VoicePhase.listening => _ListeningPanel(
+            key: const ValueKey('voice-listening'),
+            controller: controller,
           ),
-        );
+          VoicePhase.speaking => _SpeakingBanner(
+            key: const ValueKey('voice-speaking'),
+            controller: controller,
+          ),
+        };
+        return AnimatedSwitcher(duration: const Duration(milliseconds: 200), child: child);
       },
     );
   }
 }
 
-class _Panel extends StatelessWidget {
-  const _Panel({super.key, required this.controller, required this.phase});
+class _ListeningPanel extends StatelessWidget {
+  const _ListeningPanel({super.key, required this.controller});
 
   final AiVoiceController controller;
-  final VoicePhase phase;
-
-  bool get _listening => phase == VoicePhase.listening;
 
   @override
   Widget build(BuildContext context) {
-    final title = _listening ? 'Mendengarkan...' : 'Asisten berbicara...';
-
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
@@ -55,7 +48,7 @@ class _Panel extends StatelessWidget {
       },
       child: Semantics(
         liveRegion: true,
-        label: title,
+        label: 'Mendengarkan',
         child: Material(
           color: Colors.black.withValues(alpha: 0.62),
           child: SafeArea(
@@ -64,51 +57,57 @@ class _Panel extends StatelessWidget {
               child: Column(
                 children: [
                   const Spacer(flex: 2),
-                  _Orb(level: controller.level, speaking: !_listening),
+                  SizedBox(
+                    width: 240,
+                    height: 240,
+                    child: _Orb(level: controller.level, speaking: false),
+                  ),
                   const SizedBox(height: 24),
-                  Text(
-                    title,
-                    style: AppFont.semibold18
+                  const Text(
+                    'Mendengarkan...',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   const SizedBox(height: 12),
                   ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 420),
-                    child: _listening
-                        ? ValueListenableBuilder<String>(
-                            valueListenable: controller.transcript,
-                            builder: (_, text, __) => _Caption(
-                              text.isEmpty ? 'Silakan bicara' : text,
-                              dim: text.isEmpty,
-                            ),
-                          )
-                        : _Caption(controller.spokenText),
+                    child: ValueListenableBuilder<String>(
+                      valueListenable: controller.transcript,
+                      builder: (_, text, _) => Text(
+                        text.isEmpty ? 'Silakan bicara' : text,
+                        maxLines: 4,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: text.isEmpty ? 0.55 : 0.9),
+                          fontSize: 15,
+                          height: 1.35,
+                        ),
+                      ),
+                    ),
                   ),
                   const Spacer(flex: 3),
-                  if (_listening)
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      spacing: 12,
-                      children: [
-                        OutlinedButton(
-                          onPressed: controller.cancelListening,
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: Colors.white,
-                            side: const BorderSide(color: Colors.white54),
-                          ),
-                          child: const Text('Batal'),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    spacing: 12,
+                    children: [
+                      OutlinedButton(
+                        onPressed: controller.cancelListening,
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          side: const BorderSide(color: Colors.white54),
                         ),
-                        FilledButton(
-                          onPressed: controller.finishListening,
-                          child: const Text('Selesai', style: AppFont.medium12),
-                        ),
-                      ],
-                    )
-                  else
-                    FilledButton.icon(
-                      onPressed: controller.stopSpeaking,
-                      icon: const Icon(Icons.stop_rounded),
-                      label: const Text('Hentikan', style: AppFont.medium12),
-                    ),
+                        child: const Text('Batal'),
+                      ),
+                      FilledButton(
+                        onPressed: controller.finishListening,
+                        child: const Text('Selesai'),
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),
@@ -119,32 +118,81 @@ class _Panel extends StatelessWidget {
   }
 }
 
-class _Caption extends StatelessWidget {
-  const _Caption(this.text, {this.dim = false});
+class _SpeakingBanner extends StatelessWidget {
+  const _SpeakingBanner({super.key, required this.controller});
 
-  final String text;
-  final bool dim;
+  final AiVoiceController controller;
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      text,
-      maxLines: 4,
-      overflow: TextOverflow.ellipsis,
-      textAlign: TextAlign.center,
-      style: AppFont.medium14.copyWith(
-        color: Colors.white.withValues(alpha: dim ? 0.55 : 0.9),
-        height: 1.35,
+    return Align(
+      alignment: Alignment.bottomCenter,
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Semantics(
+          liveRegion: true,
+          label: 'Asisten berbicara',
+          child: Material(
+            color: Colors.black.withValues(alpha: 0.86),
+            elevation: 6,
+            borderRadius: BorderRadius.circular(16),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(12, 8, 4, 8),
+              child: Row(
+                spacing: 12,
+                children: [
+                  SizedBox(
+                    width: 44,
+                    height: 44,
+                    child: _Orb(level: controller.level, speaking: true, iconSize: 20),
+                  ),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text(
+                          'Asisten berbicara...',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        Text(
+                          controller.spokenText,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.75),
+                            fontSize: 13,
+                            height: 1.3,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: controller.stopSpeaking,
+                    style: TextButton.styleFrom(foregroundColor: Colors.white),
+                    child: const Text('Hentikan'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
 }
 
 class _Orb extends StatefulWidget {
-  const _Orb({required this.level, required this.speaking});
+  const _Orb({required this.level, required this.speaking, this.iconSize = 40});
 
   final ValueListenable<double> level;
   final bool speaking;
+  final double iconSize;
 
   @override
   State<_Orb> createState() => _OrbState();
@@ -174,38 +222,40 @@ class _OrbState extends State<_Orb> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 240,
-      height: 240,
-      child: AnimatedBuilder(
-        animation: Listenable.merge([_anim, widget.level]),
-        builder: (context, _) => CustomPaint(
-          painter: _OrbPainter(
-            t: _anim.value,
-            level: widget.level.value,
-            speaking: widget.speaking,
-            color: AppColor.primaryColor,
-          ),
-          child: Center(
-            child: Icon(
-              widget.speaking ? Icons.volume_up_rounded : Icons.mic_rounded,
-              size: 40,
-              color: Colors.white,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final side = constraints.hasBoundedWidth && constraints.maxWidth.isFinite
+            ? constraints.maxWidth
+            : 240.0;
+        return SizedBox(
+          width: side,
+          height: side,
+          child: AnimatedBuilder(
+            animation: Listenable.merge([_anim, widget.level]),
+            builder: (context, _) => CustomPaint(
+              painter: _OrbPainter(
+                t: _anim.value,
+                level: widget.level.value,
+                speaking: widget.speaking,
+                color: AppColor.primaryColor,
+              ),
+              child: Center(
+                child: Icon(
+                  widget.speaking ? Icons.volume_up_rounded : Icons.mic_rounded,
+                  size: widget.iconSize,
+                  color: Colors.white,
+                ),
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
 
 class _OrbPainter extends CustomPainter {
-  _OrbPainter({
-    required this.t,
-    required this.level,
-    required this.speaking,
-    required this.color,
-  });
+  _OrbPainter({required this.t, required this.level, required this.speaking, required this.color});
 
   final double t; // 0..1 loop
   final double level; // 0..1 microphone level
@@ -218,29 +268,17 @@ class _OrbPainter extends CustomPainter {
     final base = size.shortestSide * 0.22;
 
     for (var i = 3; i >= 1; i--) {
-      final wave = speaking
-          ? 0.5 + 0.5 * math.sin(t * 2 * math.pi * 2 - i * 0.9)
-          : level;
+      // Listening follows the microphone; speaking is a travelling ripple.
+      final wave = speaking ? 0.5 + 0.5 * math.sin(t * 2 * math.pi * 2 - i * 0.9) : level;
       final radius = base + i * size.shortestSide * 0.09 * (0.6 + 0.8 * wave);
-      canvas.drawCircle(
-        center,
-        radius,
-        Paint()..color = color.withValues(alpha: 0.34 - 0.08 * i),
-      );
+      canvas.drawCircle(center, radius, Paint()..color = color.withValues(alpha: 0.34 - 0.08 * i));
     }
 
     final pulse = speaking ? 0.5 + 0.5 * math.sin(t * 2 * math.pi * 2) : level;
-    canvas.drawCircle(
-      center,
-      base * (1 + 0.12 * pulse),
-      Paint()..color = color,
-    );
+    canvas.drawCircle(center, base * (1 + 0.12 * pulse), Paint()..color = color);
   }
 
   @override
   bool shouldRepaint(_OrbPainter old) =>
-      old.t != t ||
-      old.level != level ||
-      old.speaking != speaking ||
-      old.color != color;
+      old.t != t || old.level != level || old.speaking != speaking || old.color != color;
 }

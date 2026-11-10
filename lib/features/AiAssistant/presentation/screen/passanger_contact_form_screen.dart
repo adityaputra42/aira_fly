@@ -42,11 +42,24 @@ String? passengerFormTotalText(AiTurnEntity turn) {
 String _thousands(int v) =>
     v.toString().replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (_) => '.');
 
+
+bool passengerStepAccepted(AiChatStatus status, AiTurnEntity? turn) =>
+    status == AiChatStatus.ready && turn != null && turn.state != AiState.collectingPassengerData;
+
 class PassangerContactFormScreen extends StatefulWidget {
-  const PassangerContactFormScreen({super.key, required this.pax, this.totalText});
+  const PassangerContactFormScreen({
+    super.key,
+    required this.pax,
+    this.totalText,
+    this.firstTravel,
+    this.lastTravel,
+  });
 
   final AiPassengerSummaryEntity pax;
   final String? totalText;
+
+  final DateTime? firstTravel;
+  final DateTime? lastTravel;
 
   @override
   State<PassangerContactFormScreen> createState() => _PassangerContactFormScreenState();
@@ -97,6 +110,8 @@ class _PassangerContactFormScreenState extends State<PassangerContactFormScreen>
         passengerType: slot.type,
         label: slot.label,
         initial: _passengers[index],
+        firstTravel: widget.firstTravel,
+        lastTravel: widget.lastTravel,
       ),
     );
     if (result == null || !mounted) return;
@@ -124,7 +139,6 @@ class _PassangerContactFormScreenState extends State<PassangerContactFormScreen>
         passengers: _passengers.whereType<AiPassengerEntity>().toList(),
       ),
     );
-    Navigator.of(context).pop();
   }
 
   void _onBlocChanged(BuildContext context, AiAssistantState state) {
@@ -135,9 +149,13 @@ class _PassangerContactFormScreenState extends State<PassangerContactFormScreen>
 
       TopSnackbarHelper.error(
         context,
-        message: state.turn?.message ??
-            'Failed to submit passenger information.',
+        message: state.failure?.message ?? 'Failed to submit passenger information.',
       );
+      return;
+    }
+
+    if (passengerStepAccepted(state.status, state.turn)) {
+      Navigator.of(context).pop();
     }
   }
 

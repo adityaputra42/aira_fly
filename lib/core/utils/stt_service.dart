@@ -76,7 +76,6 @@ class SpeechToTextService {
 
   String get recognizedText => recognizedTextNotifier.value;
 
-
   Future<bool> initialize({
     bool debugLogging = false,
     Duration finalTimeout = const Duration(seconds: 2),
@@ -104,7 +103,7 @@ class SpeechToTextService {
         onError: _onError,
       );
 
-      _initialized = true;
+      _initialized = available;
 
       availableNotifier.value = available;
       hasPermissionNotifier.value = await _speech.hasPermission;

@@ -1,7 +1,8 @@
 // ignore_for_file: use_build_context_synchronously
 
-import 'dart:math' as math;
 import 'dart:async';
+import 'dart:math' as math;
+
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -14,6 +15,7 @@ import 'package:pss_app/app/theme/theme.dart';
 import 'package:pss_app/core/common/cubit/user_cubit.dart';
 import 'package:pss_app/core/common/widget/card_general.dart';
 import 'package:pss_app/core/common/widget/primary_button.dart';
+import 'package:pss_app/core/constants/images.dart';
 import 'package:pss_app/core/utils/clipper.dart';
 import 'package:pss_app/core/utils/dashed_divider.dart';
 import 'package:pss_app/core/utils/size_extension.dart';
@@ -31,6 +33,7 @@ import 'package:pss_app/features/flight/presentation/utils/flight_display_utils.
 import '../../../../../app/init_dependencies.dart';
 import '../../../../../app/routes/route_names.dart';
 import '../../../../../core/utils/top_snackbar_helper.dart';
+import '../../../../wallet/presentation/bloc/wallet_bloc.dart';
 import '../../flightResult/screen/flight_result_screen.dart';
 
 part '../widget/card_ticket_booking_detail.dart';
@@ -52,7 +55,8 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
   late final BookingBloc _bookingBloc;
   late final AncillaryBloc _ancillaryBloc;
   late final PaymentBloc _paymentBloc;
-
+  late final WalletBloc _walletBloc;
+  bool _balanceRequested = false;
   _Step _step = _Step.review;
   String? processingMessage;
   String? _errorMessage;
@@ -68,6 +72,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
     _bookingBloc = serviceLocator<BookingBloc>();
     _ancillaryBloc = serviceLocator<AncillaryBloc>();
     _paymentBloc = serviceLocator<PaymentBloc>();
+    _walletBloc = serviceLocator<WalletBloc>();
   }
 
   FlightResultArguments get _search => widget.result.paxBookingResult.searchArguments;
@@ -151,7 +156,28 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
             ),
           );
         }
+        if (_paymentMethod == 'BALANCE') {
+          final walletState = _walletBloc.state;
 
+          if (walletState.balanceStatus != WalletStatus.success) {
+            TopSnackbarHelper.error(
+              context,
+              message: "Unable to retrieve wallet balance.",
+            );
+            return;
+          }
+
+          final balance = walletState.balance?.balance ?? 0;
+          final totalAmount = _pnr?.totalAmount ?? _estimatedTotal;
+
+          if (balance < totalAmount) {
+            TopSnackbarHelper.error(
+              context,
+              message: "Insufficient wallet balance.",
+            );
+            return;
+          }
+        }
         _bookingBloc.add(
           CreatePnrRequested(
             contact: _contact,
@@ -208,6 +234,12 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
     }
   }
 
+  void _loadWalletBalance() {
+    if (_balanceRequested) return;
+
+    _balanceRequested = true;
+    _walletBloc.add(LoadBalanceRequested());
+  }
   Future<void> _purchaseAncillaries(PnrDetailEntity pnr) async {
     final allSelections = [...widget.result.baggage, ...widget.result.meals];
     if (allSelections.isEmpty) return;
@@ -252,6 +284,23 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
       }
     }
   }
+
+
+  bool _initialAuthChecked = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    if (_initialAuthChecked) return;
+    _initialAuthChecked = true;
+
+    if (context
+        .read<UserCubit>()
+        .state is UserLoggedIn) {
+      _loadWalletBalance();
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
@@ -265,6 +314,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
           context: context,
           title: "Booking Detail",
           color: AppColor.primaryColor,
+          isCanBack: _step != _Step.done,
           titleColor: AppColor.darkText1,
         ),
         body: SafeArea(
@@ -380,276 +430,394 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
     final fareSegments = _buildFareBreakdown();
     final isRetryingPayment = _pnr != null;
 
-    return BlocBuilder<UserCubit, UserState>(
-      builder: (context, userState) {
-        final isLoggedIn = userState is UserLoggedIn;
-
-        if (!isLoggedIn && _paymentMethod == 'BALANCE') {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) setState(() => _paymentMethod = 'DOKU_VA');
-          });
+    return BlocListener<UserCubit, UserState>(
+      listener: (context, state) {
+        if (state is UserLoggedIn) {
+          _loadWalletBalance();
+        } else {
+          _balanceRequested = false;
         }
+      },
+      child: BlocBuilder<UserCubit, UserState>(
+        builder: (context, userState) {
+          final isLoggedIn = userState is UserLoggedIn;
 
-        return Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.only(top: 12, bottom: 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (_errorMessage != null)
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-                        child: Text(
-                          _errorMessage!,
-                          style: AppFont.reguler12.copyWith(color: Colors.red),
-                        ),
-                      ),
-                    if (_ancillaryFailures.isNotEmpty)
-                      Container(
-                        width: double.infinity,
-                        margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.orange.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.orange, width: 0.5),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Some addons could not be attached:",
-                              style: AppFont.medium12.copyWith(color: Colors.orange.shade800),
-                            ),
-                            widget.height(4),
-                            for (final failure in _ancillaryFailures)
-                              Text(
-                                "\u2022 $failure",
-                                style: AppFont.reguler12.copyWith(color: Colors.orange.shade800),
-                              ),
-                          ],
-                        ),
-                      ),
-                    CarouselTicket(legs: _buildLegs()),
-                    widget.height(4),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Text("Contact", style: AppFont.medium14),
-                    ),
-                    widget.height(8),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: CardGeneral(
-                        width: double.infinity,
-                        margin: EdgeInsets.zero,
-                        padding: const EdgeInsets.all(12),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(_contact.fullName, style: AppFont.medium14),
-                            widget.height(4),
-                            if (_contact.email != null)
-                              Text(
-                                _contact.email!,
-                                style: AppFont.reguler12.copyWith(
-                                  color: Theme.of(context).hintColor,
-                                ),
-                              ),
-                            Text(
-                              _contact.phone,
-                              style: AppFont.reguler12.copyWith(color: Theme.of(context).hintColor),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    widget.height(16),
-                    // Passenger detail.
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Text("Passengers", style: AppFont.medium14),
-                    ),
-                    widget.height(8),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: CardGeneral(
-                        margin: EdgeInsets.zero,
-                        padding: const EdgeInsets.all(12),
-                        child: Column(
-                          children: [
-                            for (var i = 0; i < _passengers.length; i++)
-                              Padding(
-                                padding: EdgeInsets.only(
-                                  bottom: i == _passengers.length - 1 ? 0 : 8,
-                                ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(_passengerLabel(i), style: AppFont.reguler14),
-                                    Text(
-                                      _passengers[i].passengerType,
-                                      style: AppFont.reguler12.copyWith(
-                                        color: Theme.of(context).hintColor,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    // Price Detail -- real fare breakdown + ancillary totals.
-                    PriceDetail(
-                      segments: fareSegments,
-                      baggageTotal: sumAncillaryPrices(widget.result.baggage),
-                      mealTotal: sumAncillaryPrices(widget.result.meals),
-                      total: _pnr?.totalAmount ?? _estimatedTotal,
-                    ),
-                    // Payment method.
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Text("Payment Method", style: AppFont.medium14),
-                    ),
-                    widget.height(8),
-                    CardGeneral(
-                      margin: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Column(
-                        spacing: 16,
-                        children: [
-                          InkWell(
-                            onTap: () {
-                              setState(() => _paymentMethod = "DOKU_VA");
-                            },
-                            child: CardGeneral(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 16, vertical: 8),
-                              background: _paymentMethod == "DOKU_VA"
-                                  ? AppColor.secondaryColor.withValues(alpha: 0.25)
-                                  : Theme.of(context).colorScheme.surface,
-                              margin: EdgeInsets.zero,
-                              useShadow: false,
-                              border: _paymentMethod == "DOKU_VA"
-                                  ? Border.all(width: 1, color: AppColor.secondaryColor)
-                                  : null,
-                              child: Row(
-                                spacing: 16,
-                                children: [
-                                  Icon(
-                                    Icons.credit_card_rounded,
-                                    size: 24,
-                                    color: AppColor.secondaryColor,
-                                  ),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text("Virtual Account", style: AppFont.medium14),
-                                        Text(
-                                          "Virtual Account",
-                                          style: AppFont.reguler12.copyWith(
-                                            color: Theme.of(context).hintColor,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Icon(_paymentMethod == "DOKU_VA" ? Icons
-                                      .radio_button_checked : Icons
-                                      .radio_button_unchecked, size: 20,
-                                      color: _paymentMethod == "DOKU_VA"
-                                          ? AppColor.greenColor : Theme
-                                          .of(context)
-                                          .hintColor)
-                                ],
-                              ),
-                            ),
+
+          if (!isLoggedIn && _paymentMethod == 'BALANCE') {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) setState(() => _paymentMethod = 'DOKU_VA');
+            });
+          }
+
+
+          return Column(
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.only(top: 12, bottom: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (_errorMessage != null)
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                          child: Text(
+                            _errorMessage!,
+                            style: AppFont.reguler12.copyWith(
+                                color: Colors.red),
                           ),
-                          Visibility(visible: isLoggedIn,
-                                child: InkWell(
-                                  onTap: () {
-                                    setState(() => _paymentMethod = "BALANCE");
-                                  },
-                                  child: CardGeneral(padding: EdgeInsets.symmetric(
-                                      horizontal: 16, vertical: 8),
-                                    background: _paymentMethod == "BALANCE"
-                                        ? AppColor.secondaryColor.withValues(alpha: 0.25)
-                                        : Theme.of(context).colorScheme.surface,
-                                    margin: EdgeInsets.zero,
-                                    useShadow: false,
-                                    border: _paymentMethod == "BALANCE"
-                                        ? Border.all(width: 1, color: AppColor.secondaryColor)
-                                        : null,
-                                    child: Row(
-                                      spacing: 16,
-                                      children: [
-                                        Icon(
-                                          Icons.wallet_rounded,
-                                          size: 24,
-                                          color: AppColor.secondaryColor,
-                                        ),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Text("Wallet Balance", style: AppFont.medium14),
-                                              Text(
-                                                "Virtual Account",
-                                                style: AppFont.reguler12.copyWith(
-                                                  color: Theme.of(context).hintColor,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        Icon(_paymentMethod == "BALANCE" ? Icons
-                                            .radio_button_checked : Icons
-                                            .radio_button_unchecked, size: 20,
-                                            color: _paymentMethod == "BALANCE"
-                                                ? AppColor.greenColor : Theme
-                                                .of(context)
-                                                .hintColor)
-                                      ],
-                                    ),
-                                  ),
-                                ),
-
+                        ),
+                      if (_ancillaryFailures.isNotEmpty)
+                        Container(
+                          width: double.infinity,
+                          margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.orange.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                                color: Colors.orange, width: 0.5),
                           ),
-                        ],
-                      ),
-
-                    ),
-                    if (!isLoggedIn) ...[
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Some addons could not be attached:",
+                                style: AppFont.medium12.copyWith(
+                                    color: Colors.orange.shade800),
+                              ),
+                              widget.height(4),
+                              for (final failure in _ancillaryFailures)
+                                Text(
+                                  "\u2022 $failure",
+                                  style: AppFont.reguler12.copyWith(
+                                      color: Colors.orange.shade800),
+                                ),
+                            ],
+                          ),
+                        ),
+                      CarouselTicket(legs: _buildLegs()),
                       widget.height(4),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Text(
-                          "Sign in to also pay with your wallet balance.",
-                          style: AppFont.reguler12.copyWith(color: Theme.of(context).hintColor),
+                        child: Text("Contact", style: AppFont.medium14),
+                      ),
+                      widget.height(8),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: CardGeneral(
+                          width: double.infinity,
+                          margin: EdgeInsets.zero,
+                          padding: const EdgeInsets.all(12),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(_contact.fullName, style: AppFont.medium14),
+                              widget.height(4),
+                              if (_contact.email != null)
+                                Text(
+                                  _contact.email!,
+                                  style: AppFont.reguler12.copyWith(
+                                    color: Theme
+                                        .of(context)
+                                        .hintColor,
+                                  ),
+                                ),
+                              Text(
+                                _contact.phone,
+                                style: AppFont.reguler12.copyWith(color: Theme
+                                    .of(context)
+                                    .hintColor),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
+                      widget.height(16),
+                      // Passenger detail.
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Text("Passengers", style: AppFont.medium14),
+                      ),
+                      widget.height(8),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: CardGeneral(
+                          margin: EdgeInsets.zero,
+                          padding: const EdgeInsets.all(12),
+                          child: Column(
+                            children: [
+                              for (var i = 0; i < _passengers.length; i++)
+                                Padding(
+                                  padding: EdgeInsets.only(
+                                    bottom: i == _passengers.length - 1 ? 0 : 8,
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment
+                                        .spaceBetween,
+                                    children: [
+                                      Text(_passengerLabel(i),
+                                          style: AppFont.reguler14),
+                                      Text(
+                                        _passengers[i].passengerType,
+                                        style: AppFont.reguler12.copyWith(
+                                          color: Theme
+                                              .of(context)
+                                              .hintColor,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      // Price Detail -- real fare breakdown + ancillary totals.
+                      PriceDetail(
+                        segments: fareSegments,
+                        baggageTotal: sumAncillaryPrices(widget.result.baggage),
+                        mealTotal: sumAncillaryPrices(widget.result.meals),
+                        total: _pnr?.totalAmount ?? _estimatedTotal,
+                      ),
+                      // Payment method.
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Text("Payment Method", style: AppFont.medium14),
+                      ),
+                      widget.height(8),
+                      CardGeneral(
+                        margin: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Column(
+                          spacing: 16,
+                          children: [
+                            InkWell(
+                              onTap: () {
+                                setState(() => _paymentMethod = "DOKU_VA");
+                              },
+                              child: CardGeneral(
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 8),
+                                background: _paymentMethod == "DOKU_VA"
+                                    ? AppColor.secondaryColor.withValues(
+                                    alpha: 0.25)
+                                    : Theme
+                                    .of(context)
+                                    .colorScheme
+                                    .surface,
+                                margin: EdgeInsets.zero,
+                                useShadow: false,
+                                border: _paymentMethod == "DOKU_VA"
+                                    ? Border.all(
+                                    width: 1, color: AppColor.secondaryColor)
+                                    : null,
+                                child: Row(
+                                  spacing: 16,
+                                  children: [
+                                    Icon(
+                                      Icons.credit_card_rounded,
+                                      size: 24,
+                                      color: AppColor.secondaryColor,
+                                    ),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment
+                                            .start,
+                                        children: [
+                                          Text("Virtual Account",
+                                              style: AppFont.medium14),
+                                          Text(
+                                            "Doku Virtual Account",
+                                            style: AppFont.reguler12.copyWith(
+                                              color: Theme
+                                                  .of(context)
+                                                  .hintColor,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Icon(_paymentMethod == "DOKU_VA" ? Icons
+                                        .radio_button_checked : Icons
+                                        .radio_button_unchecked, size: 20,
+                                        color: _paymentMethod == "DOKU_VA"
+                                            ? AppColor.greenColor : Theme
+                                            .of(context)
+                                            .hintColor)
+                                  ],
+                                ),
+                              ),
+                            ),
+                            Visibility(visible: isLoggedIn,
+                                child: BlocBuilder<WalletBloc, WalletState>(
+                                  bloc: _walletBloc,
+                                  builder: (context, state) {
+                                    final balance = state.balance?.balance ?? 0;
+                                    final isBalanceLoaded =
+                                        state.balanceStatus ==
+                                            WalletStatus.success;
+
+                                    final totalAmount = _pnr?.totalAmount ??
+                                        _estimatedTotal;
+
+                                    final isBalanceSufficient = isBalanceLoaded &&
+                                        balance >= totalAmount;
+
+                                    return InkWell(
+                                      onTap: () {
+                                        if (!isBalanceLoaded) {
+                                          TopSnackbarHelper.error(
+                                            context,
+                                            message: "Wallet balance is not available yet.",
+                                          );
+                                          return;
+                                        }
+
+                                        if (!isBalanceSufficient) {
+                                          TopSnackbarHelper.error(
+                                            context,
+                                            message: "Insufficient wallet balance.",
+                                          );
+                                          return;
+                                        }
+
+                                        setState(() =>
+                                        _paymentMethod = "BALANCE");
+                                      },
+                                      child: CardGeneral(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 16,
+                                          vertical: 8,
+                                        ),
+                                        background: _paymentMethod == "BALANCE"
+                                            ? AppColor.secondaryColor
+                                            .withValues(alpha: 0.25)
+                                            : Theme
+                                            .of(context)
+                                            .colorScheme
+                                            .surface,
+                                        margin: EdgeInsets.zero,
+                                        useShadow: false,
+                                        border: _paymentMethod == "BALANCE"
+                                            ? Border.all(
+                                          width: 1,
+                                          color: AppColor.secondaryColor,
+                                        )
+                                            : null,
+                                        child: Row(
+                                          spacing: 16,
+                                          children: [
+                                            Icon(
+                                              Icons.wallet_rounded,
+                                              size: 24,
+                                              color: AppColor.secondaryColor,
+                                            ),
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment
+                                                    .start,
+                                                children: [
+                                                  Text(
+                                                    "Wallet Balance",
+                                                    style: AppFont.medium14,
+                                                  ),
+                                                  if (state.balanceStatus ==
+                                                      WalletStatus.success)
+                                                    Text(
+                                                      "Your balance ${NumberFormat
+                                                          .currency(
+                                                        symbol: "Rp.",
+                                                        decimalDigits: 0,
+                                                        locale: "id_ID",
+                                                      ).format(balance)}",
+                                                      style: AppFont.reguler12
+                                                          .copyWith(
+                                                        color: Theme
+                                                            .of(context)
+                                                            .hintColor,
+                                                      ),
+                                                    )
+                                                  else
+                                                    Text(
+                                                      "Loading wallet balance...",
+                                                      style: AppFont.reguler12
+                                                          .copyWith(
+                                                        color: Theme
+                                                            .of(context)
+                                                            .hintColor,
+                                                      ),
+                                                    ),
+                                                  if (isBalanceLoaded &&
+                                                      !isBalanceSufficient)
+                                                    Text(
+                                                      "Insufficient balance",
+                                                      style: AppFont.reguler12
+                                                          .copyWith(
+                                                        color: Colors.red,
+                                                      ),
+                                                    ),
+                                                ],
+                                              ),
+                                            ),
+                                            Icon(
+                                              _paymentMethod == "BALANCE"
+                                                  ? Icons.radio_button_checked
+                                                  : Icons
+                                                  .radio_button_unchecked,
+                                              size: 20,
+                                              color: _paymentMethod == "BALANCE"
+                                                  ? AppColor.greenColor
+                                                  : Theme
+                                                  .of(context)
+                                                  .hintColor,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                )
+
+                            ),
+                          ],
+                        ),
+
+                      ),
+                      if (!isLoggedIn) ...[
+                        widget.height(4),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Text(
+                            "Sign in to also pay with your wallet balance.",
+                            style: AppFont.reguler12.copyWith(color: Theme
+                                .of(context)
+                                .hintColor),
+                          ),
+                        ),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
               ),
-            ),
-            _bottomBar(
-              label: isRetryingPayment ? "Total" : "Estimated Total",
-              amount: _pnr?.totalAmount ?? _estimatedTotal,
-              buttonLabel: isRetryingPayment ? "Retry Payment" : "Confirm & Pay",
-              onPressed: () {
-                if (_paymentMethod == 'BALANCE' && !isLoggedIn) {
-                  TopSnackbarHelper.error(context, message: "Sign in to pay with your wallet balance.");
-                  return;
-                }
-                _confirmAndPay();
-              },
-            ),
-          ],
-        );
-      },
+              _bottomBar(
+                label: isRetryingPayment ? "Total" : "Estimated Total",
+                amount: _pnr?.totalAmount ?? _estimatedTotal,
+                buttonLabel: isRetryingPayment
+                    ? "Retry Payment"
+                    : "Confirm & Pay",
+                onPressed: () {
+                  if (_paymentMethod == 'BALANCE' && !isLoggedIn) {
+                    TopSnackbarHelper.error(context,
+                        message: "Sign in to pay with your wallet balance.");
+                    return;
+                  }
+                  _confirmAndPay();
+                },
+              ),
+            ],
+          );
+        },
+      ),
     );
   }
 
@@ -665,7 +833,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.check_circle_rounded, color: AppColor.greenColor, size: 64),
+            Image.asset(AppImages.schedule, width: context.w(0.6),),
             widget.height(16),
             Text(
               isInstantlyPaid ? "Payment Successful" : "Booking Confirmed",

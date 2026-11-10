@@ -13,12 +13,10 @@ import '../bloc/ai_assistant_bloc.dart';
 import '../voice/ai_voice_controller.dart';
 import '../voice/ai_voice_overlay.dart';
 import '../voice/ai_voice_ports.dart';
-// import '../widget/chat_drawer.dart';
 import '../widget/chat_input.dart';
 import '../widget/chat_message_bubble.dart';
-// import '../widget/chat_suggestions.dart';
 import '../widget/chat_typing_indicator.dart';
-// import 'chat_history_screen.dart';
+import 'passanger_contact_form_screen.dart';
 
 class ChatScreen extends StatelessWidget {
   const ChatScreen({super.key});
@@ -102,6 +100,32 @@ class _ChatViewState extends State<_ChatView> with WidgetsBindingObserver {
     }
   }
 
+  Future<void> _openPassengerForm(AiTurnEntity? turn) async {
+    unawaited(_voice.stopAll()); // never talk over a form
+    final search = turn?.search;
+    if (turn == null || search == null) {
+      TopSnackbarHelper.error(
+        context,
+        message:
+            'Data pencarian tidak tersedia, jumlah penumpang tidak diketahui. Mulai chat baru.',
+      );
+      return;
+    }
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => BlocProvider.value(
+          value: _bloc,
+          child: PassangerContactFormScreen(
+            pax: search.passengers,
+            totalText: passengerFormTotalText(turn),
+            firstTravel: search.departureDate,
+            lastTravel: search.returnDate ?? search.departureDate,
+          ),
+        ),
+      ),
+    );
+  }
+
   Future<void> _onMic() async {
     FocusScope.of(context).unfocus();
     final problem = await _voice.toggleMic();
@@ -118,33 +142,6 @@ class _ChatViewState extends State<_ChatView> with WidgetsBindingObserver {
       );
     });
   }
-
-  List<ChatConversationEntity> _conversations(AiAssistantState s) {
-    final id = s.conversationId;
-    final users = s.messages.where((m) => m.isUser);
-    if (id == null || users.isEmpty) return const [];
-    return [
-      ChatConversationEntity(
-        id: id,
-        title: users.first.text,
-        preview: s.messages.last.text,
-        updatedAt: s.messages.last.createdAt,
-      ),
-    ];
-  }
-  //
-  // void _openHistory(List<ChatConversationEntity> conversations) {
-  //   Navigator.pop(context);
-  //   Navigator.push(
-  //     context,
-  //     MaterialPageRoute(
-  //       builder: (_) => ChatHistoryScreen(
-  //         conversations: conversations,
-  //         onConversationSelected: (_) => Navigator.pop(context),
-  //       ),
-  //     ),
-  //   );
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -172,24 +169,15 @@ class _ChatViewState extends State<_ChatView> with WidgetsBindingObserver {
         if (state.status == AiChatStatus.failure && failure != null) {
           TopSnackbarHelper.error(context, message: failure.message);
 
-          if (failure.conversationGone) context.read<AiAssistantBloc>().add(const AiNewChatRequested());
+          if (failure.conversationGone) {
+            context.read<AiAssistantBloc>().add(const AiNewChatRequested());
+          }
         }
       },
       builder: (context, state) {
-        final conversations = _conversations(state);
         final lastIndex = state.messages.length - 1;
 
         return Scaffold(
-          // endDrawer: ChatDrawer(
-          //   conversations: conversations,
-          //   activeConversationId: state.conversationId,
-          //   onNewChat: () {
-          //     Navigator.pop(context);
-          //     _bloc.add(const AiNewChatRequested());
-          //   },
-          //   onViewAll: () => _openHistory(conversations),
-          //   onConversationSelected: (_) => Navigator.pop(context),
-          // ),
           appBar: WidgetHelper.appBar(
             context: context,
             title: 'AI Assistant',
@@ -199,75 +187,83 @@ class _ChatViewState extends State<_ChatView> with WidgetsBindingObserver {
           body: Stack(
             children: [
               Column(
-            children: [
-              if (state.shouldFallbackToForm)
-                MaterialBanner(
-                  content: const Text('Asisten sedang tidak tersedia. Gunakan pemesanan biasa.'),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.of(context).maybePop(),
-                      child: const Text('Pemesanan biasa'),
-                    ),
-                  ],
-                ),
-              Expanded(
-                child: state.messages.isEmpty && !state.isBusy
-                    ? const Center(child: Text('Start a conversation'))
-                    : ListView.builder(
-                        controller: _scrollController,
-                        padding: const EdgeInsets.fromLTRB(16, 20, 16, 12),
-                        itemCount: state.messages.length + (state.isBusy ? 1 : 0),
-                        itemBuilder: (context, index) {
-                          if (index == state.messages.length) return const ChatTypingIndicator();
-
-                          final message = state.messages[index];
-
-                          final active = index == lastIndex && !state.isBusy;
-
-                          return ChatMessageBubble(
-                            message: message,
-                            onSelectFlight: active
-                                ? (offer, fare, ret) => _bloc.add(
-                                    AiFlightSelected(
-                                      departureOptionId: offer.optionId,
-                                      fareClassId: fare.fareClassId,
-                                      returnOptionId: ret?.optionId,
-                                    ),
-                                  )
-                                : null,
-                            onConfirmBooking: active ? () => _bloc.add(const AiBookingConfirmed()) : null,
-                            onPay: active ? (channel) => _bloc.add(AiPaymentConfirmed(channel)) : null,
-                            onRefreshPayment: active ? () => _bloc.add(const AiPaymentRefreshed()) : null,
-                            onFillPassengers: active
-                                ? () => TopSnackbarHelper.error(
-                                    context,
-                                    message: 'Form data penumpang belum tersedia.',
-                                  )
-                                : null,
-                            onRetry: index == lastIndex && !state.isBusy
-                                ? () => state.conversationId == null
-                                      ? _bloc.add(const AiChatStarted())
-                                      : _bloc.add(const AiRetryRequested())
-                                : null,
-                          );
-                        },
+                children: [
+                  if (state.shouldFallbackToForm)
+                    MaterialBanner(
+                      content: const Text(
+                        'Asisten sedang tidak tersedia. Gunakan pemesanan biasa.',
                       ),
-              ),
-              // finished / failed / cancelled: the server only allows "start new".
-              if (state.turn?.can(AiAction.startNew) ?? false)
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: FilledButton(
-                      onPressed: state.isBusy ? null : () => _bloc.add(const AiNewChatRequested()),
-                      child: const Text('Start new chat'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).maybePop(),
+                          child: const Text('Pemesanan biasa'),
+                        ),
+                      ],
                     ),
+                  Expanded(
+                    child: state.messages.isEmpty && !state.isBusy
+                        ? const Center(child: Text('Start a conversation'))
+                        : ListView.builder(
+                            controller: _scrollController,
+                            padding: const EdgeInsets.fromLTRB(16, 20, 16, 12),
+                            itemCount: state.messages.length + (state.isBusy ? 1 : 0),
+                            itemBuilder: (context, index) {
+                              if (index == state.messages.length) {
+                                return const ChatTypingIndicator();
+                              }
+
+                              final message = state.messages[index];
+
+                              final active = index == lastIndex && !state.isBusy;
+
+                              return ChatMessageBubble(
+                                message: message,
+                                onSelectFlight: active
+                                    ? (offer, fare, ret) => _bloc.add(
+                                        AiFlightSelected(
+                                          departureOptionId: offer.optionId,
+                                          fareClassId: fare.fareClassId,
+                                          returnOptionId: ret?.optionId,
+                                        ),
+                                      )
+                                    : null,
+                                onConfirmBooking: active
+                                    ? () => _bloc.add(const AiBookingConfirmed())
+                                    : null,
+                                onPay: active
+                                    ? (channel) => _bloc.add(AiPaymentConfirmed(channel))
+                                    : null,
+                                onRefreshPayment: active
+                                    ? () => _bloc.add(const AiPaymentRefreshed())
+                                    : null,
+                                onFillPassengers: active
+                                    ? () => _openPassengerForm(message.turn ?? state.turn)
+                                    : null,
+                                onRetry: index == lastIndex && !state.isBusy
+                                    ? () => state.conversationId == null
+                                          ? _bloc.add(const AiChatStarted())
+                                          : _bloc.add(const AiRetryRequested())
+                                    : null,
+                              );
+                            },
+                          ),
                   ),
-                ),
-              // if (state.canSendMessage) ChatSuggestions(onSelected: _sendMessage),
-            ],
-          ),
+                  // finished / failed / cancelled: the server only allows "start new".
+                  if (state.turn?.can(AiAction.startNew) ?? false)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: FilledButton(
+                          onPressed: state.isBusy
+                              ? null
+                              : () => _bloc.add(const AiNewChatRequested()),
+                          child: const Text('Start new chat'),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
               Positioned.fill(child: AiVoiceOverlay(controller: _voice)),
             ],
           ),
@@ -280,7 +276,8 @@ class _ChatViewState extends State<_ChatView> with WidgetsBindingObserver {
               listening: _voice.listening,
               voiceReplies: _voice.voiceReplies,
               onToggleVoiceReplies: () => _voice.setVoiceReplies(!_voice.voiceReplies),
-              onAttachment: () => TopSnackbarHelper.error(context, message: 'Attachment is not available yet.'),
+              onAttachment: () =>
+                  TopSnackbarHelper.error(context, message: 'Attachment is not available yet.'),
               enabled: state.canSendMessage,
             ),
           ),

@@ -62,12 +62,20 @@ class CardDetailFlight extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         generateDashedDivider(context.w(0.2), dashColor: AppColor.secondaryColor),
-                        width(8),
-                        Iconify(
+                        width(8), searchArguments.tripType == "round_trip" ? Iconify(
                           MaterialSymbols.connecting_airports_rounded,
                           color: AppColor.secondaryColor,
                           size: 24,
+                        ) :
+                        Transform.rotate(
+                          angle: -math.pi / 0.66,
+                          child: Iconify(
+                            Bx.bxs_plane,
+                            color: AppColor.secondaryColor,
+                            size: 20,
+                          ),
                         ),
+
                         width(8),
                         generateDashedDivider(context.w(0.2), dashColor: AppColor.secondaryColor),
                       ],

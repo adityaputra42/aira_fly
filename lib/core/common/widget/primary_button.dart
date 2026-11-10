@@ -53,7 +53,7 @@ class PrimaryButton extends StatelessWidget {
         borderRadius: BorderRadius.circular(borderRadius ?? 8),
         color: !disable
             ? (bgColor ?? AppColor.primaryColor)
-            : (disableColor ?? Theme.of(context).cardColor),
+            : (disableColor ?? Theme.of(context).disabledColor),
       ),
       child: ElevatedButton(
         onHover: (value) {},

@@ -31,7 +31,7 @@ class NotificationTile extends StatelessWidget {
         spacing: 16,
         children: [
           CircleAvatar(
-            backgroundColor: theme.colorScheme.primary,
+            backgroundColor: AppColor.primaryColor,
             child: Icon(
               _iconFor(item.type),
               size: 24,

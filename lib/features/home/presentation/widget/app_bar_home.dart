@@ -19,7 +19,8 @@ class AppBarHome extends StatelessWidget {
       toolbarHeight: 60,
       expandedHeight: 60,
       automaticallyImplyLeading: false,
-      backgroundColor:AppColor.primaryColor,
+      backgroundColor: AppColor.primaryColor,
+      surfaceTintColor: AppColor.primaryColor,
       title: Row(
         children: [
           Expanded(

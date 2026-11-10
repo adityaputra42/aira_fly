@@ -5,7 +5,6 @@ import '../../../../core/usecase/usecase.dart';
 import '../entities/ai_assistant_entity.dart';
 import '../repository/ai_assistant_repository.dart';
 
-/// Approval is the button + summary_hash, never a chat sentence.
 class ConfirmAiBooking implements UseCase<AiTurnEntity, ConfirmAiBookingParams> {
   final AiAssistantRepository repository;
 

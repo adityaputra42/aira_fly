@@ -54,7 +54,7 @@ class CardBalance extends StatelessWidget {
                       Icon(Icons.visibility_outlined, size: 24, color: AppColor.darkText1),
                     ],
                   ),
-                  height(16),
+                  height(32),
                   Row(
                     children: [
                       Expanded(
