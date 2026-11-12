@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pss_app/app/theme/app_color.dart';
 import 'package:pss_app/app/theme/app_font.dart';
+import 'package:pss_app/core/common/widget/primary_button.dart';
+import 'package:pss_app/core/common/widget/secondary_button.dart';
 import 'package:pss_app/features/AiAssistant/domain/entities/ai_assistant_entity.dart';
 import 'package:pss_app/features/AiAssistant/domain/entities/chat_entity.dart';
 
@@ -60,18 +62,18 @@ class ChatMessageBubble extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           CircleAvatar(
-            radius: 17,
-            backgroundColor: colors.secondary.withValues(alpha: .14),
-            child: Image.asset(AppImages.aiIcon, width: 20),
+            radius: 16,
+            backgroundColor: colors.primary,
+            child: Image.asset(AppImages.aiIcon, width: 24),
           ),
-          const SizedBox(width: 9),
+          const SizedBox(width: 8),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.all(13),
+                  padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: Theme.of(context).cardColor,
                     borderRadius: const BorderRadius.only(
@@ -194,11 +196,10 @@ class _FlightResultCardState extends State<_FlightResultCard> {
           ],
           SizedBox(
             width: double.infinity,
-            child: FilledButton(
-              onPressed: widget.onSelect == null || !_ready
-                  ? null
-                  : () => widget.onSelect!(_offer!, _fare!, _return),
-              child: const Text('Select this flight', style: AppFont.medium12),
+            child: PrimaryButton(
+              disable: widget.onSelect == null || !_ready,
+              onPressed: () => widget.onSelect!(_offer!, _fare!, _return),
+              title: "Select this flight",
             ),
           ),
         ],
@@ -295,9 +296,10 @@ class _BookingDetailsCard extends StatelessWidget {
           const SizedBox(height: 12),
           SizedBox(
             width: double.infinity,
-            child: FilledButton(
-              onPressed: onConfirm,
-              child: Text('Confirm booking', style: AppFont.medium12.copyWith(color: Colors.white)),
+            child: PrimaryButton(
+              onPressed: onConfirm ?? () {},
+              title: "Confirm booking",
+
             ),
           ),
         ],
@@ -369,14 +371,12 @@ class _PaymentConfirmationCardState extends State<_PaymentConfirmationCard> {
           const SizedBox(height: 12),
           SizedBox(
             width: double.infinity,
-            child: FilledButton(
-              onPressed: widget.onPay == null || _channel == null
-                  ? null
-                  : () => widget.onPay!(_channel!),
-              child: Text(
-                _channel == null ? 'Pay' : 'Pay with ${AiPaymentChannel.label(_channel!)}',
-                style: AppFont.medium14.copyWith(color: AppColor.darkText1),
-              ),
+            child: PrimaryButton(
+              disable: widget.onPay == null || _channel == null,
+              onPressed: () => widget.onPay!(_channel!),
+              title: _channel == null ? 'Pay' : 'Pay with ${AiPaymentChannel
+                  .label(_channel!)}',
+
             ),
           ),
         ],
@@ -431,12 +431,10 @@ class _PaymentStatusCard extends StatelessWidget {
             const SizedBox(height: 12),
             SizedBox(
               width: double.infinity,
-              child: OutlinedButton(
+              child: SecondaryButton(
+                title: 'Check payment status',
                 onPressed: onRefresh,
-                child: Text(
-                  'Check payment status',
-                  style: AppFont.medium12.copyWith(color: Colors.white),
-                ),
+
               ),
             ),
           ],
@@ -464,12 +462,9 @@ class _PassengerFormCard extends StatelessWidget {
           const SizedBox(height: 12),
           SizedBox(
             width: double.infinity,
-            child: FilledButton(
-              onPressed: onFill,
-              child: Text(
-                'Fill passenger details',
-                style: AppFont.medium12.copyWith(color: Colors.white),
-              ),
+            child: PrimaryButton(
+              onPressed: onFill ?? () {}, title: 'Fill passenger details',
+
             ),
           ),
         ],

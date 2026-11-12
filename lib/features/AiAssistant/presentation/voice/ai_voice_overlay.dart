@@ -3,6 +3,8 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:pss_app/app/theme/theme.dart';
+import 'package:pss_app/core/common/widget/primary_button.dart';
+import 'package:pss_app/core/common/widget/secondary_button.dart';
 
 import 'ai_voice_controller.dart';
 
@@ -94,18 +96,17 @@ class _ListeningPanel extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     spacing: 12,
                     children: [
-                      OutlinedButton(
-                        onPressed: controller.cancelListening,
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: Colors.white,
-                          side: const BorderSide(color: Colors.white54),
+                      Expanded(
+                        child: SecondaryButton(
+                          onPressed: controller.cancelListening,
+                          title: "Cancel",
+
                         ),
-                        child: const Text('Batal'),
                       ),
-                      FilledButton(
-                        onPressed: controller.finishListening,
-                        child: const Text('Selesai'),
-                      ),
+                      Expanded(
+                        child: PrimaryButton(
+                          onPressed: controller.finishListening, title: 'Done',
+                        ),),
                     ],
                   ),
                 ],

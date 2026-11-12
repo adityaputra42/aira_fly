@@ -2,11 +2,12 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:pss_app/core/common/widget/primary_button.dart';
 import 'package:pss_app/features/AiAssistant/domain/entities/ai_assistant_entity.dart';
 import 'package:pss_app/features/AiAssistant/domain/entities/chat_entity.dart';
 
 import '../../../../app/init_dependencies.dart';
-import '../../../../app/theme/app_color.dart';
+import '../../../../app/theme/theme.dart';
 import '../../../../core/utils/top_snackbar_helper.dart';
 import '../../../../core/utils/widget_helper.dart';
 import '../bloc/ai_assistant_bloc.dart';
@@ -178,12 +179,31 @@ class _ChatViewState extends State<_ChatView> with WidgetsBindingObserver {
         final lastIndex = state.messages.length - 1;
 
         return Scaffold(
+          resizeToAvoidBottomInset: false,
           appBar: WidgetHelper.appBar(
             context: context,
             title: 'AI Assistant',
             color: AppColor.primaryColor,
             titleColor: AppColor.darkText1,
           ),
+          bottomNavigationBar: ListenableBuilder(
+            listenable: _voice,
+            builder: (context, _) =>
+                ChatInput(
+                  controller: _messageController,
+                  onSend: _sendMessage,
+                  onMic: _onMic,
+                  listening: _voice.listening,
+                  voiceReplies: _voice.voiceReplies,
+                  onToggleVoiceReplies: () =>
+                      _voice.setVoiceReplies(!_voice.voiceReplies),
+                  onAttachment: () =>
+                      TopSnackbarHelper.error(context,
+                          message: 'Attachment is not available yet.'),
+                  enabled: state.canSendMessage,
+                ),
+          ),
+
           body: Stack(
             children: [
               Column(
@@ -192,17 +212,20 @@ class _ChatViewState extends State<_ChatView> with WidgetsBindingObserver {
                     MaterialBanner(
                       content: const Text(
                         'Asisten sedang tidak tersedia. Gunakan pemesanan biasa.',
+                        style: AppFont.medium12,
                       ),
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.of(context).maybePop(),
-                          child: const Text('Pemesanan biasa'),
+                          child: const Text(
+                            'Pemesanan biasa', style: AppFont.medium12,),
                         ),
                       ],
                     ),
                   Expanded(
                     child: state.messages.isEmpty && !state.isBusy
-                        ? const Center(child: Text('Start a conversation'))
+                        ? const Center(child: Text(
+                      'Start a conversation', style: AppFont.medium12,))
                         : ListView.builder(
                             controller: _scrollController,
                             padding: const EdgeInsets.fromLTRB(16, 20, 16, 12),
@@ -248,17 +271,16 @@ class _ChatViewState extends State<_ChatView> with WidgetsBindingObserver {
                             },
                           ),
                   ),
-                  // finished / failed / cancelled: the server only allows "start new".
                   if (state.turn?.can(AiAction.startNew) ?? false)
                     Padding(
                       padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
                       child: SizedBox(
                         width: double.infinity,
-                        child: FilledButton(
-                          onPressed: state.isBusy
-                              ? null
-                              : () => _bloc.add(const AiNewChatRequested()),
-                          child: const Text('Start new chat'),
+                        child: PrimaryButton(
+                          disable: state.isBusy,
+                          onPressed: () =>
+                              _bloc.add(const AiNewChatRequested()),
+                          title: "Start new chat",
                         ),
                       ),
                     ),
@@ -267,20 +289,7 @@ class _ChatViewState extends State<_ChatView> with WidgetsBindingObserver {
               Positioned.fill(child: AiVoiceOverlay(controller: _voice)),
             ],
           ),
-          bottomNavigationBar: ListenableBuilder(
-            listenable: _voice,
-            builder: (context, _) => ChatInput(
-              controller: _messageController,
-              onSend: _sendMessage,
-              onMic: _onMic,
-              listening: _voice.listening,
-              voiceReplies: _voice.voiceReplies,
-              onToggleVoiceReplies: () => _voice.setVoiceReplies(!_voice.voiceReplies),
-              onAttachment: () =>
-                  TopSnackbarHelper.error(context, message: 'Attachment is not available yet.'),
-              enabled: state.canSendMessage,
-            ),
-          ),
+
         );
       },
     );

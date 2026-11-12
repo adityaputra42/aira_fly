@@ -44,15 +44,7 @@ class ChatInput extends StatelessWidget {
               spacing: 8,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // InkWell(
-                //   onTap: enabled ? onAttachment : null,
-                //   child: CardGeneral(
-                //     background: AppColor.primaryColor,
-                //     padding: EdgeInsets.all(8),
-                //     margin: EdgeInsets.zero,
-                //     child: const Icon(Icons.add_rounded, size: 24,color: AppColor.darkText1,),
-                //   ),
-                // ),
+
 
                 Expanded(
                   child: InputText(

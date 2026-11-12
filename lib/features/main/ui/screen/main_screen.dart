@@ -38,8 +38,8 @@ class MainScreen extends StatelessWidget {
       backgroundColor: Theme.of(context).colorScheme.surface,
       floatingActionButtonLocation: FloatingActionButtonLocation.endContained,
       floatingActionButton: Container(margin: EdgeInsets.only(bottom: 80),
-        width: 54,
-        height: 54,
+        width: 48,
+        height: 48,
         padding: EdgeInsets.all(4),
         decoration: BoxDecoration(boxShadow: [
           BoxShadow(
@@ -56,7 +56,7 @@ class MainScreen extends StatelessWidget {
               padding: EdgeInsets.all(4),
               decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: AppColor.secondaryColor
+                  color: AppColor.darkText1
 
               ),
               child:
