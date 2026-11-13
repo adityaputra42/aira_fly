@@ -334,7 +334,7 @@ abstract final class AiPassengerRequest {
       'first_name': p.firstName.trim(),
       'last_name': p.lastName.trim(),
     };
-    void put(String k, String? v) {
+    void put(String k, dynamic v) {
       if (v != null && v.trim().isNotEmpty) m[k] = v.trim();
     }
 
@@ -345,6 +345,7 @@ abstract final class AiPassengerRequest {
     put('document_type', p.documentType);
     put('document_number', p.documentNumber);
     put('document_expired_at', p.documentExpiredAt);
+    put('associated_adult_index', p.associatedAdultIndex);
     return m;
   }
 }

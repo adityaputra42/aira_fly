@@ -94,6 +94,7 @@ class _PaxBookingScreenState extends State<PaxBookingScreen> {
     final result = await showZoomDialog<PassengerInput>(
       context: context,
       child: PassengerInformationDialog(
+        passangers: _passengers,
         passengerType: slot.type,
         label: slot.label,
         initial: _passengers[index],
@@ -105,8 +106,10 @@ class _PaxBookingScreenState extends State<PaxBookingScreen> {
 
   void _onContinue() {
     if (!_isComplete) {
-      TopSnackbarHelper.info(context,
-          message: 'Please fill in contact and all passenger details first.');
+      TopSnackbarHelper.info(
+        context,
+        message: 'Please fill in contact and all passenger details first.',
+      );
       return;
     }
 

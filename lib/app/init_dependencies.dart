@@ -16,6 +16,7 @@ import 'package:pss_app/features/notifications/presentations/bloc/notification_b
 import '../core/common/cubit/theme_cubit.dart';
 import '../core/network/dio_client.dart';
 import '../core/utils/connection_checker.dart';
+import '../core/utils/secure_storage_helper.dart';
 import '../features/AiAssistant/data/datasources/ai_assistant_remote_data_sources.dart';
 import '../features/AiAssistant/data/repositories/ai_assistant_repository_impl.dart';
 import '../features/AiAssistant/domain/repository/ai_assistant_repository.dart';
@@ -128,6 +129,7 @@ Future<void> initDependencies() async {
 
   serviceLocator.registerFactory<ThemeCubit>(() => ThemeCubit());
   serviceLocator.registerFactory<OnboardingCubit>(() => OnboardingCubit());
+  serviceLocator.registerLazySingleton<SecureStorageHelper>(() => SecureStorageHelper.instance);
 
   _initAuth();
   _initFlight();
@@ -262,28 +264,26 @@ void _initAncillary() {
 void _initNotification() {
   serviceLocator
     ..registerLazySingleton<NotificationHelper>(() => NotificationHelper())
-    ..registerFactory<NotificationRemoteDataSource>(() =>
-        NotificationRemoteDataSourceImpl())..registerFactory<
-      NotificationRepository>(
-        () => NotificationRepositoryImpl(serviceLocator(), serviceLocator()),
-  )..registerFactory(() =>
-      GetListNotification(serviceLocator()))..registerFactory(() =>
-      GetUnreadCount(serviceLocator()))..registerFactory(() =>
-      ReadAllNotification(serviceLocator()))..registerFactory(() =>
-      ReadNotificationById(serviceLocator()))..registerFactory(() =>
-      RegisterDevice(serviceLocator()))..registerFactory(() =>
-      UnregisterDevice(serviceLocator()))
+    ..registerFactory<NotificationRemoteDataSource>(() => NotificationRemoteDataSourceImpl())
+    ..registerFactory<NotificationRepository>(
+      () => NotificationRepositoryImpl(serviceLocator(), serviceLocator()),
+    )
+    ..registerFactory(() => GetListNotification(serviceLocator()))
+    ..registerFactory(() => GetUnreadCount(serviceLocator()))
+    ..registerFactory(() => ReadAllNotification(serviceLocator()))
+    ..registerFactory(() => ReadNotificationById(serviceLocator()))
+    ..registerFactory(() => RegisterDevice(serviceLocator()))
+    ..registerFactory(() => UnregisterDevice(serviceLocator()))
     ..registerLazySingleton(
-          () =>
-          NotificationBloc(
-            getList: serviceLocator(),
-            getUnreadCount: serviceLocator(),
-            readAll: serviceLocator(),
-            readById: serviceLocator(),
-            registerDevice: serviceLocator(),
-            unregisterDevice: serviceLocator(),
-            helper: serviceLocator(),
-          ),
+      () => NotificationBloc(
+        getList: serviceLocator(),
+        getUnreadCount: serviceLocator(),
+        readAll: serviceLocator(),
+        readById: serviceLocator(),
+        registerDevice: serviceLocator(),
+        unregisterDevice: serviceLocator(),
+        helper: serviceLocator(),
+      ),
     );
 }
 

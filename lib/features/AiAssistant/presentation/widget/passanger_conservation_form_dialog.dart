@@ -22,6 +22,7 @@ class PassangerConservationFormDialog extends StatefulWidget {
     super.key,
     required this.passengerType,
     required this.label,
+    required this.passangers,
     this.initial,
     this.firstTravel,
     this.lastTravel,
@@ -30,6 +31,7 @@ class PassangerConservationFormDialog extends StatefulWidget {
   final String passengerType;
   final String label;
   final AiPassengerEntity? initial;
+  final List<AiPassengerEntity?> passangers;
 
   final DateTime? firstTravel;
   final DateTime? lastTravel;
@@ -57,7 +59,7 @@ class _PassangerConservationFormDialogState extends State<PassangerConservationF
   String? _documentType;
   DateTime? _documentExpiredAt;
   bool get _birthDateRequired => widget.passengerType != 'ADT';
-
+  int? _associatedAdultIndex;
   List<CountryCodeEntity>? _countries;
   String? _countriesError;
 
@@ -74,6 +76,7 @@ class _PassangerConservationFormDialogState extends State<PassangerConservationF
     _nationality = initial?.nationality;
     _documentType = initial?.documentType;
     _documentExpiredAt = _tryParseDate(initial?.documentExpiredAt);
+    _associatedAdultIndex = initial?.associatedAdultIndex;
     _loadCountries();
   }
 
@@ -188,6 +191,7 @@ class _PassangerConservationFormDialogState extends State<PassangerConservationF
         documentExpiredAt: _documentExpiredAt != null
             ? DateFormat(_dateFormat).format(_documentExpiredAt!)
             : null,
+        associatedAdultIndex: _associatedAdultIndex,
       ),
     );
   }
@@ -447,6 +451,58 @@ class _PassangerConservationFormDialogState extends State<PassangerConservationF
                           hintText: "Select expiry date",
                           value: _documentExpiredAt,
                           onTap: _pickDocumentExpiry,
+                        ),
+                        Visibility(
+                          visible: widget.passengerType == "INF",
+                          child: Column(
+                            children: [
+                              widget.height(12),
+                              Builder(
+                                builder: (context) {
+                                  final adultPassengers = widget.passangers
+                                      .whereType<AiPassengerEntity>()
+                                      .where((e) => e.passengerType == "ADT")
+                                      .toList();
+
+                                  AiPassengerEntity? selectedAdult;
+
+                                  if (_associatedAdultIndex != null &&
+                                      _associatedAdultIndex! >= 0 &&
+                                      _associatedAdultIndex! < widget.passangers.length) {
+                                    final passenger = widget.passangers[_associatedAdultIndex!];
+
+                                    if (passenger?.passengerType == "ADT") {
+                                      selectedAdult = passenger;
+                                    }
+                                  }
+
+                                  return DropDownCustom(
+                                    listData: adultPassengers.map((item) {
+                                      return DropdownItem<AiPassengerEntity>(
+                                        value: item,
+                                        child: Text(
+                                          "${item.title ?? ''} ${item.firstName} ${item.lastName}",
+                                          style: AppFont.reguler12.copyWith(
+                                            color: Theme.of(context).colorScheme.onSurface,
+                                          ),
+                                        ),
+                                      );
+                                    }).toList(),
+                                    hint: "Select adult association",
+                                    title: "Adult Association",
+                                    value: selectedAdult,
+                                    onChange: (v) {
+                                      setState(() {
+                                        _associatedAdultIndex = widget.passangers.indexWhere(
+                                          (e) => identical(e, v),
+                                        );
+                                      });
+                                    },
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
                         ),
                         widget.height(24),
                         PrimaryButton(title: "Save", onPressed: _onSave),

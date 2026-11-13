@@ -37,31 +37,38 @@ class MainScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       floatingActionButtonLocation: FloatingActionButtonLocation.endContained,
-      floatingActionButton: Container(margin: EdgeInsets.only(bottom: 80),
-        width: 48,
-        height: 48,
-        padding: EdgeInsets.all(4),
-        decoration: BoxDecoration(boxShadow: [
-          BoxShadow(
-            color: AppColor.secondaryColor.withValues(alpha: 0.2),
-            blurRadius: 0.5,
-            offset: Offset(0, 1),
-          ),
-        ],
-            shape: BoxShape.circle, color: AppColor.primaryColor),
-        child: InkWell(onTap: () {
-          context.goNamed(RouteNames.aiAssistent);
-        },
-          child: Container(
+      floatingActionButton: BlocBuilder<UserCubit,UserState>(
+        builder: (context,state) {
+          return Visibility(
+            visible: state is UserLoggedIn,
+            child: Container(margin: EdgeInsets.only(bottom: 80),
+              width: 48,
+              height: 48,
               padding: EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppColor.darkText1
+              decoration: BoxDecoration(boxShadow: [
+                BoxShadow(
+                  color: AppColor.secondaryColor.withValues(alpha: 0.2),
+                  blurRadius: 0.5,
+                  offset: Offset(0, 1),
+                ),
+              ],
+                  shape: BoxShape.circle, color: AppColor.primaryColor),
+              child: InkWell(onTap: () {
+                context.goNamed(RouteNames.aiAssistent);
+              },
+                child: Container(
+                    padding: EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: AppColor.darkText1
 
-              ),
-              child:
-              Image.asset(AppImages.aiIcon)),
-        ),),
+                    ),
+                    child:
+                    Image.asset(AppImages.aiIcon)),
+              ),),
+          );
+        }
+      ),
       body: BlocBuilder<MainCubit, int>(
         builder: (context, selectedIndex) {
           return Stack(

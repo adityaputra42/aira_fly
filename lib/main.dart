@@ -2,7 +2,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pss_app/core/common/cubit/user_cubit.dart';
-import 'package:pss_app/core/utils/pref_helper.dart';
 import 'package:pss_app/features/auth/presentation/bloc/auth_bloc.dart';
 
 import 'app/app.dart';
@@ -13,10 +12,7 @@ import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-  await PrefHelper.instance.init();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await initDependencies();
   runApp(
     MultiBlocProvider(

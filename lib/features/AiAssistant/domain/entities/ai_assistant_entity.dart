@@ -420,6 +420,7 @@ class AiPassengerEntity extends Equatable {
   final String? documentType;
   final String? documentNumber;
   final String? documentExpiredAt;
+  final int? associatedAdultIndex;
 
   const AiPassengerEntity({
     required this.passengerType,
@@ -432,10 +433,19 @@ class AiPassengerEntity extends Equatable {
     this.documentType,
     this.documentNumber,
     this.documentExpiredAt,
+    this.associatedAdultIndex
   });
 
   @override
-  List<Object?> get props => [passengerType, firstName, lastName, birthDate, documentNumber];
+  List<Object?> get props =>
+      [
+        passengerType,
+        firstName,
+        lastName,
+        birthDate,
+        documentNumber,
+        associatedAdultIndex
+      ];
 }
 
 class AiFailure extends Failure {

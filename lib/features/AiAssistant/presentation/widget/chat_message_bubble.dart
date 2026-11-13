@@ -157,11 +157,13 @@ class _FlightResultCardState extends State<_FlightResultCard> {
                   ChoiceChip(
                     backgroundColor: colors.surface,
                     selectedColor: AppColor.primaryColor,
-                    disabledColor: colors.shadow,
-
+                    disabledColor: Colors.grey,
+                    checkmarkColor: AppColor.darkText1,
                     label: Text(
                       '${fare.name} • ${fare.totalText}',
-                      style: AppFont.medium12.copyWith(color: colors.onSurface),
+                      style: AppFont.medium12.copyWith(
+                          color: _offer == offer && _fare == fare ? AppColor
+                              .darkText1 : colors.onSurface),
                     ),
                     selected: _offer == offer && _fare == fare,
                     onSelected: widget.onSelect == null || fare.availableSeats <= 0

@@ -42,7 +42,6 @@ String? passengerFormTotalText(AiTurnEntity turn) {
 String _thousands(int v) =>
     v.toString().replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (_) => '.');
 
-
 bool passengerStepAccepted(AiChatStatus status, AiTurnEntity? turn) =>
     status == AiChatStatus.ready && turn != null && turn.state != AiState.collectingPassengerData;
 
@@ -109,6 +108,7 @@ class _PassangerContactFormScreenState extends State<PassangerContactFormScreen>
       child: PassangerConservationFormDialog(
         passengerType: slot.type,
         label: slot.label,
+        passangers: _passengers,
         initial: _passengers[index],
         firstTravel: widget.firstTravel,
         lastTravel: widget.lastTravel,

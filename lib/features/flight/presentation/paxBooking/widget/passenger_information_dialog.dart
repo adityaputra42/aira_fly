@@ -20,6 +20,7 @@ class PassengerInformationDialog extends StatefulWidget {
   const PassengerInformationDialog({
     super.key,
     required this.passengerType,
+    required this.passangers,
     required this.label,
     this.initial,
   });
@@ -27,6 +28,7 @@ class PassengerInformationDialog extends StatefulWidget {
   final String passengerType; // ADT | CHD | INF
   final String label; // e.g. "Adult 1", shown as the dialog title
   final PassengerInput? initial;
+  final List<PassengerInput?> passangers;
 
   @override
   State<PassengerInformationDialog> createState() => _PassengerInformationDialogState();
@@ -47,14 +49,11 @@ class _PassengerInformationDialogState extends State<PassengerInformationDialog>
   String? _title;
   String? _gender; // M | F
   DateTime? _birthDate;
-  // Stores the ISO 3166-1 alpha-3 code (e.g. "IDN"), not the display
-  // name -- see CountryCodeEntity.alpha3. Was free text before this was
-  // wired to GET /master/country-codes.
   String? _nationality;
   String? _documentType;
   DateTime? _documentExpiredAt;
   bool get _birthDateRequired => widget.passengerType != 'ADT';
-
+  int? _associatedAdultIndex;
   List<CountryCodeEntity>? _countries;
   String? _countriesError;
 
@@ -71,6 +70,8 @@ class _PassengerInformationDialogState extends State<PassengerInformationDialog>
     _nationality = initial?.nationality;
     _documentType = initial?.documentType;
     _documentExpiredAt = _tryParseDate(initial?.documentExpiredAt);
+    _associatedAdultIndex = initial?.associatedAdultIndex;
+
     _loadCountries();
   }
 
@@ -134,9 +135,8 @@ class _PassengerInformationDialogState extends State<PassengerInformationDialog>
     if (_birthDateRequired && _birthDate == null) {
       TopSnackbarHelper.info(
         context,
-        message: 'Birth date is required for ${widget.passengerType == 'CHD'
-            ? 'child'
-            : 'infant'} passengers.',
+        message:
+            'Birth date is required for ${widget.passengerType == 'CHD' ? 'child' : 'infant'} passengers.',
       );
       return;
     }
@@ -157,6 +157,7 @@ class _PassengerInformationDialogState extends State<PassengerInformationDialog>
         documentExpiredAt: _documentExpiredAt != null
             ? DateFormat(_dateFormat).format(_documentExpiredAt!)
             : null,
+        associatedAdultIndex: _associatedAdultIndex,
       ),
     );
   }
@@ -416,6 +417,58 @@ class _PassengerInformationDialogState extends State<PassengerInformationDialog>
                           hintText: "Select expiry date",
                           value: _documentExpiredAt,
                           onTap: _pickDocumentExpiry,
+                        ),
+                        Visibility(
+                          visible: widget.passengerType == "INF",
+                          child: Column(
+                            children: [
+                              widget.height(12),
+                              Builder(
+                                builder: (context) {
+                                  final adultPassengers = widget.passangers
+                                      .whereType<PassengerInput>()
+                                      .where((e) => e.passengerType == "ADT")
+                                      .toList();
+
+                                  PassengerInput? selectedAdult;
+
+                                  if (_associatedAdultIndex != null &&
+                                      _associatedAdultIndex! >= 0 &&
+                                      _associatedAdultIndex! < widget.passangers.length) {
+                                    final passenger = widget.passangers[_associatedAdultIndex!];
+
+                                    if (passenger?.passengerType == "ADT") {
+                                      selectedAdult = passenger;
+                                    }
+                                  }
+
+                                  return DropDownCustom(
+                                    listData: adultPassengers.map((item) {
+                                      return DropdownItem<PassengerInput>(
+                                        value: item,
+                                        child: Text(
+                                          "${item.title ?? ''} ${item.firstName} ${item.lastName}",
+                                          style: AppFont.reguler12.copyWith(
+                                            color: Theme.of(context).colorScheme.onSurface,
+                                          ),
+                                        ),
+                                      );
+                                    }).toList(),
+                                    hint: "Select adult association",
+                                    title: "Adult Association",
+                                    value: selectedAdult,
+                                    onChange: (v) {
+                                      setState(() {
+                                        _associatedAdultIndex = widget.passangers.indexWhere(
+                                          (e) => identical(e, v),
+                                        );
+                                      });
+                                    },
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
                         ),
                         widget.height(24),
                         PrimaryButton(title: "Save", onPressed: _onSave),

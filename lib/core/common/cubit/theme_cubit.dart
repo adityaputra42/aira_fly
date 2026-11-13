@@ -1,19 +1,17 @@
 import 'package:bloc/bloc.dart';
 
-import '../../utils/pref_helper.dart';
+import '../../utils/secure_storage_helper.dart';
 
 class ThemeCubit extends Cubit<bool> {
   ThemeCubit() : super(false);
 
-  /// Load theme saat aplikasi start
   Future<void> loadTheme() async {
-    final isDark = PrefHelper.instance.getTheme();
+    final isDark = await SecureStorageHelper.instance.getTheme();
     emit(isDark);
   }
 
-  /// Toggle theme
   Future<void> toggleTheme(bool value) async {
-    PrefHelper.instance.setDarkTheme(value);
+    await SecureStorageHelper.instance.setDarkTheme(value);
     emit(value);
   }
 }

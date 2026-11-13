@@ -1,4 +1,4 @@
-import 'package:pss_app/core/utils/pref_helper.dart';
+import '../../../../core/utils/secure_storage_helper.dart';
 
 abstract interface class AuthLocalDataSource {
   Future<void> saveAccessToken(String token);
@@ -17,27 +17,27 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
 
   @override
   Future<void> saveAccessToken(String token) async {
-    await PrefHelper.instance.saveAccessToken(token);
+    await SecureStorageHelper.instance.saveAccessToken(token);
   }
 
   @override
   Future<void> saveRefreshToken(String token) async {
-    await PrefHelper.instance.saveRefreshToken(token);
+    await SecureStorageHelper.instance.saveRefreshToken(token);
   }
 
   @override
   Future<String?> getAccessToken() async {
-    return PrefHelper.instance.accessToken;
+    return SecureStorageHelper.instance.accessToken;
   }
 
   @override
   Future<String?> getRefreshToken() async {
-    return PrefHelper.instance.refreshToken;
+    return SecureStorageHelper.instance.refreshToken;
   }
 
   @override
   Future<void> clearTokens() async {
-    await PrefHelper.instance.removeAccessToken();
-    await PrefHelper.instance.removeRefreshToken();
+    await SecureStorageHelper.instance.removeAccessToken();
+    await SecureStorageHelper.instance.removeRefreshToken();
   }
 }

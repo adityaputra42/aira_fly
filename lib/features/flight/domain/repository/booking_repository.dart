@@ -27,7 +27,8 @@ class PassengerInput {
   final String? nationality;
   final String? documentType;
   final String? documentNumber;
-  final String? documentExpiredAt; // YYYY-MM-DD
+  final String? documentExpiredAt;
+  final int? associatedAdultIndex; // YYYY-MM-DD
 
   const PassengerInput({
     required this.passengerType,
@@ -40,6 +41,7 @@ class PassengerInput {
     this.documentType,
     this.documentNumber,
     this.documentExpiredAt,
+    this.associatedAdultIndex,
   });
 
   Map<String, dynamic> toJson() => {
@@ -53,6 +55,7 @@ class PassengerInput {
     if (documentType != null) 'document_type': documentType,
     if (documentNumber != null) 'document_number': documentNumber,
     if (documentExpiredAt != null) 'document_expired_at': documentExpiredAt,
+    if (associatedAdultIndex != null) 'associated_adult_index': associatedAdultIndex,
   };
 }
 
@@ -91,39 +94,10 @@ abstract interface class BookingRepository {
     required List<SeatSelectionInput> seatSelections,
     int holdTtlSeconds,
   });
-
-  /// Admin-only (`booking:pnr:view` permission).
   Future<Either<Failure, PnrDetailEntity>> getPnr(int id);
-
-  /// Admin-only (`booking:pnr:view` permission) -- everyone's bookings.
   Future<Either<Failure, List<PnrSummaryEntity>>> listPnrs({int page, int limit, String? status});
 
-  /// Self-service booking history -- login required, always the caller's
-  /// own bookings only (server resolves ownership from the auth token).
-  /// Use this for the app's "Ticket History" tab when the user is logged
-  /// in, NOT [listPnrs].
   Future<Either<Failure, List<PnrSummaryEntity>>> listMyPnrs({int page, int limit, String? status});
-
-  /// Self-service lookup by booking code -- no login required. Intended
-  /// for a guest "enter your booking code" search flow.
-  ///
-  /// SECURITY GAP (checked directly against the backend on 2026-09-18):
-  /// the route this hits (`GET /bookings/pnrs/mine/{code}`) has NO auth
-  /// middleware, and the handler's ownership check
-  /// (`if info.CreatedBy == nil || *info.CreatedBy != userID`) is
-  /// commented out in
-  /// internal/booking/application/query/pnr_detail_query_service.go.
-  /// The backend's own swagger doc for this endpoint claims it's
-  /// "restricted to the authenticated caller" and that guest bookings
-  /// "can never be returned here" -- neither is currently true. In
-  /// practice this means ANYONE who knows or guesses a booking code can
-  /// pull full passenger PII (names, emails, phone, document numbers)
-  /// through this call today, logged in or not, their booking or not.
-  /// This needs a backend fix (restore the ownership check, and/or
-  /// require a second factor like contact email for guest lookups, plus
-  /// rate limiting on this route) before relying on "not logged in ->
-  /// can't see other people's bookings" as an actual guarantee anywhere
-  /// in the UI built on top of this method.
   Future<Either<Failure, PnrDetailEntity>> getPnrByBookingCode(String bookingCode);
 
   Future<Either<Failure, void>> cancelPnr(int id);

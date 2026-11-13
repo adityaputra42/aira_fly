@@ -2,7 +2,7 @@ import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 
-import '../../../core/utils/pref_helper.dart';
+import '../../../core/utils/secure_storage_helper.dart';
 import '../../auth/presentation/bloc/auth_bloc.dart';
 
 part 'splash_state.dart';
@@ -21,7 +21,7 @@ class SplashCubit extends Cubit<SplashState> {
 
     await Future.wait([Future.delayed(const Duration(seconds: 3)), authCheckDone]);
 
-    final bool isFirstTime = PrefHelper.instance.isFirstInstall;
+    final bool isFirstTime = await SecureStorageHelper.instance.isFirstInstall;
 
     if (isFirstTime == true) {
       emit(SplashToOnboarding());
