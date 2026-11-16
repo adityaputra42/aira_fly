@@ -1,682 +1,202 @@
-# PSS Mobile — Aira Fly
+# PSS Mobile
 
-Flutter mobile application for the Passenger Service System (PSS). The app provides customer-facing airline services, including flight search, booking, ancillary selection, wallet, ticket management, check-in, notifications, and an AI-powered conversational booking assistant.
+> A Flutter app for booking airline tickets end to end: search, book, add-ons, pay, check in. It includes an **AI assistant** you can talk to or type to, built on top of the [PSS backend](https://github.com/adityaputra42/pss_modular_cqrs).
 
-The application is built with Flutter and Dart. Its codebase is organized by feature and follows Clean Architecture boundaries (`data`, `domain`, and `presentation`) for the major business modules.
+![Flutter](https://img.shields.io/badge/Flutter-Dart%203.13-02569B?logo=flutter&logoColor=white)
+![State](https://img.shields.io/badge/State-BLoC%20%2F%20Cubit-blueviolet)
+![Architecture](https://img.shields.io/badge/Architecture-Clean%20Architecture-success)
 
----
-
-## Contents
-
-- [Overview](#overview)
-- [Technology Stack](#technology-stack)
-- [Architecture](#architecture)
-- [Project Structure](#project-structure)
-- [Features](#features)
-- [AI Booking Assistant](#ai-booking-assistant)
-- [Backend Communication](#backend-communication)
-- [Getting Started](#getting-started)
-- [Useful Commands](#useful-commands)
-
----
-
-## Overview
-
-PSS Mobile is the customer-facing Flutter application in the PSS ecosystem. The application supports two ways to use the booking services:
-
-1. **Screen-based experience** — customers use dedicated screens and forms to search flights, select fares, enter passenger details, manage bookings, and access other airline services.
-2. **Conversational experience** — customers use the AI Assistant to express travel requirements in natural language or by voice. The assistant guides the customer through flight search, flight/fare selection, passenger submission, booking confirmation, and wallet payment.
-
-Both experiences communicate with the PSS backend. The mobile application is responsible for presentation, user interaction, client-side validation, and API integration; authoritative booking and payment business rules belong to the backend.
-
-The Flutter application title configured in `MaterialApp.router` is **Aira Fly**.
-
----
-
-## Technology Stack
-
-| Area | Package / Technology | Usage |
-|---|---|---|
-| Framework | Flutter | Cross-platform mobile application |
-| Language | Dart | Application implementation |
-| State management | `flutter_bloc`, `bloc`, `equatable` | BLoC/Cubit state and event handling |
-| Dependency injection | `get_it` | Service locator and dependency registration |
-| Navigation | `go_router` | Declarative routing and page transitions |
-| HTTP client | `dio` | REST API communication and interceptors |
-| Functional error handling | `fpdart` | `Either<Failure, T>` repository/use-case results |
-| Local preferences | `shared_preferences` | Tokens and lightweight user/application preferences |
-| Environment configuration | `envied`, `envied_generator` | Compile-time environment configuration |
-| Speech recognition | `speech_to_text` | Voice input for the AI Assistant |
-| Text-to-speech | `flutter_tts` | Spoken AI responses |
-| Push notifications | `firebase_core`, `firebase_messaging` | Firebase initialization and push messaging |
-| Local notifications | `flutter_local_notifications` | Displaying local notifications |
-| Connectivity | `internet_connection_checker_plus` | Network connectivity checks |
-| UI utilities | `cached_network_image`, `shimmer`, `animations`, `animate_do` | Image loading, loading placeholders, and UI animation |
-| Barcode | `syncfusion_flutter_barcodes` | Barcode/boarding-pass related UI |
-| Image selection | `image_picker` | Image selection |
-
-The package versions and Dart SDK constraint are defined in [`pubspec.yaml`](pubspec.yaml).
-
-> **Persistence note:** This project does not use Isar. Lightweight local values are stored with `shared_preferences`. The application does not define an Isar database layer.
-
----
-
-## Architecture
-
-The codebase follows Clean Architecture boundaries within feature-oriented modules.
-
-```text
-┌───────────────────────────────────────────────────────┐
-│                    Presentation                       │
-│                                                       │
-│  Screens • Widgets • BLoC • Cubit • UI State          │
-└──────────────────────────┬────────────────────────────┘
-                           │
-                           ▼
-┌───────────────────────────────────────────────────────┐
-│                       Domain                           │
-│                                                       │
-│  Entities • Repository Contracts • Use Cases • Rules  │
-└──────────────────────────┬────────────────────────────┘
-                           │
-                           ▼
-┌───────────────────────────────────────────────────────┐
-│                        Data                             │
-│                                                       │
-│  Repository Implementations • Models • Data Sources   │
-└──────────────────────────┬────────────────────────────┘
-                           │
-                ┌──────────┴──────────┐
-                ▼                     ▼
-        ┌───────────────┐     ┌────────────────┐
-        │   Remote API  │     │ Local Prefs    │
-        │      Dio      │     │ SharedPrefs    │
-        └───────────────┘     └────────────────┘
-```
-
-### Layer responsibilities
-
-#### Presentation
-
-Contains screens, reusable feature widgets, and state-management components.
-
-- BLoC is used for event-driven workflows such as authentication, flight search, booking, payment, wallet, notifications, and AI conversation handling.
-- Cubit is used for simpler state transitions, such as application theme and main navigation state.
-- Widgets render state and forward user actions to the relevant BLoC/Cubit.
-
-#### Domain
-
-Contains business-facing abstractions independent of Flutter widgets and HTTP implementation details.
-
-- Entities represent application concepts.
-- Repository contracts define the operations required by each feature.
-- Use cases represent individual application operations.
-- Domain rules contain validations that belong to the feature's business model, such as AI passenger category and age validation.
-
-Repository operations commonly return `Either<Failure, T>` through `fpdart`, keeping expected failures explicit at the domain boundary.
-
-#### Data
-
-Implements domain repository contracts and handles external data.
-
-- Remote data sources execute API requests.
-- Models parse API responses and map them to domain entities.
-- Repository implementations coordinate data sources, connectivity checks, parsing, and error conversion.
-- `DioClient` centralizes HTTP configuration and request interceptors.
-
-### Dependency injection
-
-`get_it` is configured in:
-
-```text
-lib/app/init_dependencies.dart
-```
-
-Feature data sources, repository implementations, use cases, and BLoCs are registered there. This keeps dependency construction outside UI widgets and makes feature dependencies explicit.
-
-### Application bootstrap
-
-The application entry point is:
-
-```text
-lib/main.dart
-```
-
-Startup initializes Flutter bindings, Firebase, `SharedPreferences`, and the dependency container before running the application. Global providers include the main navigation Cubit, theme Cubit, authentication BLoC, and user Cubit.
-
----
-
-## Project Structure
-
-The following is the structure observed in the project archive, simplified to show the main source directories:
-
-```text
-lib/
-├── app/
-│   ├── app.dart
-│   ├── init_dependencies.dart
-│   ├── routes/
-│   │   ├── app_routes.dart
-│   │   └── route_names.dart
-│   └── theme/
-│
-├── core/
-│   ├── animation/
-│   ├── common/
-│   │   ├── cubit/
-│   │   ├── entities/
-│   │   └── widget/
-│   ├── constants/
-│   ├── error/
-│   ├── network/
-│   ├── usecase/
-│   └── utils/
-│
-├── features/
-│   ├── AiAssistant/
-│   │   ├── data/
-│   │   ├── domain/
-│   │   └── presentation/
-│   ├── auth/
-│   │   ├── data/
-│   │   ├── domain/
-│   │   └── presentation/
-│   ├── flight/
-│   │   ├── data/
-│   │   ├── domain/
-│   │   └── presentation/
-│   ├── home/
-│   ├── main/
-│   ├── master/
-│   ├── notifications/
-│   ├── onboarding/
-│   ├── profile/
-│   ├── setting/
-│   ├── splash/
-│   ├── ticket/
-│   └── wallet/
-│
-├── firebase_options.dart
-└── main.dart
-```
-
-Feature naming and folder conventions reflect the existing source code. In particular, the AI module is currently named `AiAssistant` and uses `presentations` in the notifications module.
-
----
+<!--
+Add screenshots here before publishing, for example:
+| Search | Flight results | Booking | AI assistant |
+| --- | --- | --- | --- |
+| ![](docs/screenshots/search.png) | ![](docs/screenshots/results.png) | ![](docs/screenshots/booking.png) | ![](docs/screenshots/ai.png) |
+-->
 
 ## Features
 
-### 1. Application foundation
+- **Accounts.** Sign up, sign in, automatic token refresh, and guest use.
+- **Flight search.** One-way and round-trip, airport selection, results with fares.
+- **Booking.** Passenger and contact details (adults, children and infants), add-ons (baggage, meals, seats) with purchase and cancellation, seat selection.
+- **Payment.** Pays through the backend's DOKU virtual-account flow; booking history and detail.
+- **Check-in and boarding pass.**
+- **Wallet.** Balance, top-up with status tracking, and transaction history.
+- **Notifications.** Firebase Cloud Messaging with local notifications.
+- **Profile and settings.** Profile editing and a persisted light/dark theme.
+- **AI assistant.** Describe a trip in a sentence ("Jakarta to Bali on 24 December, 2 adults and 1 infant"), pick a flight from cards, fill in passengers in a form, confirm with a button, and pay by virtual account or wallet balance. Works by text or voice.
 
-- Splash screen and onboarding.
-- Main application navigation with a custom bottom navigation bar.
-- Centralized routing with `GoRouter`.
-- Light/dark theme state.
-- Shared UI components, loading overlay, animations, and snackbar helpers.
-- Network connectivity checking.
+## Architecture
 
-### 2. Authentication
+The app uses **Clean Architecture per feature**, **BLoC/Cubit** for state, **get_it** for dependency injection and **go_router** for navigation. Failures are values, not exceptions: use cases return `Either<Failure, T>` (`fpdart`).
 
-Located in `lib/features/auth/`.
+```mermaid
+flowchart LR
+    subgraph Presentation
+        S[Screens and widgets] --> B[Bloc / Cubit]
+    end
+    subgraph Domain
+        UC[Use cases] --> RI[Repository interfaces]
+        E[Entities]
+    end
+    subgraph Data
+        RP[Repository implementations] --> DS[Data sources]
+        M[Models: JSON ↔ entities]
+    end
+    B --> UC
+    RP -. implements .-> RI
+    DS --> N[DioClient] --> API[(PSS backend)]
+```
 
-- Sign in.
-- Sign up.
-- Sign-up success screen.
-- Current-user retrieval.
-- Local access-token and refresh-token handling.
-- Authenticated API requests.
-- Access-token refresh and request retry handling through the Dio interceptor.
+**The dependency rule.** Presentation depends on domain, data depends on domain, and domain depends on nothing. Entities are plain Dart; JSON lives only in models. That keeps business rules testable without Flutter or a network.
 
-### 3. Home and flight search
+**One flow, end to end** (flight search as an example):
+screen dispatches an event → bloc calls a use case → the use case asks a repository interface → the repository implementation calls a remote data source → `DioClient` calls the API → a model parses the JSON → it is mapped to an entity → the repository returns `Right(entity)` or `Left(Failure)` → the bloc emits a state → the screen rebuilds.
 
-Located in `lib/features/home/` and `lib/features/flight/`.
-
-- Flight search form.
-- Airport search and selection.
-- Departure and return date selection.
-- Passenger quantity selection.
-- Cabin/seat-class selection.
-- Flight search results.
-- Flight and itinerary details.
-- Fare-class retrieval and selection.
-
-### 4. Booking and passenger management
-
-Located in `lib/features/flight/`.
-
-- Passenger booking form.
-- Passenger information handling.
-- Booking / PNR creation.
-- PNR detail retrieval.
-- Booking lookup by booking code.
-- Customer PNR listing.
-- PNR cancellation.
-- Booking detail and price summary screens.
-
-### 5. Ancillary services
-
-The flight module contains ancillary data, domain operations, and UI flows for:
-
-- Baggage selection and purchase.
-- Meal selection and purchase.
-- Seat selection.
-- Ancillary catalog and category retrieval.
-- Ancillary purchase lookup by PNR.
-- Ancillary purchase cancellation.
-
-### 6. Payment
-
-Located in `lib/features/flight/`.
-
-- Payment creation.
-- Payment detail retrieval.
-- Payment lookup by PNR.
-- Payment workflow integration with the backend.
-
-Available payment channels and transaction outcomes are determined by backend responses and validation.
-
-### 7. Wallet
-
-Located in `lib/features/wallet/`.
-
-- Wallet balance retrieval.
-- Wallet transaction history.
-- Wallet top-up request.
-- Top-up status retrieval.
-
-The wallet screen displays balance and transaction history. Top-up processing depends on the backend payment flow and its payment notification/status lifecycle.
-
-### 8. Ticket and check-in
-
-Located in `lib/features/ticket/`.
-
-- Ticket listing.
-- Ticket detail.
-- Check-in request.
-- Boarding-pass retrieval.
-- Booking-code lookup UI.
-
-### 9. Profile and settings
-
-Located in `lib/features/profile/` and `lib/features/setting/`.
-
-- Profile retrieval.
-- Profile update.
-- Application settings screen.
-- Theme preference.
-
-### 10. Notifications
-
-Located in `lib/features/notifications/`.
-
-- Firebase Cloud Messaging initialization.
-- Push-notification permission handling.
-- Device registration and unregistration through backend use cases.
-- Notification listing.
-- Unread notification count.
-- Mark notification as read.
-- Mark all notifications as read.
-- Local notification presentation and notification interaction streams.
-
-### 11. Master data
-
-Located in `lib/features/master/`.
-
-- Country calling-code retrieval.
-- Country-code search dialog.
-
----
-
-# AI Booking Assistant
-
-The AI Assistant is an integrated conversational booking interface in the mobile application. It is implemented as a dedicated screen and has its own BLoC, domain entities, use cases, repository, and remote data source.
-
-The feature is more than a chat interface: the mobile client handles explicit booking actions returned by the assistant and sends structured commands to the PSS backend.
-
-## AI Assistant capabilities
-
-### Conversational messaging
-
-- Start a new AI conversation.
-- Retrieve or resume the active conversation.
-- Retrieve a conversation by ID.
-- Send text messages.
-- Send voice transcripts with a distinct input type.
-- Retry a failed message.
-- Cancel an eligible conversation.
-- Render assistant turns into typed chat messages.
-
-### Voice interaction
-
-Voice functionality is implemented with `speech_to_text` and `flutter_tts`.
-
-- Speech-to-text input using the `id_ID` locale.
-- Partial transcript display while listening.
-- Automatic submission when a final transcript is received.
-- Text-to-speech for assistant replies.
-- Optional voice replies.
-- Listening/speaking state and voice overlay.
-- Voice services are stopped when the application leaves the resumed lifecycle state or when a form is opened.
-
-### Flight and fare selection
-
-The AI booking flow supports structured flight selection:
-
-- Departure flight option selection.
-- Return flight option selection when applicable.
-- Fare-class selection.
-- Flight offer, segment, and fare information rendering.
-
-The selected fare is represented by a fare-class ID. Cabin/seat class and fare class are distinct concepts in the flight data model.
-
-### Passenger and contact submission
-
-The assistant flow collects passenger and contact information through a dedicated form.
-
-Passenger categories:
-
-- `ADT` — Adult.
-- `CHD` — Child.
-- `INF` — Infant.
-
-The domain rules include validation for passenger names, email, phone number, nationality code, date of birth, and passenger age against the travel dates.
-
-### Booking confirmation
-
-- Display booking confirmation details returned by the backend.
-- Submit booking confirmation using the server-provided `summary_hash`.
-- Display booking information, including booking code/PNR and hold-expiration information when returned.
-
-### Wallet payment
-
-- Display payment confirmation details.
-- Submit payment confirmation using the server-provided `summary_hash`.
-- Refresh/check payment status.
-- The AI booking payment flow is intended to use the authenticated customer's PSS wallet, subject to backend authorization and validation.
-
-The client does not calculate or independently authorize the final payable amount. The backend remains authoritative for pricing, booking state, payment eligibility, and transaction results.
-
-## AI booking lifecycle
+### Folder structure
 
 ```text
-Customer
-   │
-   ▼
-AI Assistant screen
-   │
-   ├── Text input
-   └── Voice input (speech-to-text)
-   │
-   ▼
-Start / Resume Conversation
-   │
-   ▼
-Send Message
-   │
-   ▼
-Backend AI Assistant
-   │
-   ├── Understand travel requirements
-   └── Return structured assistant turn
-   │
-   ▼
-Flight offers
-   │
-   ▼
-Customer selects flight and fare
-   │
-   ▼
-Passenger & contact form
-   │
-   ▼
-Submit passenger information
-   │
-   ▼
-Booking confirmation summary
-   │
-   ▼
-Customer confirms booking
-   │
-   ▼
-Booking / PNR result
-   │
-   ▼
-Payment confirmation summary
-   │
-   ▼
-Customer confirms wallet payment
-   │
-   ▼
-Refresh payment status
-   │
-   ▼
-Final booking/payment status
+lib/
+├── main.dart                 bootstrap: Firebase and dependency injection
+├── app/
+│   ├── init_dependencies.dart   get_it registrations, one _initX() per feature
+│   ├── routes/                  go_router configuration and route names
+│   └── theme/
+├── core/
+│   ├── common/                  shared cubits, entities and widgets
+│   ├── constants/               endpoints and environment (envied)
+│   ├── error/                   Failure types
+│   ├── network/                 DioClient, interceptors, error handling
+│   ├── usecase/                 UseCase<Success, Params> base
+│   └── utils/                   preferences, speech-to-text, text-to-speech, snackbars
+└── features/
+    ├── AiAssistant/  auth/  flight/  home/  main/  master/  notifications/
+    └── onboarding/  profile/  setting/  splash/  ticket/  wallet/
+        └── (each data-driven feature)  data/ · domain/ · presentation/
 ```
 
-The flow is state-driven. The latest `AiTurnEntity` controls which actions are currently valid, rather than allowing the UI to advance through every step unconditionally.
+### Design decisions
 
-## AI module structure
+| Decision | Why |
+| --- | --- |
+| `Either<Failure, T>` from use cases | Errors are part of the signature, so no screen forgets to handle one and none depends on a thrown exception type. |
+| `UseCase<Success, Params>` base class | One shape for every operation; easy to fake in tests. |
+| DI split per feature (`_initAuth`, `_initFlight`, …) | A feature's wiring lives in one place and can be read in isolation. |
+| Bloc for flows, Cubit for simple state | Events make multi-step flows (booking, AI chat) traceable; a Cubit is enough for a theme toggle. |
+| Auth-aware HTTP client | See below. |
+| Environment via `envied` | Separate dev, staging and production base URLs chosen at build time. |
 
-```text
-features/AiAssistant/
-├── data/
-│   ├── ai_api_exception.dart
-│   ├── datasources/
-│   │   └── ai_assistant_remote_data_sources.dart
-│   ├── models/
-│   │   └── ai_assistant_model.dart
-│   └── repositories/
-│       └── ai_assistant_repository_impl.dart
-│
-├── domain/
-│   ├── entities/
-│   │   ├── ai_assistant_entity.dart
-│   │   └── chat_entity.dart
-│   ├── repository/
-│   │   └── ai_assistant_repository.dart
-│   ├── rules/
-│   │   └── ai_passenger_rules.dart
-│   └── usecases/
-│       ├── start_ai_conversation.dart
-│       ├── get_active_ai_conversation.dart
-│       ├── get_ai_conversation.dart
-│       ├── send_ai_message.dart
-│       ├── select_ai_flight.dart
-│       ├── submit_ai_passengers.dart
-│       ├── confirm_ai_booking.dart
-│       ├── confirm_ai_payment.dart
-│       ├── refresh_ai_payment.dart
-│       └── cancel_ai_conversation.dart
-│
-└── presentation/
-    ├── bloc/
-    │   ├── ai_assistant_bloc.dart
-    │   ├── ai_assistant_event.dart
-    │   ├── ai_assistant_state.dart
-    │   └── ai_chat_mapper.dart
-    ├── screen/
-    │   ├── chat_screen.dart
-    │   ├── chat_history_screen.dart
-    │   └── passanger_contact_form_screen.dart
-    ├── voice/
-    │   ├── ai_voice_ports.dart
-    │   ├── ai_voice_controller.dart
-    │   └── ai_voice_overlay.dart
-    └── widget/
-        ├── chat_input.dart
-        ├── chat_message_bubble.dart
-        ├── chat_typing_indicator.dart
-        ├── chat_suggestions.dart
-        ├── chat_drawer.dart
-        └── ...
+### Networking
+
+`DioClient` attaches the bearer token, and when several requests fail with `401` at the same time it refreshes the token **once** (a single in-flight refresh shared by all of them), retries each failed request a single time, and signs the user out if the refresh token is no longer valid. Sessions without a refresh token are treated as guests rather than as errors.
+
+## AI assistant
+
+The assistant is a thin client over the backend agent. The server owns the conversation state and decides what the user may do next; the app renders it.
+
+```mermaid
+sequenceDiagram
+    actor U as User
+    participant UI as Chat screen
+    participant B as AiAssistantBloc
+    participant API as PSS backend (agent)
+    U->>UI: types or speaks
+    UI->>B: AiMessageSent(text, input_type)
+    B->>API: POST /ai/conversations/{id}/messages
+    API-->>B: turn { state, message, speakable, actions[], search, offers, confirmation }
+    B-->>UI: new state
+    UI-->>U: cards and buttons, enabled only for turn.actions
+    UI->>U: reads "speakable" aloud (voice replies)
 ```
 
-## AI API integration
+- **Server-driven UI.** Buttons are enabled from the `actions` list of the latest turn, never from guesses on the client. The booking and payment confirmations are buttons bound to a server hash; saying "yes" in chat does nothing.
+- **Voice.** Speech-to-text fills the input live and sends the final transcript as `voice_transcript`; replies are read aloud from the server's `speakable` text. The microphone is released before the speaker starts, so the assistant never transcribes itself. A full-screen overlay shows listening (level-reactive) and a compact banner shows speaking without blocking taps.
+- **Passenger form.** The form is sized from the server's validated search (`search.passengers`: how many adults, children and infants), and mirrors the server's age rules against the first and last travel date. The date picker only offers birth dates the server will accept.
+- **Fallback.** When the assistant is unavailable the app offers the regular booking form.
 
-The AI remote data source uses `DioClient` and the endpoint definitions in `lib/core/constants/endpoint.dart`.
+## Tech stack
 
-The client-side operations include:
+| Area | Packages |
+| --- | --- |
+| State management | `flutter_bloc`, `bloc`, `equatable` |
+| Dependency injection | `get_it` |
+| Navigation | `go_router` |
+| Networking | `dio`, `internet_connection_checker_plus` |
+| Functional error handling | `fpdart` |
+| Config | `envied` (+ `build_runner`) |
+| Push and local notifications | `firebase_core`, `firebase_messaging`, `flutter_local_notifications` |
+| Voice | `speech_to_text`, `flutter_tts` |
+| Storage | `flutter_secure_storage` |
+| UI | `animations`, `animate_do`, `shimmer`, `paged_vertical_calendar`, `timelines_plus`, `dropdown_button2`, `top_snackbar_flutter`, `loader_overlay` |
+| Device and formatting | `device_info_plus`, `package_info_plus`, `intl` |
 
-| Operation | Purpose |
-|---|---|
-| Start conversation | Create a new assistant conversation |
-| Get active conversation | Resume the active conversation |
-| Get conversation by ID | Load a specific conversation |
-| Send message | Submit text or voice transcript |
-| Select flight | Submit departure/return option and fare class |
-| Submit passengers | Submit contact and passenger data |
-| Confirm booking | Confirm a booking summary |
-| Confirm payment | Confirm a payment summary and channel |
-| Check payment | Refresh payment status |
-| Cancel conversation | Cancel an eligible conversation |
+Dart SDK `^3.13.0` (see `pubspec.yaml`).
 
-The AI Assistant is integrated through the PSS backend API; the mobile application does not connect directly to an LLM provider.
-
----
-
-## Backend Communication
-
-All remote feature data is accessed through the backend REST API using the shared `DioClient`.
-
-### Dio client responsibilities
-
-The shared client configures:
-
-- Base URL from the selected environment.
-- JSON request/response defaults.
-- Connection and receive timeouts.
-- Authorization header injection from the local token data source.
-- Request/response logging interceptor.
-- Handling of HTTP `401` responses.
-- Refresh-token coordination to avoid parallel refresh requests.
-- Retrying the failed request with the refreshed access token.
-- Session invalidation and forced logout handling.
-
-The AI Assistant, authentication, flight, booking, payment, wallet, profile, ticket, and notification remote data sources use the shared networking layer.
-
-### Backend architecture context
-
-The mobile application is a client of the PSS backend. The backend project uses a Go Modular Monolith architecture with CQRS. From the mobile application's perspective, backend modules are accessed through versioned API endpoints and represented by feature-specific remote data sources and repository contracts.
-
----
-### Environment variables with Envied
-
-Environment configuration is defined in:
-
-```text
-lib/core/constants/environment.dart
-```
-
-The project uses `envied` with an `.env` file and generated Dart code. The selected `APP_ENV` determines which API base URL is used:
-
-- `dev`
-- `staging`
-- `prod`
-
-Expected environment keys:
-
-```env
-APP_ENV=staging
-DEV_URL=https://your-development-api
-STAGING_URL=https://your-staging-api
-PRODUCTION_URL=https://your-production-api
-APP_USERNAME_LOGIN=your-development-username
-APP_PASSWORD_LOGIN=your-development-password
-```
-
-Use actual values only in your local environment. Do not commit `.env` or expose credentials in documentation, issue reports, or screenshots.
-
-`envied` obfuscation should not be treated as a substitute for secret management. Values embedded in a client application can potentially be extracted.
-
-### Firebase
-
-Firebase is initialized through `firebase_options.dart`. Platform-specific Firebase configuration must be provided for the platforms being built.
-
----
-
-## Getting Started
+## Getting started
 
 ### Prerequisites
 
-- Flutter SDK compatible with the Dart SDK constraint in `pubspec.yaml` (`^3.13.0`).
-- Dart SDK.
-- Android Studio / Android SDK for Android development.
-- Xcode for iOS development on macOS.
-- Access to a running PSS backend environment.
-- Firebase configuration for the target platform.
-- Local `.env` configuration.
+- A Flutter SDK matching `environment.sdk` in `pubspec.yaml`
+- A running [PSS backend](https://github.com/adityaputra42/pss_modular_cqrs) (the Docker stack is the easiest way)
+- A Firebase project for push notifications
 
-### 1. Clone the repository
+### Setup
 
 ```bash
-git clone https://github.com/adityaputra42/aira_fly.git
+git clone <this repository>
 cd pss_app
-```
 
-### 2. Install dependencies
-
-```bash
+cp .env.example .env              # set the backend URL(s), see below
 flutter pub get
+dart run build_runner build --delete-conflicting-outputs   # generates the envied config
 ```
 
-### 3. Configure environment
+Add your own Firebase files (they are specific to your project):
 
-Create a local `.env` file in the project root using the keys listed in [Environment variables with Envied](#environment-variables-with-envied).
+- `android/app/google-services.json`
+- `lib/firebase_options.dart`, generated with `flutterfire configure`
 
-Do not copy production credentials into a shared repository.
-
-### 4. Generate Envied code
-
-```bash
-dart run build_runner build --delete-conflicting-outputs
-```
-
-### 5. Run the application
+Then:
 
 ```bash
 flutter run
 ```
 
-Make sure the configured API base URL points to a reachable backend environment.
+### Configuration
 
----
+| Key | Meaning |
+| --- | --- |
+| `APP_ENV` | `dev`, `staging` or `prod`: which base URL the app uses |
+| `DEV_URL`, `STAGING_URL`, `PRODUCTION_URL` | Backend base URL per environment (include `/api/v1`) |
+| `APP_USERNAME_LOGIN`, `APP_PASSWORD_LOGIN` | Demo account prefilled on the sign-in screen outside production, a development convenience |
 
-## Useful Commands
+On the Android emulator the host machine is `10.0.2.2`, so a local backend is typically `http://10.0.2.2:8000/api/v1`.
 
-### Analyze source code
+`envied` obfuscation makes values harder to read in the binary, but it is not encryption. Do not put real secrets in `.env`, and do not commit the generated `environment.g.dart` if it contains anything you would not publish.
+
+### Voice permissions
+
+Voice needs the microphone and speech recognition: `RECORD_AUDIO` and the speech-recognizer and TTS `<queries>` on Android, and `NSMicrophoneUsageDescription` plus `NSSpeechRecognitionUsageDescription` on iOS. All of these are already in the manifest and `Info.plist`.
+
+## Testing
 
 ```bash
 flutter analyze
-```
-
-### Run tests
-
-```bash
 flutter test
 ```
 
-### Build Android APK
+Current tests cover the AI assistant's passenger rules (age windows and field validation, mirroring the backend) and its passenger-step completion logic. Coverage of use cases, blocs and widgets is still thin and is the next thing to grow.
 
-```bash
-flutter build apk --release
-```
+## Roadmap
 
-### Build Android App Bundle
+- [x] Clean Architecture with BLoC, get_it and go_router
+- [x] Booking, add-ons, payment, wallet, check-in
+- [x] Push notifications
+- [x] AI assistant with voice input and spoken replies
+- [x] Store tokens in secure storage
+- [ ] Widget and bloc test coverage
+- [ ] Wallet payment in the regular checkout (the AI checkout already offers it)
+- [ ] Localization (strings are currently mixed Indonesian and English)
 
-```bash
-flutter build appbundle --release
-```
+## Author
 
-### Build iOS
-
-```bash
-flutter build ios --release
-```
-
-## License
-
-This project is licensed under the MIT License.
-
----
-
-Developed by **Aditya Putra Pratama**
+**Aditya Putra Pratama** · [@adityaputra42](https://github.com/adityaputra42)

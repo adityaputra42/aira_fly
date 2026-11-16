@@ -133,7 +133,7 @@ class CardTikcetList extends StatelessWidget {
                       ),
                       Expanded(
                         child: Text(
-                          DateFormat("dd MMM yyyy").format(DateTime.now()),
+                          DateFormat("dd MMM yyyy").format(pnr.departureTime?? DateTime.now()),
                           style: AppFont.reguler12.copyWith(color: Theme.of(context).hintColor),
                           textAlign: TextAlign.center,
                         ),

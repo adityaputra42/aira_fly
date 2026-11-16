@@ -358,9 +358,15 @@ class _PaymentConfirmationCardState extends State<_PaymentConfirmationCard> {
                   disabledColor: colors.shadow,
 
                   avatar: AiPaymentChannel.isWallet(ch)
-                      ? const Icon(Icons.account_balance_wallet_outlined, size: 18)
+                      ?  Icon(
+                    Icons.account_balance_wallet_outlined, size: 18,
+                    color: _channel == ch ? AppColor.darkText1 : colors
+                      .onSurface,)
                       : null,
-                  label: Text(AiPaymentChannel.label(ch), style: AppFont.medium12),
+                  label: Text(AiPaymentChannel.label(ch),
+                      style: AppFont.medium12.copyWith(
+                          color: _channel == ch ? AppColor.darkText1 : colors
+                              .onSurface)),
                   selected: _channel == ch,
                   onSelected: widget.onPay == null ? null : (_) => setState(() => _channel = ch),
                 ),

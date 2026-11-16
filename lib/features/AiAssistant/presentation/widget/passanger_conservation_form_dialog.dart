@@ -26,13 +26,14 @@ class PassangerConservationFormDialog extends StatefulWidget {
     this.initial,
     this.firstTravel,
     this.lastTravel,
+    this.withNationality = false,
   });
 
   final String passengerType;
   final String label;
   final AiPassengerEntity? initial;
   final List<AiPassengerEntity?> passangers;
-
+  final bool withNationality;
   final DateTime? firstTravel;
   final DateTime? lastTravel;
 
@@ -77,7 +78,9 @@ class _PassangerConservationFormDialogState extends State<PassangerConservationF
     _documentType = initial?.documentType;
     _documentExpiredAt = _tryParseDate(initial?.documentExpiredAt);
     _associatedAdultIndex = initial?.associatedAdultIndex;
-    _loadCountries();
+    if (widget.withNationality) {
+      _loadCountries();
+    }
   }
 
   Future<void> _loadCountries() async {
@@ -331,36 +334,45 @@ class _PassangerConservationFormDialogState extends State<PassangerConservationF
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
-                          spacing: 8,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Visibility(
                               visible: widget.passengerType != "INF",
-                              child: SizedBox(
-                                width: context.w(0.25),
-                                child: DropDownCustom(
-                                  listData:
+                              child: Row(mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  SizedBox(
+                                    width: context.w(0.25),
+                                    child: DropDownCustom(
+                                      listData:
                                       (widget.passengerType == "ADT"
-                                              ? _adultTitleOptions
-                                              : _childTitleOptions)
+                                          ? _adultTitleOptions
+                                          : _childTitleOptions)
                                           .map(
-                                            (item) => DropdownItem<String>(
+                                            (item) =>
+                                            DropdownItem<String>(
                                               value: item,
                                               child: Text(
                                                 item,
-                                                style: AppFont.reguler12.copyWith(
-                                                  color: Theme.of(context).colorScheme.onSurface,
+                                                style: AppFont.reguler12
+                                                    .copyWith(
+                                                  color: Theme
+                                                      .of(context)
+                                                      .colorScheme
+                                                      .onSurface,
                                                 ),
                                               ),
                                             ),
-                                          )
+                                      )
                                           .toList(),
-                                  hint: "Select title",
-                                  title: "Title ",
-                                  value: _title == "" ? null : _title,
+                                      hint: "Select title",
+                                      title: "Title ",
+                                      value: _title == "" ? null : _title,
 
-                                  onChange: (v) => setState(() => _title = v),
-                                ),
+                                      onChange: (v) =>
+                                          setState(() => _title = v),
+                                    ),
+                                  ), widget.width(8)
+                                ],
                               ),
                             ),
 
@@ -414,51 +426,61 @@ class _PassangerConservationFormDialogState extends State<PassangerConservationF
                           onTap: _pickBirthDate,
                         ),
 
-                        // Column(
-                        //   children: [
-                        //     widget.height(12),
-                        //     _nationalityField(),
-                        //     widget.height(12),
-                        //
-                        //     DropDownCustom(
-                        //       listData: _documentTypeOptions
-                        //           .map(
-                        //             (item) =>
-                        //             DropdownItem<String>(
-                        //           value: item,
-                        //           child: Text(
-                        //             item,
-                        //             style: AppFont.reguler12.copyWith(
-                        //               color: Theme.of(context).colorScheme.onSurface,
-                        //             ),
-                        //           ),
-                        //         ),
-                        //       )
-                        //           .toList(),
-                        //       hint: "Select document type",
-                        //       title: "Document Type (optional)",
-                        //       value: _documentType == "" ? null : _documentType,
-                        //
-                        //       onChange: (v) =>
-                        //           setState(() => _documentType = v),
-                        //     ),
-                        //
-                        //     widget.height(12),
-                        //     InputText(
-                        //       title: "Document Number (optional)",
-                        //       hintText: "e.g. 3171234567890001",
-                        //       controller: _documentNumberController,
-                        //       textInputAction: TextInputAction.next,
-                        //     ),
-                        //     widget.height(12),
-                        //     _dateField(
-                        //       label: "Document Expiry (optional)",
-                        //       hintText: "Select expiry date",
-                        //       value: _documentExpiredAt,
-                        //       onTap: _pickDocumentExpiry,
-                        //     ),
-                        //   ],
-                        // ),
+                        Visibility(
+                          visible: widget.withNationality,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              widget.height(12),
+                              _nationalityField(),
+                              widget.height(12),
+
+                              DropDownCustom(
+                                listData: _documentTypeOptions
+                                    .map(
+                                      (item) =>
+                                      DropdownItem<String>(
+                                        value: item,
+                                        child: Text(
+                                          item,
+                                          style: AppFont.reguler12.copyWith(
+                                            color: Theme
+                                                .of(context)
+                                                .colorScheme
+                                                .onSurface,
+                                          ),
+                                        ),
+                                      ),
+                                )
+                                    .toList(),
+                                hint: "Select document type",
+                                title: "Document Type (optional)",
+                                value: _documentType == ""
+                                    ? null
+                                    : _documentType,
+
+                                onChange: (v) =>
+                                    setState(() => _documentType = v),
+                              ),
+
+                              widget.height(12),
+                              InputText(
+                                title: "Document Number (optional)",
+                                hintText: "e.g. 3171234567890001",
+                                controller: _documentNumberController,
+                                textInputAction: TextInputAction.next,
+                              ),
+                              widget.height(12),
+                              _dateField(
+                                label: "Document Expiry (optional)",
+                                hintText: "Select expiry date",
+                                value: _documentExpiredAt,
+                                onTap: _pickDocumentExpiry,
+                              ),
+                            ],
+                          ),
+                        ),
                         Visibility(
                           visible: widget.passengerType == "INF",
                           child: Column(

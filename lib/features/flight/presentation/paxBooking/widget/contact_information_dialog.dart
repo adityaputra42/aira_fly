@@ -107,7 +107,7 @@ class _ContactInformationDialogState extends State<ContactInformationDialog> {
               widget.height(16),
               InputText(
                 title: "Full Name",
-                hintText: "e.g. Aditya Pratama",
+                hintText: "e.g. John Doe",
                 controller: _nameController,
                 textInputAction: TextInputAction.next,
                 validator: (v) => _requiredValidator(v, "Full name"),
