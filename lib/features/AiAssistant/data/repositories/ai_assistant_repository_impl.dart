@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:fpdart/fpdart.dart';
 
 import '../../../../core/error/failures.dart';
@@ -14,7 +16,6 @@ class AiAssistantRepositoryImpl implements AiAssistantRepository {
   final ConnectionChecker connectionChecker;
 
   const AiAssistantRepositoryImpl(this.remoteDataSource, this.connectionChecker);
-
 
   @override
   Future<Either<Failure, AiTurnEntity>> startConversation() {
@@ -119,14 +120,16 @@ class AiAssistantRepositoryImpl implements AiAssistantRepository {
 
   @override
   Future<Either<Failure, AiTurnEntity>> refreshPayment(String id) {
-    return _turn(() => remoteDataSource.checkPaymentConversation(id: id), 'Gagal memeriksa pembayaran');
+    return _turn(
+      () => remoteDataSource.checkPaymentConversation(id: id),
+      'Gagal memeriksa pembayaran',
+    );
   }
 
   @override
   Future<Either<Failure, AiTurnEntity>> cancelConversation(String id) {
     return _turn(() => remoteDataSource.cancelConversation(id: id), 'Gagal membatalkan percakapan');
   }
-
 
   Future<Either<Failure, AiTurnEntity>> _turn(
     Future<ApiResponse?> Function() request,
@@ -154,7 +157,8 @@ class AiAssistantRepositoryImpl implements AiAssistantRepository {
       return right(parse(Map<String, dynamic>.from(data)));
     } on AiApiException catch (e) {
       return left(_toFailure(e));
-    } catch (_) {
+    } catch (e, st) {
+      log('AI repo error [$errorMessage]: $e', stackTrace: st);
       return left(AiFailure(errorMessage));
     }
   }

@@ -327,15 +327,15 @@ abstract final class AiPassengerRequest {
     },
     'passengers': passengers.map(_passenger).toList(),
   };
-
   static Map<String, dynamic> _passenger(AiPassengerEntity p) {
     final m = <String, dynamic>{
       'passenger_type': p.passengerType,
       'first_name': p.firstName.trim(),
       'last_name': p.lastName.trim(),
     };
-    void put(String k, dynamic v) {
-      if (v != null && v.trim().isNotEmpty) m[k] = v.trim();
+    void put(String k, String? v) {
+      final t = v?.trim();
+      if (t != null && t.isNotEmpty) m[k] = t;
     }
 
     put('title', p.title);
@@ -345,7 +345,9 @@ abstract final class AiPassengerRequest {
     put('document_type', p.documentType);
     put('document_number', p.documentNumber);
     put('document_expired_at', p.documentExpiredAt);
-    put('associated_adult_index', p.associatedAdultIndex);
+    if (p.associatedAdultIndex != null) {
+      m['associated_adult_index'] = p.associatedAdultIndex; // tetap int
+    }
     return m;
   }
 }

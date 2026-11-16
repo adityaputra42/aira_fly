@@ -413,45 +413,52 @@ class _PassangerConservationFormDialogState extends State<PassangerConservationF
                           value: _birthDate,
                           onTap: _pickBirthDate,
                         ),
-                        widget.height(12),
-                        _nationalityField(),
-                        widget.height(12),
 
-                        DropDownCustom(
-                          listData: _documentTypeOptions
-                              .map(
-                                (item) => DropdownItem<String>(
-                                  value: item,
-                                  child: Text(
-                                    item,
-                                    style: AppFont.reguler12.copyWith(
-                                      color: Theme.of(context).colorScheme.onSurface,
-                                    ),
-                                  ),
-                                ),
-                              )
-                              .toList(),
-                          hint: "Select document type",
-                          title: "Document Type (optional)",
-                          value: _documentType == "" ? null : _documentType,
-
-                          onChange: (v) => setState(() => _documentType = v),
-                        ),
-
-                        widget.height(12),
-                        InputText(
-                          title: "Document Number (optional)",
-                          hintText: "e.g. 3171234567890001",
-                          controller: _documentNumberController,
-                          textInputAction: TextInputAction.next,
-                        ),
-                        widget.height(12),
-                        _dateField(
-                          label: "Document Expiry (optional)",
-                          hintText: "Select expiry date",
-                          value: _documentExpiredAt,
-                          onTap: _pickDocumentExpiry,
-                        ),
+                        // Column(
+                        //   children: [
+                        //     widget.height(12),
+                        //     _nationalityField(),
+                        //     widget.height(12),
+                        //
+                        //     DropDownCustom(
+                        //       listData: _documentTypeOptions
+                        //           .map(
+                        //             (item) =>
+                        //             DropdownItem<String>(
+                        //           value: item,
+                        //           child: Text(
+                        //             item,
+                        //             style: AppFont.reguler12.copyWith(
+                        //               color: Theme.of(context).colorScheme.onSurface,
+                        //             ),
+                        //           ),
+                        //         ),
+                        //       )
+                        //           .toList(),
+                        //       hint: "Select document type",
+                        //       title: "Document Type (optional)",
+                        //       value: _documentType == "" ? null : _documentType,
+                        //
+                        //       onChange: (v) =>
+                        //           setState(() => _documentType = v),
+                        //     ),
+                        //
+                        //     widget.height(12),
+                        //     InputText(
+                        //       title: "Document Number (optional)",
+                        //       hintText: "e.g. 3171234567890001",
+                        //       controller: _documentNumberController,
+                        //       textInputAction: TextInputAction.next,
+                        //     ),
+                        //     widget.height(12),
+                        //     _dateField(
+                        //       label: "Document Expiry (optional)",
+                        //       hintText: "Select expiry date",
+                        //       value: _documentExpiredAt,
+                        //       onTap: _pickDocumentExpiry,
+                        //     ),
+                        //   ],
+                        // ),
                         Visibility(
                           visible: widget.passengerType == "INF",
                           child: Column(

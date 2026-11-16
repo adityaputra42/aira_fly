@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:dio/dio.dart';
 
 import '../../../../core/constants/endpoint.dart';
@@ -257,6 +259,7 @@ class AiAssistantRemoteDataSourcesImpl implements AiAssistantRemoteDataSources {
         cancelToken: cancelToken,
         data: contactPassenger,
       );
+      log('reponse submit ==> ${response.data}');
       if (response.data == null) {
         return ApiResponse.withError(response, response.statusMessage, null);
       }
