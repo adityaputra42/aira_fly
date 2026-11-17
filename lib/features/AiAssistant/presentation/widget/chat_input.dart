@@ -12,8 +12,6 @@ class ChatInput extends StatelessWidget {
   final VoidCallback? onMic;
   final bool listening;
 
-  final bool voiceReplies;
-  final VoidCallback? onToggleVoiceReplies;
 
   const ChatInput({
     super.key,
@@ -23,8 +21,6 @@ class ChatInput extends StatelessWidget {
     this.enabled = true,
     this.onMic,
     this.listening = false,
-    this.voiceReplies = false,
-    this.onToggleVoiceReplies,
   });
 
   @override
@@ -55,23 +51,7 @@ class ChatInput extends StatelessWidget {
                     onSubmited: (_) => onSend(),
                   ),
                 ),
-                if (onToggleVoiceReplies != null)
-                  Tooltip(
-                    message: voiceReplies ? 'Suara balasan: aktif' : 'Suara balasan: mati',
-                    child: InkWell(
-                      onTap: onToggleVoiceReplies,
-                      child: CardGeneral(
-                        background: voiceReplies ? AppColor.primaryColor : colors.hintColor.withValues(alpha: 0.2),
-                        padding: const EdgeInsets.all(8),
-                        margin: EdgeInsets.zero,
-                        child: Icon(
-                          voiceReplies ? Icons.volume_up_rounded : Icons.volume_off_rounded,
-                          size: 24,
-                          color: voiceReplies ? AppColor.darkText1 : colors.hintColor,
-                        ),
-                      ),
-                    ),
-                  ),
+
                 ListenableBuilder(
                   listenable: controller,
                   builder: (context, _) {

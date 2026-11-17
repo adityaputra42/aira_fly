@@ -8,6 +8,7 @@ import 'package:pss_app/features/AiAssistant/domain/entities/chat_entity.dart';
 
 import '../../../../app/init_dependencies.dart';
 import '../../../../app/theme/theme.dart';
+import '../../../../core/common/widget/card_general.dart';
 import '../../../../core/utils/top_snackbar_helper.dart';
 import '../../../../core/utils/widget_helper.dart';
 import '../bloc/ai_assistant_bloc.dart';
@@ -185,6 +186,37 @@ class _ChatViewState extends State<_ChatView> with WidgetsBindingObserver {
             title: 'AI Assistant',
             color: AppColor.primaryColor,
             titleColor: AppColor.darkText1,
+              icon:
+              Tooltip(
+                message: _voice.voiceReplies
+                    ? 'Suara balasan: aktif'
+                    : 'Suara balasan: mati',
+                child: InkWell(
+                  onTap: () {
+                    setState(() {
+                      _voice.setVoiceReplies(!_voice.voiceReplies);
+                    });
+                  },
+
+                  child: CardGeneral(
+                    background:  Theme
+                        .of(context)
+                        .hintColor
+                        .withValues(alpha: 0.2),
+                    radius: 6,
+                    padding: const EdgeInsets.all(6),
+                    margin: EdgeInsets.zero,
+                    child: Icon(
+                      _voice.voiceReplies ? Icons.volume_up_rounded : Icons
+                          .volume_off_rounded,
+                      size: 20,
+                      color: _voice.voiceReplies ? AppColor.darkText1 : Theme
+                          .of(context)
+                          .hintColor,
+                    ),
+                  ),
+                ),
+              )
           ),
           bottomNavigationBar: ListenableBuilder(
             listenable: _voice,
@@ -194,9 +226,7 @@ class _ChatViewState extends State<_ChatView> with WidgetsBindingObserver {
                   onSend: _sendMessage,
                   onMic: _onMic,
                   listening: _voice.listening,
-                  voiceReplies: _voice.voiceReplies,
-                  onToggleVoiceReplies: () =>
-                      _voice.setVoiceReplies(!_voice.voiceReplies),
+
                   onAttachment: () =>
                       TopSnackbarHelper.error(context,
                           message: 'Attachment is not available yet.'),
